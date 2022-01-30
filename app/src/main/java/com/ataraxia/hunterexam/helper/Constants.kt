@@ -1,3 +1,5 @@
+package com.ataraxia.hunterexam.helper
+
 class Constants {
     companion object {
         const val CHAPTER_1 = "'Sachgebiet_1_Tierarten_Wildbiologie_Wildhege'"
