@@ -1,7 +1,7 @@
 package com.ataraxia.hunterexam.data
 
-import com.ataraxia.hunterexam.model.Question
 import androidx.lifecycle.LiveData
+import com.ataraxia.hunterexam.model.Question
 
 class QuestionRepository(private val questionDao: QuestionDao) {
 

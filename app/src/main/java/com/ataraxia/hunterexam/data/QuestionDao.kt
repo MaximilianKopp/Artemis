@@ -1,8 +1,9 @@
 package com.ataraxia.hunterexam.data
-import com.ataraxia.hunterexam.model.Question
+import com.ataraxia.hunterexam.helper.Constants
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Query
+import com.ataraxia.hunterexam.model.Question
 
 @Dao
 interface QuestionDao {
