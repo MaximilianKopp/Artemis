@@ -1,5 +1,6 @@
 package com.ataraxia.artemis.ui
 
+import AppBarViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -7,47 +8,29 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.ataraxia.artemis.model.Screen
 import com.ataraxia.artemis.ui.theme.YELLOW_ARTEMIS
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class AppBarComposition {
-
-    class AppBarViewModel : ViewModel() {
-        private val _title = MutableLiveData("Artemis-Jägerprüfung")
-        val title: LiveData<String> = _title
-
-        fun onTopBarTitleChange(newTitle: String) {
-            viewModelScope.launch {
-                onTopBarTitleChangeCoroutine(newTitle)
-            }
-        }
-
-        private suspend fun onTopBarTitleChangeCoroutine(newTitle: String) = withContext(Dispatchers.Default) {
-            _title.postValue(newTitle)
-        }
-
-    }
 
     @Composable
     fun GeneralTopAppBar(
         scope: CoroutineScope,
         state: ScaffoldState,
-        title: String
+        title: String,
+        filter: Float,
+        topBarViewModel: AppBarViewModel
     ) {
         TopAppBar(
             title = { Text(text = title) },
@@ -55,6 +38,15 @@ class AppBarComposition {
             navigationIcon = {
                 IconButton(onClick = { scope.launch { state.drawerState.open() } }) {
                     Icon(Icons.Default.Menu, contentDescription = "")
+                }
+            },
+            actions = {
+
+                IconButton(
+                    onClick = {  },
+                    Modifier.alpha(filter)
+                ) {
+                    Icon(Icons.Default.FilterAlt, contentDescription = "")
                 }
             }
         )
