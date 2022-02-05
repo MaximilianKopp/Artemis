@@ -8,7 +8,7 @@ android {
     compileSdk 31
 
     defaultConfig {
-        applicationId "com.ataraxia.hunterexam"
+        applicationId 'com.ataraxia.artemis'
         minSdk 24
         targetSdk 31
         versionCode 1
@@ -58,6 +58,7 @@ dependencies {
     implementation "androidx.compose.material:material:$compose_version"
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_version"
     implementation "androidx.compose.runtime:runtime-livedata:$compose_version"
+    implementation "androidx.compose.material:material-icons-extended:$compose_version"
     implementation "androidx.navigation:navigation-compose:2.5.0-alpha01"
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.5.0-alpha01'
     implementation 'androidx.activity:activity-compose:1.5.0-alpha01'
