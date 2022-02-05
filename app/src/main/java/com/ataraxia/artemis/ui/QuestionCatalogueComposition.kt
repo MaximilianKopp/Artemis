@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.ataraxia.artemis.model.Screen.DrawerScreen.*
 import com.ataraxia.artemis.ui.theme.YELLOW_ARTEMIS
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -43,7 +44,7 @@ class QuestionCatalogueComposition {
                             .border(BorderStroke(2.dp, Color.White), RoundedCornerShape(15.dp))
                     ) {
                         TextButton(
-                            onClick = { scope.launch { navController.navigate("topicWildlife") } },
+                            onClick = { navController.navigate(TopicWildLife.route) },
                             modifier = Modifier.background(YELLOW_ARTEMIS)
                         ) {
                             Text(
@@ -60,7 +61,7 @@ class QuestionCatalogueComposition {
                             .border(BorderStroke(2.dp, Color.White), RoundedCornerShape(15.dp))
                     ) {
                         TextButton(
-                            onClick = {  },
+                            onClick = { navController.navigate(TopicHuntingOperations.route) },
                             modifier = Modifier.background(YELLOW_ARTEMIS)
                         ) {
                             Text(
@@ -77,7 +78,7 @@ class QuestionCatalogueComposition {
                             .border(BorderStroke(2.dp, Color.White), RoundedCornerShape(15.dp))
                     ) {
                         TextButton(
-                            onClick = { /*TODO*/ },
+                            onClick = { navController.navigate(TopicWeaponsLawAndTechnology.route) },
                             modifier = Modifier.background(YELLOW_ARTEMIS),
                         ) {
                             Text(
@@ -94,7 +95,7 @@ class QuestionCatalogueComposition {
                             .border(BorderStroke(2.dp, Color.White), RoundedCornerShape(15.dp))
                     ) {
                         TextButton(
-                            onClick = { /*TODO*/ },
+                            onClick = { navController.navigate(TopicWildLifeTreatment.route) },
                             modifier = Modifier.background(YELLOW_ARTEMIS)
                         ) {
                             Text(
@@ -111,7 +112,7 @@ class QuestionCatalogueComposition {
                             .border(BorderStroke(2.dp, Color.White), RoundedCornerShape(15.dp))
                     ) {
                         TextButton(
-                            onClick = { /*TODO*/ },
+                            onClick = { navController.navigate(TopicHuntingLaw.route) },
                             modifier = Modifier.background(YELLOW_ARTEMIS)
                         ) {
                             Text(
@@ -128,7 +129,7 @@ class QuestionCatalogueComposition {
                             .border(BorderStroke(2.dp, Color.White), RoundedCornerShape(15.dp))
                     ) {
                         TextButton(
-                            onClick = { /*TODO*/ },
+                            onClick = { navController.navigate(TopicPreservationOfWildLifeAndNature.route) },
                             modifier = Modifier.background(YELLOW_ARTEMIS)
                         ) {
                             Text(

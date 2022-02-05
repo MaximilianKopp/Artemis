@@ -1,6 +1,6 @@
 package com.ataraxia.artemis.ui
 
-import android.app.Application
+import AppBarViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -16,36 +16,41 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.ataraxia.artemis.R
+import com.ataraxia.artemis.data.QuestionViewModel
+import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.helper.NavHelper
-import com.ataraxia.artemis.model.QuestionViewModel
 import com.ataraxia.artemis.model.Screen
 import com.ataraxia.artemis.templates.TextButtonTemplate
 import com.ataraxia.artemis.templates.TextTemplate
 import com.ataraxia.artemis.ui.theme.GREEN_ARTEMIS
 import com.ataraxia.artemis.ui.theme.YELLOW_ARTEMIS
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 class StartMenuComposition {
-
     private val appBarComposition = AppBarComposition()
-
     @Composable
     fun StartScreen(
-        topBarViewModel: AppBarComposition.AppBarViewModel = viewModel()
+        topBarViewModel: AppBarViewModel = viewModel(), questionViewModel: QuestionViewModel = viewModel()
     ) {
         val title: String by topBarViewModel.title.observeAsState("")
-
+        val filter: Float by topBarViewModel.filter.observeAsState(Constants.FILTER_ALPHA_INVISIBLE)
         StartContent(
             title = title,
-            onTitleChange = { topBarViewModel.onTopBarTitleChange(newTitle = it) }
+            filter = filter,
+            onHideFilter = { topBarViewModel.onHideFilter(visible = it) },
+            onTitleChange = { topBarViewModel.onTopBarTitleChange(newTitle = it) },
+            questionViewModel = questionViewModel,
+            topBarViewModel = topBarViewModel
         )
     }
 
     @Composable
     fun StartContent(
         title: String,
-        onTitleChange: (String) -> Unit
+        filter: Float,
+        onHideFilter: (Float) -> Unit,
+        onTitleChange: (String) -> Unit,
+        questionViewModel: QuestionViewModel,
+        topBarViewModel: AppBarViewModel = viewModel()
     ) {
         val navController = rememberNavController()
         val state = rememberScaffoldState(drawerState = DrawerState(DrawerValue.Closed))
@@ -58,7 +63,9 @@ class StartMenuComposition {
                 appBarComposition.GeneralTopAppBar(
                     scope = scope,
                     state = state,
-                    title = title
+                    title = title,
+                    filter = filter,
+                    topBarViewModel = topBarViewModel
                 )
             },
             drawerContent = {
@@ -75,7 +82,10 @@ class StartMenuComposition {
                 navController = navController,
                 paddingValues = it,
                 onTitleChange = onTitleChange,
-                scope = scope
+                onHideFilter = onHideFilter,
+                scope = scope,
+                questionViewModel = questionViewModel,
+                topBarViewModel = topBarViewModel
             )
         }
     }
@@ -117,7 +127,7 @@ class StartMenuComposition {
     }
 
     @Composable
-    fun StartMenu(navController: NavController, scope: CoroutineScope) {
+    fun StartMenu(navController: NavController) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -126,14 +136,14 @@ class StartMenuComposition {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row {
-                StartMenuButton(onClick = { scope.launch { navController.navigate(Screen.DrawerScreen.Questions.route) } }) {
+                StartMenuButton(onClick = { navController.navigate(Screen.DrawerScreen.Questions.route) }) {
                     StartMenuContent(
                         drawable = R.drawable.ic_baseline_menu_book_24,
                         contentDescription = "Questions",
                         text = "Sachgebiete"
                     )
                 }
-                StartMenuButton(onClick = { scope.launch { navController.navigate("exam") } }) {
+                StartMenuButton(onClick = { navController.navigate("exam") } ) {
                     StartMenuContent(
                         drawable = R.drawable.ic_baseline_assignment_24,
                         contentDescription = "Examination",
@@ -142,14 +152,14 @@ class StartMenuComposition {
                 }
             }
             Row {
-                StartMenuButton(onClick = { scope.launch { navController.navigate("statistics") } }) {
+                StartMenuButton(onClick = { navController.navigate("statistics") }) {
                     StartMenuContent(
                         drawable = R.drawable.ic_baseline_insert_chart_24,
                         contentDescription = "Statistics",
                         text = "Statistik"
                     )
                 }
-                StartMenuButton(onClick = { scope.launch { navController.navigate("configuration") } }) {
+                StartMenuButton(onClick = { navController.navigate("configuration") }) {
                     StartMenuContent(
                         drawable = R.drawable.ic_baseline_build_circle_24,
                         contentDescription = "Configuration",
