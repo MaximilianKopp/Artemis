@@ -45,6 +45,32 @@ class Screen {
             "Wildbiologie & Wildhege",
             "topicWildlife"
         )
+
+        object TopicHuntingOperations : DrawerScreen(
+            "Jagdbetrieb",
+            "topicHuntingOperations"
+        )
+
+        object TopicWeaponsLawAndTechnology : DrawerScreen(
+            "Waffenrecht & Technik",
+            "topicWeaponsLawAndTechnology"
+        )
+
+        object TopicWildLifeTreatment : DrawerScreen(
+            "Behandlung des Wildes",
+            "topicWildLifeTreatment"
+        )
+
+        object TopicHuntingLaw : DrawerScreen(
+            "Jagdrecht",
+            "topicHuntingLaw"
+        )
+
+        object TopicPreservationOfWildLifeAndNature : DrawerScreen(
+            "Tier- und Naturschutz",
+            "topicPreservationOfWildLifeAndNature"
+        )
+
     }
 
     companion object {

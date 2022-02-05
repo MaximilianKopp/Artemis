@@ -3,7 +3,7 @@ package com.ataraxia.artemis.model
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "hunter_exam")
+@Entity(tableName = "artemis_rlp")
 data class Question(
 
     @PrimaryKey(autoGenerate = true)
@@ -14,5 +14,9 @@ data class Question(
     val optionB: String,
     val optionC: String,
     val optionD: String,
-    val correctAnswers: String
+    val correctAnswers: String,
+    var favourite: Int,
+    val learnedOnce: Int,
+    val learnedTwice: Int,
+    val failed: Int
 )
