@@ -1,6 +1,5 @@
 package com.ataraxia.artemis.ui
 
-import AppBarViewModel
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,7 +9,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,7 +21,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ataraxia.artemis.data.QuestionViewModel
-import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.model.Question
 
 class QuestionListComposition {
@@ -26,10 +28,11 @@ class QuestionListComposition {
     @Composable
     fun LoadChapterList(
         chapter: String,
-        questionViewModel: QuestionViewModel,
-        topBarViewModel: AppBarViewModel = viewModel()
     ) {
-        val questions = loadChapter(chapter, questionViewModel)
+        val vm: QuestionViewModel = viewModel()
+        val questions: List<Question> by vm.questions.observeAsState(listOf())
+        vm.loadQuestions(chapter)
+
         LazyColumn {
             items(questions) { question ->
                 val isFavourite = rememberSaveable { mutableStateOf(question.favourite) }
@@ -41,20 +44,19 @@ class QuestionListComposition {
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(4.dp),
-                        content = { QuestionCard(question, isFavourite, questionViewModel) }
+                        content = { QuestionCard(question, isFavourite) }
                     )
                 }
             }
         }
     }
 
-
     @Composable
     fun QuestionCard(
         question: Question,
         isFavourite: MutableState<Int>,
-        questionViewModel: QuestionViewModel
     ) {
+        val vm: QuestionViewModel = viewModel()
         val iconColor by animateColorAsState(
             if (isFavourite.value == 1) Color.Yellow else Color.Black
         )
@@ -83,7 +85,7 @@ class QuestionListComposition {
                         }
                     }
                     IconButton(onClick = {
-                        setFavourite(question, isFavourite, questionViewModel)
+                        setFavourite(question, isFavourite) { vm.updateQuestion(question) }
                     }, Modifier.size(20.dp)) {
                         Icon(
                             imageVector = Icons.Filled.Star,
@@ -102,7 +104,7 @@ class QuestionListComposition {
     private fun setFavourite(
         question: Question,
         isFavourite: MutableState<Int>,
-        questionViewModel: QuestionViewModel
+        updateQuestion: (Question) -> Unit
     ) {
         if (question.favourite == 0) {
             question.favourite = 1
@@ -111,29 +113,7 @@ class QuestionListComposition {
             question.favourite = 0
             isFavourite.value = question.favourite
         }
-        questionViewModel.updateQuestion(question)
+        updateQuestion(question)
     }
 
-    private fun loadChapter(
-        chapter: String,
-        questionViewModel: QuestionViewModel,
-    ): MutableList<Question> {
-        var loadedChapter = mutableStateListOf<Question>()
-
-        when (chapter) {
-            Constants.CHAPTER_1 -> loadedChapter =
-                questionViewModel.allQuestionsFromChapterOne.toMutableStateList()
-            Constants.CHAPTER_2 -> loadedChapter =
-                questionViewModel.allQuestionsFromChapterTwo.toMutableStateList()
-            Constants.CHAPTER_3 -> loadedChapter =
-                questionViewModel.allQuestionsFromChapterThree.toMutableStateList()
-            Constants.CHAPTER_4 -> loadedChapter =
-                questionViewModel.allQuestionsFromChapterFour.toMutableStateList()
-            Constants.CHAPTER_5 -> loadedChapter =
-                questionViewModel.allQuestionsFromChapterFive.toMutableStateList()
-            Constants.CHAPTER_6 -> loadedChapter =
-                questionViewModel.allQuestionsFromChapterSix.toMutableStateList()
-        }
-        return loadedChapter
-    }
 }

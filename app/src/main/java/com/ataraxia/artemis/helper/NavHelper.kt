@@ -22,18 +22,16 @@ class NavHelper {
         fun LoadNavigationRoutes(
             navController: NavHostController,
             paddingValues: PaddingValues,
-            onTitleChange: (String) -> Unit,
-            onHideFilter: (Float) -> Unit,
             scope: CoroutineScope,
-            questionViewModel: QuestionViewModel,
-            topBarViewModel: AppBarViewModel = viewModel()
         ) {
+            val topBarViewModel: AppBarViewModel = viewModel()
             val startMenuComposition = StartMenuComposition()
             val questionComposition = QuestionCatalogueComposition()
             val examComposition = ExamComposition()
             val statisticComposition = StatisticComposition()
             val configComposition = ConfigComposition()
             val questionListComposition = QuestionListComposition()
+            val vm: QuestionViewModel = viewModel()
 
             NavHost(
                 navController,
@@ -43,102 +41,95 @@ class NavHelper {
                 composable(Home.route) {
                     startMenuComposition.StartMenu(navController)
                         .apply {
-                            onTitleChange(Home.title)
-                            onHideFilter(Constants.FILTER_ALPHA_INVISIBLE)
+                            (Home.title)
+                            topBarViewModel.onHideFilter(Constants.FILTER_ALPHA_INVISIBLE)
                         }
                 }
 
                 composable(Questions.route) {
                     questionComposition.QuestionScreen(navController, scope)
                         .apply {
-                            onTitleChange(Questions.title)
-                            onHideFilter(Constants.FILTER_ALPHA_INVISIBLE)
+                            topBarViewModel.onTopBarTitleChange(Questions.title)
+                            topBarViewModel.onHideFilter(Constants.FILTER_ALPHA_INVISIBLE)
                         }
                 }
                 composable(Exam.route) {
                     examComposition.ExamScreen().apply {
-                        onTitleChange(Exam.title)
-                        onHideFilter(Constants.FILTER_ALPHA_INVISIBLE)
+                        topBarViewModel.onTopBarTitleChange(Exam.title)
+                        topBarViewModel.onHideFilter(Constants.FILTER_ALPHA_INVISIBLE)
                     }
                 }
 
                 composable(Statistics.route) {
                     statisticComposition.StatisticScreen().apply {
-                        onTitleChange(Statistics.title)
-                        onHideFilter(Constants.FILTER_ALPHA_INVISIBLE)
+                        topBarViewModel.onTopBarTitleChange(Statistics.title)
+                        topBarViewModel.onHideFilter(Constants.FILTER_ALPHA_INVISIBLE)
                     }
                 }
 
                 composable(Configuration.route) {
                     configComposition.ConfigScreen().apply {
-                        onTitleChange(Configuration.title)
-                        onHideFilter(Constants.FILTER_ALPHA_INVISIBLE)
+                        topBarViewModel.onTopBarTitleChange(Configuration.title)
+                        topBarViewModel.onHideFilter(Constants.FILTER_ALPHA_INVISIBLE)
                     }
                 }
 
                 composable(TopicWildLife.route) {
                     questionListComposition.LoadChapterList(
-                        Constants.CHAPTER_1,
-                        questionViewModel,
-                        topBarViewModel
+                        Constants.CHAPTER_1
                     ).apply {
-                        onTitleChange(TopicWildLife.title)
-                        onHideFilter(Constants.FILTER_ALPHA_VISIBLE)
+                        topBarViewModel.onTopBarTitleChange(TopicWildLife.title)
+                        topBarViewModel.onHideFilter(Constants.FILTER_ALPHA_VISIBLE)
                     }
                 }
 
                 composable(TopicHuntingOperations.route) {
+                    vm.loadQuestions(Constants.CHAPTER_2)
                     questionListComposition.LoadChapterList(
-                        Constants.CHAPTER_2,
-                        questionViewModel,
-                        topBarViewModel
+                        Constants.CHAPTER_2
                     ).apply {
-                        onTitleChange(TopicHuntingOperations.title)
-                        onHideFilter(Constants.FILTER_ALPHA_VISIBLE)
+                        topBarViewModel.onTopBarTitleChange(TopicHuntingOperations.title)
+                        topBarViewModel.onHideFilter(Constants.FILTER_ALPHA_VISIBLE)
                     }
                 }
 
                 composable(TopicWeaponsLawAndTechnology.route) {
+                    vm.loadQuestions(Constants.CHAPTER_3)
                     questionListComposition.LoadChapterList(
                         Constants.CHAPTER_3,
-                        questionViewModel,
-                        topBarViewModel
                     ).apply {
-                        onTitleChange(TopicWeaponsLawAndTechnology.title)
-                        onHideFilter(Constants.FILTER_ALPHA_VISIBLE)
+                        topBarViewModel.onTopBarTitleChange(TopicWeaponsLawAndTechnology.title)
+                        topBarViewModel.onHideFilter(Constants.FILTER_ALPHA_VISIBLE)
                     }
                 }
 
                 composable(TopicWildLifeTreatment.route) {
+                    vm.loadQuestions(Constants.CHAPTER_4)
                     questionListComposition.LoadChapterList(
                         Constants.CHAPTER_4,
-                        questionViewModel,
-                        topBarViewModel
                     ).apply {
-                        onTitleChange(TopicWildLifeTreatment.title)
-                        onHideFilter(Constants.FILTER_ALPHA_VISIBLE)
+                        topBarViewModel.onTopBarTitleChange(TopicWildLifeTreatment.title)
+                        topBarViewModel.onHideFilter(Constants.FILTER_ALPHA_VISIBLE)
                     }
                 }
 
                 composable(TopicHuntingLaw.route) {
+                    vm.loadQuestions(Constants.CHAPTER_5)
                     questionListComposition.LoadChapterList(
                         Constants.CHAPTER_5,
-                        questionViewModel,
-                        topBarViewModel
                     ).apply {
-                        onTitleChange(TopicHuntingLaw.title)
-                        onHideFilter(Constants.FILTER_ALPHA_VISIBLE)
+                        topBarViewModel.onTopBarTitleChange(TopicHuntingLaw.title)
+                        topBarViewModel.onHideFilter(Constants.FILTER_ALPHA_VISIBLE)
                     }
                 }
 
                 composable(TopicPreservationOfWildLifeAndNature.route) {
+                    vm.loadQuestions(Constants.CHAPTER_6)
                     questionListComposition.LoadChapterList(
                         Constants.CHAPTER_6,
-                        questionViewModel,
-                        topBarViewModel
                     ).apply {
-                        onTitleChange(TopicPreservationOfWildLifeAndNature.title)
-                        onHideFilter(Constants.FILTER_ALPHA_VISIBLE)
+                        topBarViewModel.onTopBarTitleChange(TopicPreservationOfWildLifeAndNature.title)
+                        topBarViewModel.onHideFilter(Constants.FILTER_ALPHA_VISIBLE)
                     }
                 }
             }

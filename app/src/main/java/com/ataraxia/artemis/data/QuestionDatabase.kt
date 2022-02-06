@@ -22,8 +22,7 @@ abstract class QuestionDatabase : RoomDatabase() {
             synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext, QuestionDatabase::class.java, "artemisRlp.db"
-                ).createFromAsset("database/artemisRlp.db")
-                    .allowMainThreadQueries()
+                ).createFromAsset("database/artemisRlp.db").allowMainThreadQueries()
                     .build()
                 INSTANCE = instance
                 return instance

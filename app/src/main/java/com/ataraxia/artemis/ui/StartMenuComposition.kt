@@ -1,23 +1,17 @@
 package com.ataraxia.artemis.ui
 
-import AppBarViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.ataraxia.artemis.R
-import com.ataraxia.artemis.data.QuestionViewModel
-import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.helper.NavHelper
 import com.ataraxia.artemis.model.Screen
 import com.ataraxia.artemis.templates.TextButtonTemplate
@@ -27,30 +21,16 @@ import com.ataraxia.artemis.ui.theme.YELLOW_ARTEMIS
 
 class StartMenuComposition {
     private val appBarComposition = AppBarComposition()
+
     @Composable
     fun StartScreen(
-        topBarViewModel: AppBarViewModel = viewModel(), questionViewModel: QuestionViewModel = viewModel()
+
     ) {
-        val title: String by topBarViewModel.title.observeAsState("")
-        val filter: Float by topBarViewModel.filter.observeAsState(Constants.FILTER_ALPHA_INVISIBLE)
-        StartContent(
-            title = title,
-            filter = filter,
-            onHideFilter = { topBarViewModel.onHideFilter(visible = it) },
-            onTitleChange = { topBarViewModel.onTopBarTitleChange(newTitle = it) },
-            questionViewModel = questionViewModel,
-            topBarViewModel = topBarViewModel
-        )
+        StartContent()
     }
 
     @Composable
     fun StartContent(
-        title: String,
-        filter: Float,
-        onHideFilter: (Float) -> Unit,
-        onTitleChange: (String) -> Unit,
-        questionViewModel: QuestionViewModel,
-        topBarViewModel: AppBarViewModel = viewModel()
     ) {
         val navController = rememberNavController()
         val state = rememberScaffoldState(drawerState = DrawerState(DrawerValue.Closed))
@@ -63,16 +43,12 @@ class StartMenuComposition {
                 appBarComposition.GeneralTopAppBar(
                     scope = scope,
                     state = state,
-                    title = title,
-                    filter = filter,
-                    topBarViewModel = topBarViewModel
                 )
             },
             drawerContent = {
                 appBarComposition.DrawerContent(
                     scope = scope,
                     state = state,
-                    onTitleChange = onTitleChange,
                     navController = navController
                 )
             },
@@ -81,11 +57,7 @@ class StartMenuComposition {
             NavHelper.LoadNavigationRoutes(
                 navController = navController,
                 paddingValues = it,
-                onTitleChange = onTitleChange,
-                onHideFilter = onHideFilter,
-                scope = scope,
-                questionViewModel = questionViewModel,
-                topBarViewModel = topBarViewModel
+                scope = scope
             )
         }
     }
@@ -143,7 +115,7 @@ class StartMenuComposition {
                         text = "Sachgebiete"
                     )
                 }
-                StartMenuButton(onClick = { navController.navigate("exam") } ) {
+                StartMenuButton(onClick = { navController.navigate("exam") }) {
                     StartMenuContent(
                         drawable = R.drawable.ic_baseline_assignment_24,
                         contentDescription = "Examination",

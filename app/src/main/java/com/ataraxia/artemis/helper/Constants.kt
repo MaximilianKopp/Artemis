@@ -11,5 +11,10 @@ class Constants {
 
         const val FILTER_ALPHA_VISIBLE = 1f
         const val FILTER_ALPHA_INVISIBLE = 0f
+
+        const val FILTER_CRITERIA_ALL = "all_questions"
+        const val FILTER_CRITERIA_NOT_LEARNED = "not_learned_questions"
+        const val FILTER_CRITERIA_FAILED = "failed_questions"
+        const val FILTER_CRITERIA_FAVOURITES = "favourite_questions"
     }
 }
