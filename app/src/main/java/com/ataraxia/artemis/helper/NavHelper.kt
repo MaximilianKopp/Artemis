@@ -1,6 +1,6 @@
 package com.ataraxia.artemis.helper
 
-import AppBarViewModel
+import com.ataraxia.artemis.data.AppBarViewModel
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -9,7 +9,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.ataraxia.artemis.data.QuestionViewModel
+import com.ataraxia.artemis.model.Screen
 import com.ataraxia.artemis.model.Screen.DrawerScreen.*
 import com.ataraxia.artemis.ui.*
 import kotlinx.coroutines.CoroutineScope
@@ -23,6 +23,8 @@ class NavHelper {
             navController: NavHostController,
             paddingValues: PaddingValues,
             scope: CoroutineScope,
+            isDialogOpen: Boolean,
+            onOpenDialog: (Boolean) -> Unit
         ) {
             val topBarViewModel: AppBarViewModel = viewModel()
             val startMenuComposition = StartMenuComposition()
@@ -31,104 +33,31 @@ class NavHelper {
             val statisticComposition = StatisticComposition()
             val configComposition = ConfigComposition()
             val questionListComposition = QuestionListComposition()
-            val vm: QuestionViewModel = viewModel()
 
             NavHost(
                 navController,
                 Home.route,
                 Modifier.padding(paddingValues = paddingValues)
             ) {
-                composable(Home.route) {
-                    startMenuComposition.StartMenu(navController)
-                        .apply {
-                            (Home.title)
-                            topBarViewModel.onHideFilter(Constants.FILTER_ALPHA_INVISIBLE)
+
+                for (screen in Screen.GENERAL_SCREENS) {
+                    composable(screen.route) {
+                        when (screen.route) {
+                            Home.route -> startMenuComposition.StartMenu(navController = navController)
+                            Questions.route -> questionComposition.QuestionScreen(navController, scope)
+                            Exam.route -> examComposition.ExamScreen()
+                            Statistics.route -> statisticComposition.StatisticScreen()
+                            Configuration.route -> configComposition.ConfigScreen()
                         }
-                }
-
-                composable(Questions.route) {
-                    questionComposition.QuestionScreen(navController, scope)
-                        .apply {
-                            topBarViewModel.onTopBarTitleChange(Questions.title)
-                            topBarViewModel.onHideFilter(Constants.FILTER_ALPHA_INVISIBLE)
-                        }
-                }
-                composable(Exam.route) {
-                    examComposition.ExamScreen().apply {
-                        topBarViewModel.onTopBarTitleChange(Exam.title)
+                        topBarViewModel.onTopBarTitleChange(screen.title)
                         topBarViewModel.onHideFilter(Constants.FILTER_ALPHA_INVISIBLE)
                     }
                 }
 
-                composable(Statistics.route) {
-                    statisticComposition.StatisticScreen().apply {
-                        topBarViewModel.onTopBarTitleChange(Statistics.title)
-                        topBarViewModel.onHideFilter(Constants.FILTER_ALPHA_INVISIBLE)
-                    }
-                }
-
-                composable(Configuration.route) {
-                    configComposition.ConfigScreen().apply {
-                        topBarViewModel.onTopBarTitleChange(Configuration.title)
-                        topBarViewModel.onHideFilter(Constants.FILTER_ALPHA_INVISIBLE)
-                    }
-                }
-
-                composable(TopicWildLife.route) {
-                    questionListComposition.LoadChapterList(
-                        Constants.CHAPTER_1
-                    ).apply {
-                        topBarViewModel.onTopBarTitleChange(TopicWildLife.title)
-                        topBarViewModel.onHideFilter(Constants.FILTER_ALPHA_VISIBLE)
-                    }
-                }
-
-                composable(TopicHuntingOperations.route) {
-                    vm.loadQuestions(Constants.CHAPTER_2)
-                    questionListComposition.LoadChapterList(
-                        Constants.CHAPTER_2
-                    ).apply {
-                        topBarViewModel.onTopBarTitleChange(TopicHuntingOperations.title)
-                        topBarViewModel.onHideFilter(Constants.FILTER_ALPHA_VISIBLE)
-                    }
-                }
-
-                composable(TopicWeaponsLawAndTechnology.route) {
-                    vm.loadQuestions(Constants.CHAPTER_3)
-                    questionListComposition.LoadChapterList(
-                        Constants.CHAPTER_3,
-                    ).apply {
-                        topBarViewModel.onTopBarTitleChange(TopicWeaponsLawAndTechnology.title)
-                        topBarViewModel.onHideFilter(Constants.FILTER_ALPHA_VISIBLE)
-                    }
-                }
-
-                composable(TopicWildLifeTreatment.route) {
-                    vm.loadQuestions(Constants.CHAPTER_4)
-                    questionListComposition.LoadChapterList(
-                        Constants.CHAPTER_4,
-                    ).apply {
-                        topBarViewModel.onTopBarTitleChange(TopicWildLifeTreatment.title)
-                        topBarViewModel.onHideFilter(Constants.FILTER_ALPHA_VISIBLE)
-                    }
-                }
-
-                composable(TopicHuntingLaw.route) {
-                    vm.loadQuestions(Constants.CHAPTER_5)
-                    questionListComposition.LoadChapterList(
-                        Constants.CHAPTER_5,
-                    ).apply {
-                        topBarViewModel.onTopBarTitleChange(TopicHuntingLaw.title)
-                        topBarViewModel.onHideFilter(Constants.FILTER_ALPHA_VISIBLE)
-                    }
-                }
-
-                composable(TopicPreservationOfWildLifeAndNature.route) {
-                    vm.loadQuestions(Constants.CHAPTER_6)
-                    questionListComposition.LoadChapterList(
-                        Constants.CHAPTER_6,
-                    ).apply {
-                        topBarViewModel.onTopBarTitleChange(TopicPreservationOfWildLifeAndNature.title)
+                for (screen in Screen.CHAPTER_SCREENS) {
+                    composable(screen.route) {
+                        screen.chapter?.let { chapter -> questionListComposition.LoadChapterList(chapter, isDialogOpen, onOpenDialog) }
+                        topBarViewModel.onTopBarTitleChange(screen.title)
                         topBarViewModel.onHideFilter(Constants.FILTER_ALPHA_VISIBLE)
                     }
                 }
