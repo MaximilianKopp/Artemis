@@ -1,11 +1,11 @@
 package com.ataraxia.artemis.model
 
 import androidx.room.Entity
+import androidx.room.Ignore
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "artemis_rlp")
-data class Question(
-
+data class Question @JvmOverloads constructor(
     @PrimaryKey(autoGenerate = true)
     val id: Int,
     val topic: String,
@@ -18,5 +18,7 @@ data class Question(
     var favourite: Int,
     val learnedOnce: Int,
     val learnedTwice: Int,
-    val failed: Int
+    val failed: Int,
+    @Ignore
+    val isSelected: Boolean = false,
 )
