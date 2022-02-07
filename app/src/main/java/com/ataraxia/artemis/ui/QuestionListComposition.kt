@@ -1,6 +1,5 @@
 package com.ataraxia.artemis.ui
 
-import AppBarViewModel
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,7 +9,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,10 +29,22 @@ class QuestionListComposition {
     @Composable
     fun LoadChapterList(
         chapter: String,
-        questionViewModel: QuestionViewModel,
-        topBarViewModel: AppBarViewModel = viewModel()
+        isDialogOpen: Boolean,
+        onOpenDialog: (Boolean) -> Unit,
     ) {
-        val questions = loadChapter(chapter, questionViewModel)
+        val questionViewModel: QuestionViewModel = viewModel()
+        val questions: List<Question> by questionViewModel.questions.observeAsState(listOf())
+
+        if(questions.isEmpty()) {
+            questionViewModel.loadQuestions(chapter)
+        }
+
+        FilterDialog(isDialogOpen, onOpenDialog, chapter) { currentChapter, criteria ->
+            questionViewModel.filterQuestions(
+                currentChapter,
+                criteria
+            )
+        }
         LazyColumn {
             items(questions) { question ->
                 val isFavourite = rememberSaveable { mutableStateOf(question.favourite) }
@@ -40,20 +55,23 @@ class QuestionListComposition {
                         backgroundColor = Color.White,
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(4.dp),
-                        content = { QuestionCard(question, isFavourite, questionViewModel) }
-                    )
+                            .padding(4.dp)
+                    ) {
+                        QuestionCard(
+                            question,
+                            isFavourite
+                        ) { questionViewModel.updateQuestion(it) }
+                    }
                 }
             }
         }
     }
 
-
     @Composable
     fun QuestionCard(
         question: Question,
         isFavourite: MutableState<Int>,
-        questionViewModel: QuestionViewModel
+        onUpdate: (Question) -> Unit,
     ) {
         val iconColor by animateColorAsState(
             if (isFavourite.value == 1) Color.Yellow else Color.Black
@@ -83,7 +101,7 @@ class QuestionListComposition {
                         }
                     }
                     IconButton(onClick = {
-                        setFavourite(question, isFavourite, questionViewModel)
+                        setFavourite(question, isFavourite) { onUpdate(question) }
                     }, Modifier.size(20.dp)) {
                         Icon(
                             imageVector = Icons.Filled.Star,
@@ -95,6 +113,96 @@ class QuestionListComposition {
         }
     }
 
+    @Composable
+    fun FilterDialog(
+        isDialogOpen: Boolean,
+        openDialog: (Boolean) -> Unit,
+        chapter: String,
+        onTest: (String, String) -> Unit
+    ) {
+        if (isDialogOpen) {
+            AlertDialog(
+                onDismissRequest = { openDialog(false) },
+                text = {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "Filterauswahl",
+                            style = MaterialTheme.typography.h4
+                        )
+                        Divider(thickness = 2.dp)
+                        Text(
+                            text = "Der Filter legt fest, welche Fragen vorausgewählt werden:",
+                            style = MaterialTheme.typography.body1
+                        )
+                    }
+                },
+                buttons = {
+                    Column(
+                        Modifier.padding(12.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Button(
+                            onClick = {
+                                onTest(chapter, Constants.FILTER_CRITERIA_ALL)
+                                openDialog(false)
+                            },
+                            Modifier
+                                .width(300.dp)
+                                .padding(4.dp)
+                        ) {
+                            Text(
+                                text = "Alle Fragen",
+                                style = MaterialTheme.typography.body1
+                            )
+                        }
+                        Button(
+                            onClick = {
+                                onTest(chapter, Constants.FILTER_CRITERIA_NOT_LEARNED)
+                                openDialog(false)
+                            },
+                            Modifier
+                                .width(300.dp)
+                                .padding(4.dp)
+                        ) {
+                            Text(
+                                text = "Noch nicht gelernt",
+                                style = MaterialTheme.typography.body1
+                            )
+                        }
+                        Button(
+                            onClick = {
+                                onTest(chapter, Constants.FILTER_CRITERIA_FAILED)
+                                openDialog(false)
+                            },
+                            Modifier
+                                .width(300.dp)
+                                .padding(4.dp)
+                        ) {
+                            Text(
+                                text = "Falsch beantwortet",
+                                style = MaterialTheme.typography.body1
+                            )
+                        }
+                        Button(
+                            onClick = {
+                                onTest(chapter, Constants.FILTER_CRITERIA_FAVOURITES)
+                                openDialog(false)
+                            },
+                            Modifier
+                                .width(300.dp)
+                                .padding(4.dp)
+                        ) {
+                            Text(
+                                text = "Favouriten",
+                                style = MaterialTheme.typography.body1
+                            )
+                        }
+                    }
+                }
+            )
+        }
+    }
+
     private fun onCheckedChange(checkedState: MutableState<Boolean>) {
         checkedState.value = !checkedState.value
     }
@@ -102,7 +210,7 @@ class QuestionListComposition {
     private fun setFavourite(
         question: Question,
         isFavourite: MutableState<Int>,
-        questionViewModel: QuestionViewModel
+        updateQuestion: (Question) -> Unit
     ) {
         if (question.favourite == 0) {
             question.favourite = 1
@@ -111,29 +219,7 @@ class QuestionListComposition {
             question.favourite = 0
             isFavourite.value = question.favourite
         }
-        questionViewModel.updateQuestion(question)
+        updateQuestion(question)
     }
 
-    private fun loadChapter(
-        chapter: String,
-        questionViewModel: QuestionViewModel,
-    ): MutableList<Question> {
-        var loadedChapter = mutableStateListOf<Question>()
-
-        when (chapter) {
-            Constants.CHAPTER_1 -> loadedChapter =
-                questionViewModel.allQuestionsFromChapterOne.toMutableStateList()
-            Constants.CHAPTER_2 -> loadedChapter =
-                questionViewModel.allQuestionsFromChapterTwo.toMutableStateList()
-            Constants.CHAPTER_3 -> loadedChapter =
-                questionViewModel.allQuestionsFromChapterThree.toMutableStateList()
-            Constants.CHAPTER_4 -> loadedChapter =
-                questionViewModel.allQuestionsFromChapterFour.toMutableStateList()
-            Constants.CHAPTER_5 -> loadedChapter =
-                questionViewModel.allQuestionsFromChapterFive.toMutableStateList()
-            Constants.CHAPTER_6 -> loadedChapter =
-                questionViewModel.allQuestionsFromChapterSix.toMutableStateList()
-        }
-        return loadedChapter
-    }
 }

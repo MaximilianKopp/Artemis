@@ -1,6 +1,6 @@
 package com.ataraxia.artemis.ui
 
-import AppBarViewModel
+import com.ataraxia.artemis.data.AppBarViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -16,8 +16,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.ataraxia.artemis.R
-import com.ataraxia.artemis.data.QuestionViewModel
-import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.helper.NavHelper
 import com.ataraxia.artemis.model.Screen
 import com.ataraxia.artemis.templates.TextButtonTemplate
@@ -27,34 +25,22 @@ import com.ataraxia.artemis.ui.theme.YELLOW_ARTEMIS
 
 class StartMenuComposition {
     private val appBarComposition = AppBarComposition()
+
     @Composable
     fun StartScreen(
-        topBarViewModel: AppBarViewModel = viewModel(), questionViewModel: QuestionViewModel = viewModel()
+
     ) {
-        val title: String by topBarViewModel.title.observeAsState("")
-        val filter: Float by topBarViewModel.filter.observeAsState(Constants.FILTER_ALPHA_INVISIBLE)
-        StartContent(
-            title = title,
-            filter = filter,
-            onHideFilter = { topBarViewModel.onHideFilter(visible = it) },
-            onTitleChange = { topBarViewModel.onTopBarTitleChange(newTitle = it) },
-            questionViewModel = questionViewModel,
-            topBarViewModel = topBarViewModel
-        )
+        StartContent()
     }
 
     @Composable
     fun StartContent(
-        title: String,
-        filter: Float,
-        onHideFilter: (Float) -> Unit,
-        onTitleChange: (String) -> Unit,
-        questionViewModel: QuestionViewModel,
-        topBarViewModel: AppBarViewModel = viewModel()
     ) {
+        val appBarViewModel: AppBarViewModel = viewModel()
         val navController = rememberNavController()
         val state = rememberScaffoldState(drawerState = DrawerState(DrawerValue.Closed))
         val scope = rememberCoroutineScope()
+        val isDialogOpen: Boolean by appBarViewModel.filterDialog.observeAsState(false)
 
         Scaffold(
             scaffoldState = state,
@@ -63,16 +49,12 @@ class StartMenuComposition {
                 appBarComposition.GeneralTopAppBar(
                     scope = scope,
                     state = state,
-                    title = title,
-                    filter = filter,
-                    topBarViewModel = topBarViewModel
                 )
             },
             drawerContent = {
                 appBarComposition.DrawerContent(
                     scope = scope,
                     state = state,
-                    onTitleChange = onTitleChange,
                     navController = navController
                 )
             },
@@ -81,11 +63,9 @@ class StartMenuComposition {
             NavHelper.LoadNavigationRoutes(
                 navController = navController,
                 paddingValues = it,
-                onTitleChange = onTitleChange,
-                onHideFilter = onHideFilter,
                 scope = scope,
-                questionViewModel = questionViewModel,
-                topBarViewModel = topBarViewModel
+                isDialogOpen = isDialogOpen,
+                onOpenDialog = {appBarViewModel.onOpenFilterDialog(it)}
             )
         }
     }
@@ -143,7 +123,7 @@ class StartMenuComposition {
                         text = "Sachgebiete"
                     )
                 }
-                StartMenuButton(onClick = { navController.navigate("exam") } ) {
+                StartMenuButton(onClick = { navController.navigate(Screen.DrawerScreen.Exam.route) }) {
                     StartMenuContent(
                         drawable = R.drawable.ic_baseline_assignment_24,
                         contentDescription = "Examination",
@@ -152,14 +132,14 @@ class StartMenuComposition {
                 }
             }
             Row {
-                StartMenuButton(onClick = { navController.navigate("statistics") }) {
+                StartMenuButton(onClick = { navController.navigate(Screen.DrawerScreen.Statistics.route) }) {
                     StartMenuContent(
                         drawable = R.drawable.ic_baseline_insert_chart_24,
                         contentDescription = "Statistics",
                         text = "Statistik"
                     )
                 }
-                StartMenuButton(onClick = { navController.navigate("configuration") }) {
+                StartMenuButton(onClick = { navController.navigate(Screen.DrawerScreen.Configuration.route) }) {
                     StartMenuContent(
                         drawable = R.drawable.ic_baseline_build_circle_24,
                         contentDescription = "Configuration",
