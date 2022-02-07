@@ -1,3 +1,5 @@
+package com.ataraxia.artemis.data
+
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -15,7 +17,7 @@ class AppBarViewModel : ViewModel() {
     val filter: LiveData<Float> = _filter
 
     private val _filterDialog = MutableLiveData(false)
-    val filterDialog = _filterDialog
+    val filterDialog: LiveData<Boolean> = _filterDialog
 
     fun onTopBarTitleChange(newTitle: String) {
         viewModelScope.launch {

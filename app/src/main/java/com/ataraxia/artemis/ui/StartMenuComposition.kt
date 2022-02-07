@@ -1,14 +1,18 @@
 package com.ataraxia.artemis.ui
 
+import com.ataraxia.artemis.data.AppBarViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.ataraxia.artemis.R
@@ -32,9 +36,11 @@ class StartMenuComposition {
     @Composable
     fun StartContent(
     ) {
+        val appBarViewModel: AppBarViewModel = viewModel()
         val navController = rememberNavController()
         val state = rememberScaffoldState(drawerState = DrawerState(DrawerValue.Closed))
         val scope = rememberCoroutineScope()
+        val isDialogOpen: Boolean by appBarViewModel.filterDialog.observeAsState(false)
 
         Scaffold(
             scaffoldState = state,
@@ -57,7 +63,9 @@ class StartMenuComposition {
             NavHelper.LoadNavigationRoutes(
                 navController = navController,
                 paddingValues = it,
-                scope = scope
+                scope = scope,
+                isDialogOpen = isDialogOpen,
+                onOpenDialog = {appBarViewModel.onOpenFilterDialog(it)}
             )
         }
     }
@@ -115,7 +123,7 @@ class StartMenuComposition {
                         text = "Sachgebiete"
                     )
                 }
-                StartMenuButton(onClick = { navController.navigate("exam") }) {
+                StartMenuButton(onClick = { navController.navigate(Screen.DrawerScreen.Exam.route) }) {
                     StartMenuContent(
                         drawable = R.drawable.ic_baseline_assignment_24,
                         contentDescription = "Examination",
@@ -124,14 +132,14 @@ class StartMenuComposition {
                 }
             }
             Row {
-                StartMenuButton(onClick = { navController.navigate("statistics") }) {
+                StartMenuButton(onClick = { navController.navigate(Screen.DrawerScreen.Statistics.route) }) {
                     StartMenuContent(
                         drawable = R.drawable.ic_baseline_insert_chart_24,
                         contentDescription = "Statistics",
                         text = "Statistik"
                     )
                 }
-                StartMenuButton(onClick = { navController.navigate("configuration") }) {
+                StartMenuButton(onClick = { navController.navigate(Screen.DrawerScreen.Configuration.route) }) {
                     StartMenuContent(
                         drawable = R.drawable.ic_baseline_build_circle_24,
                         contentDescription = "Configuration",

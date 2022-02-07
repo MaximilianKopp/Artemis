@@ -14,6 +14,9 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
     private val _questions = MutableLiveData<List<Question>>()
     val questions = _questions
 
+    private var _isChecked = MutableLiveData<Boolean>()
+    var isChecked = _isChecked
+
     private val questionRepository: QuestionRepository
     private val questionsChapter1: List<Question>
     private val questionsChapter2: List<Question>
@@ -47,15 +50,42 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
 
     private suspend fun loadQuestionsCoroutine(chapter: String) =
         withContext(Dispatchers.IO) {
-            var questions = listOf<Question>()
-            when (chapter) {
-                Constants.CHAPTER_1 -> questions = questionsChapter1
-                Constants.CHAPTER_2 -> questions = questionsChapter2
-                Constants.CHAPTER_3 -> questions = questionsChapter3
-                Constants.CHAPTER_4 -> questions = questionsChapter4
-                Constants.CHAPTER_5 -> questions = questionsChapter5
-                Constants.CHAPTER_6 -> questions = questionsChapter6
-            }
+            val questions = selectChapter(chapter)
             _questions.postValue(questions)
+        }
+
+    private fun selectChapter(chapter: String): List<Question> {
+        var questions = listOf<Question>()
+        when (chapter) {
+            Constants.CHAPTER_1 -> questions = questionsChapter1
+            Constants.CHAPTER_2 -> questions = questionsChapter2
+            Constants.CHAPTER_3 -> questions = questionsChapter3
+            Constants.CHAPTER_4 -> questions = questionsChapter4
+            Constants.CHAPTER_5 -> questions = questionsChapter5
+            Constants.CHAPTER_6 -> questions = questionsChapter6
+        }
+        return questions
+    }
+
+    fun filterQuestions(chapter: String, criteria: String) {
+            viewModelScope.launch {
+                filterQuestionsCoroutine(chapter, criteria)
+            }
+    }
+
+    private suspend fun filterQuestionsCoroutine(chapter: String, criteria: String) =
+        withContext(Dispatchers.IO) {
+            var filteredQuestions = listOf<Question>()
+            when (criteria) {
+                Constants.FILTER_CRITERIA_ALL -> filteredQuestions =
+                    selectChapter(chapter)
+                Constants.FILTER_CRITERIA_FAVOURITES -> filteredQuestions =
+                    selectChapter(chapter).filter { q -> q.favourite == 1 }
+                Constants.FILTER_CRITERIA_NOT_LEARNED -> filteredQuestions =
+                    selectChapter(chapter).filter { q -> q.learnedOnce == 0 || q.learnedTwice == 1 }
+                Constants.FILTER_CRITERIA_FAILED -> filteredQuestions =
+                    selectChapter(chapter).filter { q -> q.failed == 1 }
+            }
+            _questions.postValue(filteredQuestions)
         }
 }
