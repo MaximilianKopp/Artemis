@@ -14,8 +14,8 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
     private val _questions = MutableLiveData<List<Question>>()
     val questions = _questions
 
-    private var _isChecked = MutableLiveData<Boolean>()
-    var isChecked = _isChecked
+    private val _filterCriteria = MutableLiveData<String>()
+    val filterCriteria = _filterCriteria
 
     private val questionRepository: QuestionRepository
     private val questionsChapter1: List<Question>
@@ -36,25 +36,37 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
         questionsChapter6 = questionRepository.getAllQuestionsFromChapterSix
     }
 
+    fun onUpdateList(newValue: List<Question>) {
+        viewModelScope.launch {
+            onUpdateListCoroutine(newValue)
+        }
+    }
+
+    private suspend fun onUpdateListCoroutine(newValue: List<Question>) =
+        withContext(Dispatchers.IO) {
+            _questions.postValue(newValue)
+        }
+
+
     fun updateQuestion(question: Question) {
         viewModelScope.launch {
             questionRepository.updateQuestion(question)
         }
     }
 
-    fun loadQuestions(chapter: String) {
+    fun onLoadQuestions(chapter: String) {
         viewModelScope.launch {
-            loadQuestionsCoroutine(chapter)
+            onLoadQuestionsCoroutine(chapter)
         }
     }
 
-    private suspend fun loadQuestionsCoroutine(chapter: String) =
+    private suspend fun onLoadQuestionsCoroutine(chapter: String) =
         withContext(Dispatchers.IO) {
             val questions = selectChapter(chapter)
             _questions.postValue(questions)
         }
 
-    private fun selectChapter(chapter: String): List<Question> {
+    fun selectChapter(chapter: String): List<Question> {
         var questions = listOf<Question>()
         when (chapter) {
             Constants.CHAPTER_1 -> questions = questionsChapter1
@@ -66,26 +78,4 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
         }
         return questions
     }
-
-    fun filterQuestions(chapter: String, criteria: String) {
-            viewModelScope.launch {
-                filterQuestionsCoroutine(chapter, criteria)
-            }
-    }
-
-    private suspend fun filterQuestionsCoroutine(chapter: String, criteria: String) =
-        withContext(Dispatchers.IO) {
-            var filteredQuestions = listOf<Question>()
-            when (criteria) {
-                Constants.FILTER_CRITERIA_ALL -> filteredQuestions =
-                    selectChapter(chapter)
-                Constants.FILTER_CRITERIA_FAVOURITES -> filteredQuestions =
-                    selectChapter(chapter).filter { q -> q.favourite == 1 }
-                Constants.FILTER_CRITERIA_NOT_LEARNED -> filteredQuestions =
-                    selectChapter(chapter).filter { q -> q.learnedOnce == 0 || q.learnedTwice == 1 }
-                Constants.FILTER_CRITERIA_FAILED -> filteredQuestions =
-                    selectChapter(chapter).filter { q -> q.failed == 1 }
-            }
-            _questions.postValue(filteredQuestions)
-        }
 }

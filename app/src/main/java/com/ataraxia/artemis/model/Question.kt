@@ -20,5 +20,5 @@ data class Question @JvmOverloads constructor(
     val learnedTwice: Int,
     val failed: Int,
     @Ignore
-    val isSelected: Boolean = false,
+    var isSelected: Int = 1,
 )

@@ -1,6 +1,6 @@
 package com.ataraxia.artemis.ui
 
-import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -8,13 +8,9 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,102 +23,96 @@ import com.ataraxia.artemis.model.Question
 class QuestionListComposition {
 
     @Composable
-    fun LoadChapterList(
+    fun ChapterScreen(
         chapter: String,
         isDialogOpen: Boolean,
-        onOpenDialog: (Boolean) -> Unit,
+        onOpenDialog: (Boolean) -> Unit
     ) {
         val questionViewModel: QuestionViewModel = viewModel()
-        val questions: List<Question> by questionViewModel.questions.observeAsState(listOf())
-
-        if(questions.isEmpty()) {
-            questionViewModel.loadQuestions(chapter)
-        }
-
-        FilterDialog(isDialogOpen, onOpenDialog, chapter) { currentChapter, criteria ->
-            questionViewModel.filterQuestions(
-                currentChapter,
-                criteria
-            )
-        }
-        LazyColumn {
-            items(questions) { question ->
-                val isFavourite = rememberSaveable { mutableStateOf(question.favourite) }
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Card(
-                        backgroundColor = Color.White,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(4.dp)
-                    ) {
-                        QuestionCard(
-                            question,
-                            isFavourite
-                        ) { questionViewModel.updateQuestion(it) }
-                    }
-                }
-            }
-        }
+        val renewQuestions: List<Question> = questionViewModel.selectChapter(chapter)
+        val liveQuestions: List<Question> by questionViewModel.questions.observeAsState(
+            renewQuestions
+        )
+        ChapterContent(
+            renewQuestions,
+            liveQuestions,
+            isDialogOpen,
+            onOpenDialog,
+            questionViewModel,
+        )
     }
 
+    @OptIn(ExperimentalFoundationApi::class)
     @Composable
-    fun QuestionCard(
-        question: Question,
-        isFavourite: MutableState<Int>,
-        onUpdate: (Question) -> Unit,
+    fun ChapterContent(
+        renewQuestions: List<Question>,
+        questions: List<Question>,
+        isDialogOpen: Boolean,
+        onOpenDialog: (Boolean) -> Unit,
+        questionViewModel: QuestionViewModel,
     ) {
-        val iconColor by animateColorAsState(
-            if (isFavourite.value == 1) Color.Yellow else Color.Black
-        )
-        val checkedState = rememberSaveable { mutableStateOf(true) }
-        Column {
-            Row {
-                Checkbox(
-                    checked = checkedState.value,
-                    onCheckedChange = { onCheckedChange(checkedState) })
-                Text(
-                    text = question.text,
-                    Modifier.padding(start = 3.dp)
-                )
+        LazyColumn {
+            stickyHeader {
+                Button(
+                    modifier = Modifier.padding(8.dp),
+                    onClick = { /*TODO*/ }) {
+                    Text(text = "Training starten")
+                }
             }
-            Row {
 
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.CenterEnd
+            items(questions) { question ->
+                Card(
+                    backgroundColor = Color.White,
+                    modifier = Modifier.padding(4.dp)
                 ) {
-
-                    Box(modifier = Modifier.padding(end = 30.dp)) {
+                    Column {
                         Row {
-                            Icon(Icons.Filled.Check, contentDescription = "", Modifier.size(20.dp))
-                            Icon(Icons.Filled.Close, contentDescription = "", Modifier.size(20.dp))
+                            Text(
+                                text = question.text,
+                                Modifier.padding(start = 3.dp)
+                            )
+                        }
+                        Row {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.CenterEnd
+                            ) {
+
+                                Box(modifier = Modifier.padding(end = 4.dp)) {
+                                    Row {
+                                        Icon(
+                                            Icons.Filled.Check,
+                                            contentDescription = "",
+                                            modifier = Modifier.size(20.dp),
+                                            tint = if (question.learnedOnce == 1 && question.failed == 0) {
+                                                Color.Yellow
+                                            } else if (question.learnedTwice == 1 && question.failed == 0) {
+                                                Color.Green
+                                            } else {
+                                                Color.Black
+                                            }
+                                        )
+                                        Icon(
+                                            Icons.Filled.Close,
+                                            contentDescription = "",
+                                            modifier = Modifier.size(20.dp),
+                                            tint = if (question.failed == 1) {
+                                                Color.Red
+                                            } else {
+                                                Color.Black
+                                            }
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
-                    IconButton(onClick = {
-                        setFavourite(question, isFavourite) { onUpdate(question) }
-                    }, Modifier.size(20.dp)) {
-                        Icon(
-                            imageVector = Icons.Filled.Star,
-                            contentDescription = "Test", tint = iconColor
-                        )
-                    }
                 }
             }
         }
-    }
-
-    @Composable
-    fun FilterDialog(
-        isDialogOpen: Boolean,
-        openDialog: (Boolean) -> Unit,
-        chapter: String,
-        onTest: (String, String) -> Unit
-    ) {
         if (isDialogOpen) {
             AlertDialog(
-                onDismissRequest = { openDialog(false) },
+                onDismissRequest = { onOpenDialog(false) },
                 text = {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
@@ -143,8 +133,9 @@ class QuestionListComposition {
                     ) {
                         Button(
                             onClick = {
-                                onTest(chapter, Constants.FILTER_CRITERIA_ALL)
-                                openDialog(false)
+                                questionViewModel.filterCriteria.postValue(Constants.FILTER_CRITERIA_ALL)
+                                questionViewModel.questions.postValue(renewQuestions.filter { it.isSelected == 1 })
+                                onOpenDialog(false)
                             },
                             Modifier
                                 .width(300.dp)
@@ -157,8 +148,9 @@ class QuestionListComposition {
                         }
                         Button(
                             onClick = {
-                                onTest(chapter, Constants.FILTER_CRITERIA_NOT_LEARNED)
-                                openDialog(false)
+                                questionViewModel.onUpdateList(renewQuestions.filter { it.learnedOnce == 1 && it.learnedTwice == 0 })
+                                questionViewModel.filterCriteria.postValue(Constants.FILTER_CRITERIA_NOT_LEARNED)
+                                onOpenDialog(false)
                             },
                             Modifier
                                 .width(300.dp)
@@ -171,8 +163,9 @@ class QuestionListComposition {
                         }
                         Button(
                             onClick = {
-                                onTest(chapter, Constants.FILTER_CRITERIA_FAILED)
-                                openDialog(false)
+                                questionViewModel.onUpdateList(renewQuestions.filter { it.learnedOnce == 1 })
+                                questionViewModel.filterCriteria.postValue(Constants.FILTER_CRITERIA_FAILED)
+                                onOpenDialog(false)
                             },
                             Modifier
                                 .width(300.dp)
@@ -185,8 +178,9 @@ class QuestionListComposition {
                         }
                         Button(
                             onClick = {
-                                onTest(chapter, Constants.FILTER_CRITERIA_FAVOURITES)
-                                openDialog(false)
+                                questionViewModel.onUpdateList(renewQuestions.filter { it.favourite == 1 })
+                                questionViewModel.filterCriteria.postValue(Constants.FILTER_CRITERIA_FAVOURITES)
+                                onOpenDialog(false)
                             },
                             Modifier
                                 .width(300.dp)
@@ -202,24 +196,4 @@ class QuestionListComposition {
             )
         }
     }
-
-    private fun onCheckedChange(checkedState: MutableState<Boolean>) {
-        checkedState.value = !checkedState.value
-    }
-
-    private fun setFavourite(
-        question: Question,
-        isFavourite: MutableState<Int>,
-        updateQuestion: (Question) -> Unit
-    ) {
-        if (question.favourite == 0) {
-            question.favourite = 1
-            isFavourite.value = question.favourite
-        } else if (question.favourite == 1) {
-            question.favourite = 0
-            isFavourite.value = question.favourite
-        }
-        updateQuestion(question)
-    }
-
 }
