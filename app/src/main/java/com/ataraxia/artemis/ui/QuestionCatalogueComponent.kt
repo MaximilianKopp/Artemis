@@ -21,7 +21,7 @@ import com.ataraxia.artemis.ui.theme.YELLOW_ARTEMIS
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-class QuestionCatalogueComposition {
+class QuestionCatalogueComponent {
 
     @Composable
     fun QuestionScreen(navController: NavHostController, scope: CoroutineScope) {

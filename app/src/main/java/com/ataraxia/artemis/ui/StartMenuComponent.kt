@@ -23,8 +23,8 @@ import com.ataraxia.artemis.templates.TextTemplate
 import com.ataraxia.artemis.ui.theme.GREEN_ARTEMIS
 import com.ataraxia.artemis.ui.theme.YELLOW_ARTEMIS
 
-class StartMenuComposition {
-    private val appBarComposition = AppBarComposition()
+class StartMenuComponent {
+    private val appBarComposition = AppBarComponent()
 
     @Composable
     fun StartScreen(

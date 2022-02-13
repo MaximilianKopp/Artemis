@@ -27,12 +27,12 @@ class NavHelper {
             onOpenDialog: (Boolean) -> Unit
         ) {
             val topBarViewModel: AppBarViewModel = viewModel()
-            val startMenuComposition = StartMenuComposition()
-            val questionComposition = QuestionCatalogueComposition()
-            val examComposition = ExamComposition()
-            val statisticComposition = StatisticComposition()
-            val configComposition = ConfigComposition()
-            val questionListComposition = QuestionListComposition()
+            val startMenuComposition = StartMenuComponent()
+            val questionComposition = QuestionCatalogueComponent()
+            val examComposition = ExamComponent()
+            val statisticComposition = StatisticComponent()
+            val configComposition = ConfigComponent()
+            val questionListComposition = QuestionListComponent()
 
             NavHost(
                 navController,

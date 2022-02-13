@@ -2,10 +2,10 @@ package com.ataraxia.artemis.ui
 
 import androidx.compose.runtime.Composable
 
-class StatisticComposition {
+class ChapterComponent {
 
     @Composable
-    fun StatisticScreen() {
+    fun ChapterScreen() {
 
     }
 }

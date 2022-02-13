@@ -3,7 +3,7 @@ package com.ataraxia.artemis.ui
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 
-class ExamComposition {
+class ExamComponent {
 
     @Composable
     fun ExamScreen() {

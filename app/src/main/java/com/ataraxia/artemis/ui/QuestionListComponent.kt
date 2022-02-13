@@ -20,7 +20,7 @@ import com.ataraxia.artemis.data.QuestionViewModel
 import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.model.Question
 
-class QuestionListComposition {
+class QuestionListComponent {
 
     @Composable
     fun ChapterScreen(

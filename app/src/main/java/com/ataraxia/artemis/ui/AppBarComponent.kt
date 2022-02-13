@@ -26,7 +26,7 @@ import com.ataraxia.artemis.ui.theme.YELLOW_ARTEMIS
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-class AppBarComposition {
+class AppBarComponent {
 
 
     @Composable
