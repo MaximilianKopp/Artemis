@@ -14,6 +14,9 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
     private val _questions = MutableLiveData<List<Question>>()
     val questions = _questions
 
+    private val _trainingData = MutableLiveData<List<Question>>()
+    val trainingData = _trainingData
+
     private val _filterCriteria = MutableLiveData<String>()
     val filterCriteria = _filterCriteria
 
@@ -77,5 +80,39 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
             Constants.CHAPTER_6 -> questions = questionsChapter6
         }
         return questions
+    }
+
+    fun prepareTrainingData(questions: List<Question>, filterCriteria: String) {
+        viewModelScope.launch {
+            prepareTrainingDataCoroutine(questions, filterCriteria)
+        }
+    }
+
+    private suspend fun prepareTrainingDataCoroutine(
+        questions: List<Question>,
+        filterCriteria: String
+    ) = withContext(Dispatchers.IO) {
+        val learnedOnceQuestions = questions.filter { it.learnedOnce == 1 && it.learnedTwice == 0 }
+        val learnedTwiceQuestions = questions.filter { it.learnedTwice == 1 }
+        val failedQuestions = questions.filter { it.failed == 1 }
+        val favourites = questions.filter { it.favourite == 1 }
+        val openQuestions = questions.toMutableList()
+        openQuestions.removeAll(learnedOnceQuestions)
+        openQuestions.removeAll(learnedTwiceQuestions)
+        openQuestions.removeAll(failedQuestions)
+
+        val trainingDataWithoutFilter = mutableListOf<Question>()
+        trainingDataWithoutFilter.addAll(failedQuestions.take(8))
+        trainingDataWithoutFilter.addAll(learnedOnceQuestions.take(5))
+        trainingDataWithoutFilter.addAll(learnedTwiceQuestions.take(2))
+        val sizeDifference = 30 - trainingDataWithoutFilter.size
+        trainingDataWithoutFilter.addAll(openQuestions.take(Constants.TRAINING_SIZE))
+
+        when (filterCriteria) {
+            Constants.FILTER_CRITERIA_ALL -> _trainingData.postValue(trainingDataWithoutFilter)
+            Constants.FILTER_CRITERIA_NOT_LEARNED -> _trainingData.postValue(learnedOnceQuestions)
+            Constants.FILTER_CRITERIA_FAILED -> _trainingData.postValue(failedQuestions)
+            Constants.FILTER_CRITERIA_FAVOURITES -> _trainingData.postValue(favourites)
+        }
     }
 }

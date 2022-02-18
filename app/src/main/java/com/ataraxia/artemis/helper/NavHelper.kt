@@ -9,6 +9,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.ataraxia.artemis.data.AppBarViewModel
+import com.ataraxia.artemis.data.QuestionViewModel
 import com.ataraxia.artemis.model.Screen
 import com.ataraxia.artemis.model.Screen.DrawerScreen.*
 import com.ataraxia.artemis.ui.*
@@ -26,13 +27,15 @@ class NavHelper {
             isDialogOpen: Boolean,
             onOpenDialog: (Boolean) -> Unit
         ) {
-            val topBarViewModel: AppBarViewModel = viewModel()
-            val startMenuComposition = StartMenuComponent()
-            val questionComposition = QuestionCatalogueComponent()
-            val examComposition = ExamComponent()
-            val statisticComposition = StatisticComponent()
-            val configComposition = ConfigComponent()
-            val questionListComposition = QuestionListComponent()
+            val appBarViewModel: AppBarViewModel = viewModel()
+            val startMenuComponent = StartMenuComponent()
+            val questionComponent = QuestionCatalogueComponent()
+            val examComponent = ExamComponent()
+            val statisticComponent = StatisticComponent()
+            val configComponent = ConfigComponent()
+            val questionListComponent = QuestionListComponent()
+            val trainingComponent = TrainingComponent()
+            val questionViewModel: QuestionViewModel = viewModel()
 
             NavHost(
                 navController,
@@ -43,22 +46,37 @@ class NavHelper {
                 for (screen in Screen.GENERAL_SCREENS) {
                     composable(screen.route) {
                         when (screen.route) {
-                            Home.route -> startMenuComposition.StartMenu(navController = navController)
-                            Questions.route -> questionComposition.QuestionScreen(navController, scope)
-                            Exam.route -> examComposition.ExamScreen()
-                            Statistics.route -> statisticComposition.StatisticScreen()
-                            Configuration.route -> configComposition.ConfigScreen()
+                            Home.route -> startMenuComponent.StartMenu(navController = navController)
+                            Questions.route -> questionComponent.QuestionScreen(
+                                navController,
+                                scope
+                            )
+                            Exam.route -> examComponent.ExamScreen()
+                            Statistics.route -> statisticComponent.StatisticScreen()
+                            Configuration.route -> configComponent.ConfigScreen()
                         }
-                        topBarViewModel.onTopBarTitleChange(screen.title)
-                        topBarViewModel.onHideFilter(Constants.FILTER_ALPHA_INVISIBLE)
+                        appBarViewModel.onTopBarTitleChange(screen.title)
+                        appBarViewModel.onHideFilter(Constants.FILTER_ALPHA_INVISIBLE)
                     }
                 }
 
                 for (screen in Screen.CHAPTER_SCREENS) {
                     composable(screen.route) {
-                        screen.chapter?.let { chapter -> questionListComposition.ChapterScreen(chapter, isDialogOpen, onOpenDialog) }
-                        topBarViewModel.onTopBarTitleChange(screen.title)
-                        topBarViewModel.onHideFilter(Constants.FILTER_ALPHA_VISIBLE)
+                        screen.chapter?.let { chapter ->
+                            questionListComponent.ChapterScreen(
+                                chapter,
+                                navController,
+                                isDialogOpen,
+                                onOpenDialog,
+                                questionViewModel
+                            )
+                        }
+                        appBarViewModel.onHideFilter(Constants.FILTER_ALPHA_VISIBLE)
+                        if (screen.route == Constants.TRAINING) {
+                            trainingComponent.TrainingScreen(questionViewModel)
+                            appBarViewModel.onHideFilter(Constants.FILTER_ALPHA_INVISIBLE)
+                        }
+                        appBarViewModel.onTopBarTitleChange(screen.title)
                     }
                 }
             }

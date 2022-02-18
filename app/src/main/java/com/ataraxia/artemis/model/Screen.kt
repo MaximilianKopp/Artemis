@@ -26,6 +26,13 @@ class Screen {
             chapter
         )
 
+        constructor(title: String, route: String) : this(
+            null,
+            title,
+            route,
+            null
+        )
+
         object Home : DrawerScreen(
             R.drawable.ic_baseline_language_24,
             "Startmenü",
@@ -92,6 +99,11 @@ class Screen {
             "topicPreservationOfWildLifeAndNature",
             Constants.CHAPTER_6
         )
+
+        object Training : DrawerScreen(
+            "Training",
+            "training"
+        )
     }
 
     companion object {
@@ -100,7 +112,7 @@ class Screen {
             DrawerScreen.Questions,
             DrawerScreen.Exam,
             DrawerScreen.Statistics,
-            DrawerScreen.Configuration
+            DrawerScreen.Configuration,
         )
 
         val CHAPTER_SCREENS = listOf(
@@ -109,7 +121,8 @@ class Screen {
             DrawerScreen.TopicWeaponsLawAndTechnology,
             DrawerScreen.TopicWildLifeTreatment,
             DrawerScreen.TopicHuntingLaw,
-            DrawerScreen.TopicPreservationOfWildLifeAndNature
+            DrawerScreen.TopicPreservationOfWildLifeAndNature,
+            DrawerScreen.Training
         )
     }
 }

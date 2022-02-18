@@ -8,6 +8,8 @@ class Constants {
         const val CHAPTER_4 = "'Sachgebiet_4_Sachgebiet_Behandlung_des_Wildes'"
         const val CHAPTER_5 = "'Sachgebiet_5_Jagdrecht'"
         const val CHAPTER_6 = "'Sachgebiet_6_Tier_und_Naturschutz'"
+        const val TRAINING = "training"
+        const val TRAINING_SIZE = 30
 
         const val FILTER_ALPHA_VISIBLE = 1f
         const val FILTER_ALPHA_INVISIBLE = 0f

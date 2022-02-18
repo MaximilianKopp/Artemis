@@ -26,7 +26,6 @@ class QuestionCatalogueComponent {
     @Composable
     fun QuestionScreen(navController: NavHostController, scope: CoroutineScope) {
         val localConfiguration = LocalConfiguration.current
-
         when (localConfiguration.orientation) {
             Configuration.ORIENTATION_PORTRAIT -> {
                 Column(

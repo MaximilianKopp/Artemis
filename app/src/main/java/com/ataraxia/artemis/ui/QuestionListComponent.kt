@@ -15,30 +15,33 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.ataraxia.artemis.data.QuestionViewModel
 import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.model.Question
+import com.ataraxia.artemis.model.Screen
 
 class QuestionListComponent {
 
     @Composable
     fun ChapterScreen(
         chapter: String,
+        navController: NavController,
         isDialogOpen: Boolean,
-        onOpenDialog: (Boolean) -> Unit
+        onOpenDialog: (Boolean) -> Unit,
+        questionViewModel: QuestionViewModel
     ) {
-        val questionViewModel: QuestionViewModel = viewModel()
         val renewQuestions: List<Question> = questionViewModel.selectChapter(chapter)
-        val liveQuestions: List<Question> by questionViewModel.questions.observeAsState(
+        val questions: List<Question> by questionViewModel.questions.observeAsState(
             renewQuestions
         )
         ChapterContent(
             renewQuestions,
-            liveQuestions,
+            questions,
             isDialogOpen,
             onOpenDialog,
             questionViewModel,
+            navController,
         )
     }
 
@@ -46,20 +49,25 @@ class QuestionListComponent {
     @Composable
     fun ChapterContent(
         renewQuestions: List<Question>,
+
         questions: List<Question>,
         isDialogOpen: Boolean,
         onOpenDialog: (Boolean) -> Unit,
         questionViewModel: QuestionViewModel,
+        navController: NavController
     ) {
+        val filterCriteria: String by questionViewModel.filterCriteria.observeAsState(Constants.FILTER_CRITERIA_ALL)
         LazyColumn {
             stickyHeader {
                 Button(
                     modifier = Modifier.padding(8.dp),
-                    onClick = { /*TODO*/ }) {
+                    onClick = {
+                        questionViewModel.prepareTrainingData(renewQuestions, filterCriteria)
+                        navController.navigate(Screen.DrawerScreen.Training.route)
+                    }) {
                     Text(text = "Training starten")
                 }
             }
-
             items(questions) { question ->
                 Card(
                     backgroundColor = Color.White,

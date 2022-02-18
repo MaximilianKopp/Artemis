@@ -56,7 +56,6 @@ class AppBarComponent {
         )
     }
 
-
     @Composable
     fun DrawerContent(
         scope: CoroutineScope,

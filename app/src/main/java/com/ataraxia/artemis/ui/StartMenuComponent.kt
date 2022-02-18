@@ -65,7 +65,7 @@ class StartMenuComponent {
                 paddingValues = it,
                 scope = scope,
                 isDialogOpen = isDialogOpen,
-                onOpenDialog = {appBarViewModel.onOpenFilterDialog(it)}
+                onOpenDialog = { appBarViewModel.onOpenFilterDialog(it) }
             )
         }
     }
