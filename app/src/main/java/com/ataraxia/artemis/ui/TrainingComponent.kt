@@ -1,7 +1,6 @@
 package com.ataraxia.artemis.ui
 
 import android.util.Log
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -18,7 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ataraxia.artemis.data.QuestionViewModel
 import com.ataraxia.artemis.data.TrainingViewModel
-import com.ataraxia.artemis.helper.Constants
+import com.ataraxia.artemis.helper.NavTrainingButton
 import com.ataraxia.artemis.model.Question
 import com.ataraxia.artemis.ui.theme.YELLOW_ARTEMIS
 
@@ -95,19 +94,29 @@ class TrainingComponent {
                 ) {
                     Column {
                         for (selection in selections) {
-                            val currentQuestionText: String = trainingViewModel.setCurrentQuestionText(currentQuestion, selection.second)
+                            val currentQuestionText: String =
+                                trainingViewModel.setCurrentQuestionText(
+                                    currentQuestion,
+                                    selection.second
+                                )
                             Row(
                                 Modifier.padding(top = 10.dp, bottom = 10.dp)
                             ) {
                                 Checkbox(checked = selection.first, onCheckedChange = {
-                                        trainingViewModel.onChangeCurrentCheckedAnswersList(selection.second)
-                                        trainingViewModel.onChangeCheckedOption(selection.first, selection.second)
-                                        trainingViewModel.onChangeSelection(selection.second)
+                                    trainingViewModel.onChangeCurrentCheckedAnswersList(selection.second)
+                                    trainingViewModel.onChangeCheckedOption(
+                                        selection.first,
+                                        selection.second
+                                    )
+                                    trainingViewModel.onChangeSelection(selection.second)
 
                                 }, modifier = Modifier.padding(start = 5.dp))
                                 Text(
                                     modifier = Modifier.padding(start = 4.dp),
-                                    text = trainingViewModel.setCurrentQuestionText(currentQuestion, selection.second),
+                                    text = trainingViewModel.setCurrentQuestionText(
+                                        currentQuestion,
+                                        selection.second
+                                    ),
                                     style = if (currentQuestionText.length < 150) MaterialTheme.typography.h6 else MaterialTheme.typography.subtitle2
                                 )
                             }
@@ -122,8 +131,11 @@ class TrainingComponent {
                     ) {
                         IconButton(
                             onClick = {
-                                trainingViewModel.onChangeIndex(0)
-                                trainingViewModel.onChangeCurrentQuestion(questions[0])
+                                trainingViewModel.setNavTrainingButton(
+                                    NavTrainingButton.FIRST_PAGE,
+                                    index,
+                                    questions
+                                )
                             }) {
                             Icon(
                                 Icons.Filled.FirstPage,
@@ -134,15 +146,15 @@ class TrainingComponent {
                         }
                         IconButton(
                             onClick = {
-                                if (index > 0) {
-                                    trainingViewModel.onChangeIndex(index - 1)
-                                    trainingViewModel.onChangeCurrentQuestion(questions[index - 1])
-                                    Log.v("Current index", index.toString())
-                                }
+                                trainingViewModel.setNavTrainingButton(
+                                    NavTrainingButton.PREV_PAGE,
+                                    index,
+                                    questions
+                                )
                             }) {
                             Icon(
                                 Icons.Filled.ChevronLeft,
-                                contentDescription = "Former question button",
+                                contentDescription = "Prev question button",
                                 modifier = Modifier.size(50.dp),
                                 tint = YELLOW_ARTEMIS
                             )
@@ -151,17 +163,13 @@ class TrainingComponent {
                     Row(
                         modifier = Modifier.padding(top = 5.dp)
                     ) {
-                        BackHandler(enabled = true) {
-                            if (index > 0) {
-                                trainingViewModel.onChangeIndex(index - 1)
-                                trainingViewModel.onChangeCurrentQuestion(questions[index - 1])
-                                Log.v("Current index", index.toString())
-                            }
-                        }
                         Button(
                             onClick = {
                                 Log.v("Current Question", currentQuestion.correctAnswers)
-                                trainingViewModel.submitCheckedAnswers(currentQuestion.correctAnswers, checkedAnswers)
+                                trainingViewModel.submitCheckedAnswers(
+                                    currentQuestion.correctAnswers,
+                                    checkedAnswers
+                                )
                             }) {
                             Text(text = "Antworten")
                         }
@@ -171,11 +179,11 @@ class TrainingComponent {
                     ) {
                         IconButton(
                             onClick = {
-                                if (index < Constants.TRAINING_SIZE - 1) {
-                                    trainingViewModel.onChangeIndex(index + 1)
-                                    trainingViewModel.onChangeCurrentQuestion(questions[index + 1])
-                                    Log.v("Current index", index.toString())
-                                }
+                                trainingViewModel.setNavTrainingButton(
+                                    NavTrainingButton.NEXT_PAGE,
+                                    index,
+                                    questions
+                                )
                             }) {
                             Icon(
                                 Icons.Filled.ChevronRight,
@@ -186,9 +194,11 @@ class TrainingComponent {
                         }
                         IconButton(
                             onClick = {
-                                trainingViewModel.onChangeIndex(questions.size - 1)
-                                trainingViewModel.onChangeCurrentQuestion(questions[questions.size - 1])
-                                Log.v("Current index", index.toString())
+                                trainingViewModel.setNavTrainingButton(
+                                    NavTrainingButton.LAST_PAGE,
+                                    index,
+                                    questions
+                                )
                             }) {
                             Icon(
                                 Icons.Filled.LastPage,

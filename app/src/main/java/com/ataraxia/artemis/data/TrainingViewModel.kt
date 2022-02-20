@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ataraxia.artemis.helper.Constants
+import com.ataraxia.artemis.helper.NavTrainingButton
 import com.ataraxia.artemis.model.Question
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -133,5 +134,41 @@ class TrainingViewModel : ViewModel() {
         }
         Log.v("Correct or not?", result.toString())
         return result
+    }
+
+    fun setNavTrainingButton(direction: NavTrainingButton, index: Int, questions: List<Question>) {
+        when (direction) {
+            NavTrainingButton.FIRST_PAGE -> firstPage(index, questions)
+            NavTrainingButton.PREV_PAGE -> prevPage(index, questions)
+            NavTrainingButton.NEXT_PAGE -> nextPage(index, questions)
+            NavTrainingButton.LAST_PAGE -> lastPage(index, questions)
+        }
+    }
+
+    private fun firstPage(index: Int, questions: List<Question>) {
+        onChangeIndex(0)
+        onChangeCurrentQuestion(questions[0])
+    }
+
+    private fun prevPage(index: Int, questions: List<Question>) {
+        if (index > 0) {
+            onChangeIndex(index - 1)
+            onChangeCurrentQuestion(questions[index - 1])
+            Log.v("Current index", index.toString())
+        }
+    }
+
+    private fun nextPage(index: Int, questions: List<Question>) {
+        if (index < Constants.TRAINING_SIZE - 1) {
+            onChangeIndex(index + 1)
+            onChangeCurrentQuestion(questions[index + 1])
+            Log.v("Current index", index.toString())
+        }
+    }
+
+    private fun lastPage(index: Int, questions: List<Question>) {
+        onChangeIndex(questions.size - 1)
+        onChangeCurrentQuestion(questions[questions.size - 1])
+        Log.v("Current index", index.toString())
     }
 }
