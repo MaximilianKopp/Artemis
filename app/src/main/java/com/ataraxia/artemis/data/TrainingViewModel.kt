@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.model.Question
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -21,7 +22,6 @@ class TrainingViewModel : ViewModel() {
     private val _index = MutableLiveData(0)
     val index: LiveData<Int> = _index
 
-
     private val _selectA = MutableLiveData<String>()
     val selectA: LiveData<String> = _selectA
 
@@ -35,16 +35,16 @@ class TrainingViewModel : ViewModel() {
     val selectD: LiveData<String> = _selectD
 
     private val _checkedA = MutableLiveData<Boolean>()
-    val checkedA = _checkedA
+    val checkedA: LiveData<Boolean> = _checkedA
 
     private val _checkedB = MutableLiveData<Boolean>()
-    val checkedB = _checkedB
+    val checkedB: LiveData<Boolean> = _checkedB
 
     private val _checkedC = MutableLiveData<Boolean>()
-    val checkedC = _checkedC
+    val checkedC: LiveData<Boolean> = _checkedC
 
     private val _checkedD = MutableLiveData<Boolean>()
-    val checkedD = _checkedD
+    val checkedD: LiveData<Boolean> = _checkedD
 
     fun onChangeCurrentQuestion(newQuestion: Question) {
         viewModelScope.launch {
@@ -68,51 +68,55 @@ class TrainingViewModel : ViewModel() {
             _index.postValue(newIndex)
         }
 
-    fun onChangeSelectA(selectA: String) {
+    fun setCurrentQuestionText(question: Question, checkedAnswer: String): String {
+        when (checkedAnswer) {
+            Constants.TRAINING_SELECTION_A -> return question.optionA
+            Constants.TRAINING_SELECTION_B -> return question.optionB
+            Constants.TRAINING_SELECTION_C -> return question.optionC
+            Constants.TRAINING_SELECTION_D -> return question.optionD
+        }
+        return ""
+    }
+
+    fun onChangeCheckedOption(selection: Boolean, checkedAnswer: String) {
         viewModelScope.launch {
-            onChangeSelectACoroutine(selectA)
+            onChangeCheckedOptionCoroutine(selection, checkedAnswer)
         }
     }
 
-    private suspend fun onChangeSelectACoroutine(selectA: String) =
+    private suspend fun onChangeCheckedOptionCoroutine(selection: Boolean, checkedAnswer: String) =
         withContext(Dispatchers.IO) {
-            _selectA.postValue(selectA)
+            var newSelectionValue = false
+            if (selection) {
+                newSelectionValue = false
+            } else if (!selection) {
+                newSelectionValue = true
+            }
+            when (checkedAnswer) {
+                Constants.TRAINING_SELECTION_A -> _checkedA.postValue(newSelectionValue)
+                Constants.TRAINING_SELECTION_B -> _checkedB.postValue(newSelectionValue)
+                Constants.TRAINING_SELECTION_C -> _checkedC.postValue(newSelectionValue)
+                Constants.TRAINING_SELECTION_D -> _checkedD.postValue(newSelectionValue)
+            }
         }
 
-    fun onChangeSelectB(selectB: String) {
+    fun onChangeSelection(selection: String) {
         viewModelScope.launch {
-            onChangeSelectBCoroutine(selectB)
+            onChangeSelectionCoroutine(selection)
         }
     }
 
-    private suspend fun onChangeSelectBCoroutine(selectB: String) =
+    private suspend fun onChangeSelectionCoroutine(selection: String) =
         withContext(Dispatchers.IO) {
-            _selectB.postValue(selectB)
+            when (selection) {
+                Constants.TRAINING_SELECTION_A -> _selectA.postValue(selection)
+                Constants.TRAINING_SELECTION_B -> _selectB.postValue(selection)
+                Constants.TRAINING_SELECTION_C -> _selectC.postValue(selection)
+                "" -> _selectC.postValue("")
+            }
         }
 
-    fun onChangeSelectC(selectC: String) {
-        viewModelScope.launch {
-            onChangeSelectCCoroutine(selectC)
-        }
-    }
-
-    fun onChangeSelectD(selectD: String) {
-        viewModelScope.launch {
-            onChangeSelectDCoroutine(selectD)
-        }
-    }
-
-    private suspend fun onChangeSelectDCoroutine(selectD: String) =
-        withContext(Dispatchers.IO) {
-            _selectD.postValue(selectD)
-        }
-
-    private suspend fun onChangeSelectCCoroutine(selectC: String) =
-        withContext(Dispatchers.IO) {
-            _selectC.postValue(selectC)
-        }
-
-    fun onChangecurrentCheckedAnswersList(checkedAnswer: String): String {
+    fun onChangeCurrentCheckedAnswersList(checkedAnswer: String): String {
         if (_currentCheckedAnswersList.contains(checkedAnswer)) {
             _currentCheckedAnswersList.remove(checkedAnswer)
         } else {

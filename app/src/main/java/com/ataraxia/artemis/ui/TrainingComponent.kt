@@ -55,11 +55,18 @@ class TrainingComponent {
         val selectA: String by trainingViewModel.selectA.observeAsState("a")
         val selectB: String by trainingViewModel.selectB.observeAsState("b")
         val selectC: String by trainingViewModel.selectC.observeAsState("c")
+        val selectD: String by trainingViewModel.selectD.observeAsState("d")
 
         val checkedA: Boolean by trainingViewModel.checkedA.observeAsState(false)
         val checkedB: Boolean by trainingViewModel.checkedB.observeAsState(false)
         val checkedC: Boolean by trainingViewModel.checkedC.observeAsState(false)
         val checkedD: Boolean by trainingViewModel.checkedD.observeAsState(false)
+
+        val optionA: Pair<Boolean, String> = Pair(checkedA, selectA)
+        val optionB: Pair<Boolean, String> = Pair(checkedB, selectB)
+        val optionC: Pair<Boolean, String> = Pair(checkedC, selectC)
+        val optionD: Pair<Boolean, String> = Pair(checkedD, selectD)
+        val selections: List<Pair<Boolean, String>> = listOf(optionA, optionB, optionC, optionD)
 
         Column(
             modifier = Modifier
@@ -87,93 +94,29 @@ class TrainingComponent {
                         .padding(top = 35.dp)
                 ) {
                     Column {
-                        Row(
-                            Modifier.padding(top = 20.dp, bottom = 20.dp)
-                        ) {
-                            Checkbox(checked = checkedA, onCheckedChange = {
-                                if (checkedA) {
-                                    trainingViewModel.onChangecurrentCheckedAnswersList("a")
-                                    trainingViewModel.onChangeSelectA("a")
-                                    trainingViewModel.checkedA.postValue(false)
-                                } else if (!checkedA) {
-                                    trainingViewModel.onChangecurrentCheckedAnswersList("a")
-                                    trainingViewModel.checkedA.postValue(true)
-                                    trainingViewModel.onChangeSelectA("")
-                                }
-                            }, modifier = Modifier.padding(start = 5.dp))
-                            Text(
-                                modifier = Modifier.padding(start = 4.dp),
-                                text = currentQuestion.optionA,
-                                style = if (currentQuestion.optionC.length < 150) MaterialTheme.typography.h6 else MaterialTheme.typography.subtitle2
-                            )
-                        }
-                        Row(
-                            Modifier.padding(bottom = 20.dp)
-                        ) {
-                            Checkbox(checked = checkedB, onCheckedChange = {
-                                if (checkedB) {
-                                    trainingViewModel.onChangecurrentCheckedAnswersList("b")
-                                    trainingViewModel.onChangeSelectB("b")
-                                    trainingViewModel.checkedB.postValue(false)
-                                } else if (!checkedB) {
-                                    trainingViewModel.onChangecurrentCheckedAnswersList("b")
-                                    trainingViewModel.checkedB.postValue(true)
-                                    trainingViewModel.onChangeSelectB("")
-                                }
-                            }, modifier = Modifier.padding(start = 5.dp))
-                            Text(
-                                modifier = Modifier.padding(start = 4.dp),
-                                text = currentQuestion.optionB,
-                                style = if (currentQuestion.optionC.length < 150) MaterialTheme.typography.h6 else MaterialTheme.typography.subtitle2
-                            )
-                        }
-                        Row(
-                            Modifier.padding(bottom = 20.dp)
-                        ) {
-                            Checkbox(checked = checkedC, onCheckedChange = {
-                                if (checkedC) {
-                                    trainingViewModel.onChangecurrentCheckedAnswersList("c")
-                                    trainingViewModel.onChangeSelectC("c")
-                                    trainingViewModel.checkedC.postValue(false)
-                                } else if (!checkedC) {
-                                    trainingViewModel.onChangecurrentCheckedAnswersList("c")
-                                    trainingViewModel.checkedC.postValue(true)
-                                    trainingViewModel.onChangeSelectC("")
-                                }
-                            }, modifier = Modifier.padding(start = 5.dp))
-                            Text(
-                                modifier = Modifier.padding(start = 4.dp),
-                                text = currentQuestion.optionC,
-                                style = if (currentQuestion.optionC.length < 150) MaterialTheme.typography.h6 else MaterialTheme.typography.subtitle2
+                        for (selection in selections) {
+                            val currentQuestionText: String = trainingViewModel.setCurrentQuestionText(currentQuestion, selection.second)
+                            Row(
+                                Modifier.padding(top = 10.dp, bottom = 10.dp)
+                            ) {
+                                Checkbox(checked = selection.first, onCheckedChange = {
+                                        trainingViewModel.onChangeCurrentCheckedAnswersList(selection.second)
+                                        trainingViewModel.onChangeCheckedOption(selection.first, selection.second)
+                                        trainingViewModel.onChangeSelection(selection.second)
 
-                            )
-                        }
-                        Row(
-                            Modifier.padding(bottom = 20.dp)
-                        ) {
-                            Checkbox(checked = checkedD, onCheckedChange = {
-                                if (checkedD) {
-                                    trainingViewModel.onChangecurrentCheckedAnswersList("d")
-                                    trainingViewModel.onChangeSelectD("d")
-                                    trainingViewModel.checkedD.postValue(false)
-                                } else if (!checkedD) {
-                                    trainingViewModel.onChangecurrentCheckedAnswersList("d")
-                                    trainingViewModel.checkedD.postValue(true)
-                                    trainingViewModel.onChangeSelectD("")
-                                }
-                            }, modifier = Modifier.padding(start = 5.dp))
-                            Text(
-                                modifier = Modifier.padding(start = 4.dp),
-                                text = currentQuestion.optionD,
-                                style = if (currentQuestion.optionD.length < 150) MaterialTheme.typography.h6 else MaterialTheme.typography.subtitle2
-                            )
+                                }, modifier = Modifier.padding(start = 5.dp))
+                                Text(
+                                    modifier = Modifier.padding(start = 4.dp),
+                                    text = trainingViewModel.setCurrentQuestionText(currentQuestion, selection.second),
+                                    style = if (currentQuestionText.length < 150) MaterialTheme.typography.h6 else MaterialTheme.typography.subtitle2
+                                )
+                            }
                         }
                     }
                 }
             }
             Column {
-                Row(
-                ) {
+                Row {
                     Row(
                         modifier = Modifier.padding(bottom = 30.dp, end = 30.dp)
                     ) {

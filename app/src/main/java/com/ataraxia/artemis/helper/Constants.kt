@@ -18,5 +18,10 @@ class Constants {
         const val FILTER_CRITERIA_NOT_LEARNED = "not_learned_questions"
         const val FILTER_CRITERIA_FAILED = "failed_questions"
         const val FILTER_CRITERIA_FAVOURITES = "favourite_questions"
+
+        const val TRAINING_SELECTION_A = "a"
+        const val TRAINING_SELECTION_B = "b"
+        const val TRAINING_SELECTION_C = "c"
+        const val TRAINING_SELECTION_D = "d"
     }
 }
