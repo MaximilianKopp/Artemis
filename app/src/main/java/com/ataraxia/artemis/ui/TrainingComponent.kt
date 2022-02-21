@@ -13,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ataraxia.artemis.data.QuestionViewModel
@@ -61,6 +62,9 @@ class TrainingComponent {
         val checkedC: Boolean by trainingViewModel.checkedC.observeAsState(false)
         val checkedD: Boolean by trainingViewModel.checkedD.observeAsState(false)
 
+        val answerBtnText: String by trainingViewModel.answerBtnText.observeAsState("Antworten")
+        val optionCBColor: Color by trainingViewModel.optionCheckBoxColor.observeAsState(Color.Black)
+
         val optionA: Pair<Boolean, String> = Pair(checkedA, selectA)
         val optionB: Pair<Boolean, String> = Pair(checkedB, selectB)
         val optionC: Pair<Boolean, String> = Pair(checkedC, selectC)
@@ -102,15 +106,22 @@ class TrainingComponent {
                             Row(
                                 Modifier.padding(top = 10.dp, bottom = 10.dp)
                             ) {
-                                Checkbox(checked = selection.first, onCheckedChange = {
-                                    trainingViewModel.onChangeCurrentCheckedAnswersList(selection.second)
-                                    trainingViewModel.onChangeCheckedOption(
-                                        selection.first,
-                                        selection.second
-                                    )
-                                    trainingViewModel.onChangeSelection(selection.second)
+                                Checkbox(
+                                    colors = CheckboxDefaults.colors(optionCBColor),
+                                    checked = selection.first,
+                                    onCheckedChange = {
+                                        trainingViewModel.onChangeCurrentCheckedAnswersList(
+                                            selection.second
+                                        )
+                                        trainingViewModel.onChangeCheckedOption(
+                                            selection.first,
+                                            selection.second
+                                        )
+                                        trainingViewModel.onChangeSelection(selection.second)
 
-                                }, modifier = Modifier.padding(start = 5.dp))
+                                    },
+                                    modifier = Modifier.padding(start = 5.dp)
+                                )
                                 Text(
                                     modifier = Modifier.padding(start = 4.dp),
                                     text = trainingViewModel.setCurrentQuestionText(
@@ -165,13 +176,27 @@ class TrainingComponent {
                     ) {
                         Button(
                             onClick = {
-                                Log.v("Current Question", currentQuestion.correctAnswers)
-                                trainingViewModel.submitCheckedAnswers(
-                                    currentQuestion.correctAnswers,
-                                    checkedAnswers
-                                )
+                                if (answerBtnText == "Antworten") {
+                                    trainingViewModel.onChangeAnswerButtonText("Weiter")
+                                    trainingViewModel.submitCheckedAnswers(
+                                        currentQuestion.correctAnswers,
+                                        checkedAnswers
+                                    )
+                                    trainingViewModel.onChangeOptionCheckBoxColor(Color.Green)
+                                }
+                                if (answerBtnText == "Weiter") {
+                                    trainingViewModel.resetQuestion()
+                                    Log.v("Current Question", currentQuestion.correctAnswers)
+                                    trainingViewModel.setNavTrainingButton(
+                                        NavTrainingButton.NEXT_PAGE,
+                                        index,
+                                        questions
+                                    )
+                                    trainingViewModel.onChangeAnswerButtonText("Antworten")
+
+                                }
                             }) {
-                            Text(text = "Antworten")
+                            Text(text = answerBtnText)
                         }
                     }
                     Row(

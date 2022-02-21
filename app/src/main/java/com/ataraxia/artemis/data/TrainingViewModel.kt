@@ -1,6 +1,7 @@
 package com.ataraxia.artemis.data
 
 import android.util.Log
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -47,7 +48,13 @@ class TrainingViewModel : ViewModel() {
     private val _checkedD = MutableLiveData<Boolean>()
     val checkedD: LiveData<Boolean> = _checkedD
 
-    fun onChangeCurrentQuestion(newQuestion: Question) {
+    private val _optionCheckBoxColor = MutableLiveData(Color.Black)
+    val optionCheckBoxColor: LiveData<Color> = _optionCheckBoxColor
+
+    private val _answerBtnText = MutableLiveData("Antworten")
+    val answerBtnText: LiveData<String> = _answerBtnText
+
+    private fun onChangeCurrentQuestion(newQuestion: Question) {
         viewModelScope.launch {
             onChangeCurrentQuestionCoroutine(newQuestion)
         }
@@ -58,7 +65,7 @@ class TrainingViewModel : ViewModel() {
             _currentQuestion.postValue(newQuestion)
         }
 
-    fun onChangeIndex(newIndex: Int) {
+    private fun onChangeIndex(newIndex: Int) {
         viewModelScope.launch {
             onChangeIndexCoroutine(newIndex)
         }
@@ -148,6 +155,7 @@ class TrainingViewModel : ViewModel() {
     private fun firstPage(index: Int, questions: List<Question>) {
         onChangeIndex(0)
         onChangeCurrentQuestion(questions[0])
+        Log.v("Current index", index.toString())
     }
 
     private fun prevPage(index: Int, questions: List<Question>) {
@@ -170,5 +178,35 @@ class TrainingViewModel : ViewModel() {
         onChangeIndex(questions.size - 1)
         onChangeCurrentQuestion(questions[questions.size - 1])
         Log.v("Current index", index.toString())
+    }
+
+    fun onChangeOptionCheckBoxColor(cbColor: Color) {
+        viewModelScope.launch {
+            onChangeOptionCheckBoxColorCoroutine(cbColor)
+        }
+    }
+
+    private suspend fun onChangeOptionCheckBoxColorCoroutine(cbColor: Color) =
+        withContext(Dispatchers.IO) {
+            _optionCheckBoxColor.postValue(cbColor)
+        }
+
+    fun onChangeAnswerButtonText(answerBtnText: String) {
+        viewModelScope.launch {
+            onChangeAnswerButtonTextCoroutine(answerBtnText)
+        }
+    }
+
+    private suspend fun onChangeAnswerButtonTextCoroutine(answerBtnText: String) =
+        withContext(Dispatchers.IO) {
+            _answerBtnText.postValue(answerBtnText)
+        }
+
+    fun resetQuestion() {
+        _checkedA.postValue(false)
+        _checkedB.postValue(false)
+        _checkedC.postValue(false)
+        _checkedD.postValue(false)
+        _optionCheckBoxColor.postValue(Color.Black)
     }
 }
