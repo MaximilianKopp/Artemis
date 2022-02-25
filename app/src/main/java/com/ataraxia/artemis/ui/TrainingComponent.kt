@@ -1,6 +1,7 @@
 package com.ataraxia.artemis.ui
 
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -16,22 +17,30 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.ataraxia.artemis.data.QuestionViewModel
 import com.ataraxia.artemis.data.TrainingViewModel
+import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.helper.NavTrainingButton
 import com.ataraxia.artemis.model.Question
+import com.ataraxia.artemis.model.Screen
 import com.ataraxia.artemis.ui.theme.YELLOW_ARTEMIS
 
 class TrainingComponent {
 
     @Composable
-    fun TrainingScreen(questionViewModel: QuestionViewModel) {
+    fun TrainingScreen(
+        navController: NavController,
+        questionViewModel: QuestionViewModel
+    ) {
         val trainingViewModel: TrainingViewModel = viewModel()
         val index: Int by trainingViewModel.index.observeAsState(0)
         val questions: List<Question> by questionViewModel.trainingData.observeAsState(listOf())
         if (questions.isNotEmpty()) {
             TrainingContent(
+                navController = navController,
                 trainingViewModel = trainingViewModel,
+                questionViewModel = questionViewModel,
                 questions = questions,
                 index = index
             )
@@ -40,7 +49,9 @@ class TrainingComponent {
 
     @Composable
     fun TrainingContent(
+        navController: NavController,
         trainingViewModel: TrainingViewModel,
+        questionViewModel: QuestionViewModel,
         questions: List<Question>,
         index: Int
     ) {
@@ -201,26 +212,32 @@ class TrainingComponent {
                                     ) {
                                         if (currentQuestion.learnedOnce == 0) {
                                             currentQuestion.learnedOnce = 1
+                                            currentQuestion.failed = 0
                                             Log.v(
                                                 "LearnedOnce",
                                                 currentQuestion.learnedOnce.toString()
                                             )
                                         } else if (currentQuestion.learnedTwice == 0) {
                                             currentQuestion.learnedTwice = 1
+                                            currentQuestion.failed = 0
                                             Log.v(
                                                 "LearnedTwice",
                                                 currentQuestion.learnedTwice.toString()
                                             )
                                         }
-                                    } else if (!trainingViewModel.isSelectionCorrect(
+                                    }
+                                    if (!trainingViewModel.isSelectionCorrect(
                                             currentQuestion,
                                             checkedAnswers,
                                             selections
                                         )
                                     ) {
+                                        currentQuestion.learnedOnce = 0
+                                        currentQuestion.learnedTwice = 0
                                         currentQuestion.failed = 1
                                         Log.v("Failed", currentQuestion.failed.toString())
                                     }
+                                    //questionViewModel.updateQuestion(currentQuestion)
                                     trainingViewModel.onChangeEnableButtons(false)
                                 }
                                 if (answerBtnText == "Weiter") {
@@ -233,7 +250,6 @@ class TrainingComponent {
                                         questions
                                     )
                                     trainingViewModel.onChangeAnswerButtonText("Antworten")
-
                                 }
                             }) {
                             Text(text = answerBtnText)
@@ -242,6 +258,14 @@ class TrainingComponent {
                     Row(
                         modifier = Modifier.padding(bottom = 30.dp, start = 30.dp)
                     ) {
+                        BackHandler(enabled = true) {
+                            questionViewModel.prepareTrainingData(
+                                questions,
+                                Constants.FILTER_CRITERIA_ALL
+                            )
+                            navController.navigate(Screen.CHAPTER_SCREENS[0].route)
+                        }
+
                         //Loads next question
                         IconButton(
                             enabled = isButtonEnabled,

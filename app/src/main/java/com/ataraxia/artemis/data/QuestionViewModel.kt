@@ -1,6 +1,7 @@
 package com.ataraxia.artemis.data
 
 import android.app.Application
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -114,5 +115,16 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
             Constants.FILTER_CRITERIA_FAILED -> _trainingData.postValue(failedQuestions)
             Constants.FILTER_CRITERIA_FAVOURITES -> _trainingData.postValue(favourites)
         }
+    }
+
+    fun setQuestionStateColor(question: Question): Color {
+        var result = Color.Black
+        if (question.learnedOnce == 1 && question.failed == 0) {
+            result = Color.Yellow
+        }
+        if (question.learnedTwice == 1 && question.failed == 0) {
+            result = Color.Green
+        }
+        return result
     }
 }

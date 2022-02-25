@@ -88,18 +88,14 @@ class QuestionListComponent {
 
                                 Box(modifier = Modifier.padding(end = 4.dp)) {
                                     Row {
+                                        //Icon for learned questions
                                         Icon(
                                             Icons.Filled.Check,
                                             contentDescription = "",
                                             modifier = Modifier.size(20.dp),
-                                            tint = if (question.learnedOnce == 1 && question.failed == 0) {
-                                                Color.Yellow
-                                            } else if (question.learnedTwice == 1 && question.failed == 0) {
-                                                Color.Green
-                                            } else {
-                                                Color.Black
-                                            }
+                                            tint = questionViewModel.setQuestionStateColor(question)
                                         )
+                                        //Icon for failed questions
                                         Icon(
                                             Icons.Filled.Close,
                                             contentDescription = "",
@@ -171,7 +167,7 @@ class QuestionListComponent {
                         }
                         Button(
                             onClick = {
-                                questionViewModel.onUpdateList(renewQuestions.filter { it.learnedOnce == 1 })
+                                questionViewModel.onUpdateList(renewQuestions.filter { it.failed == 1 })
                                 questionViewModel.filterCriteria.postValue(Constants.FILTER_CRITERIA_FAILED)
                                 onOpenDialog(false)
                             },

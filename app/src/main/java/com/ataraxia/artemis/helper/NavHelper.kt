@@ -73,7 +73,7 @@ class NavHelper {
                         }
                         appBarViewModel.onHideFilter(Constants.FILTER_ALPHA_VISIBLE)
                         if (screen.route == Constants.TRAINING) {
-                            trainingComponent.TrainingScreen(questionViewModel)
+                            trainingComponent.TrainingScreen(navController, questionViewModel)
                             appBarViewModel.onHideFilter(Constants.FILTER_ALPHA_INVISIBLE)
                         }
                         appBarViewModel.onTopBarTitleChange(screen.title)
