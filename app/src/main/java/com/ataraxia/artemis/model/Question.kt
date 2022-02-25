@@ -16,9 +16,9 @@ data class Question @JvmOverloads constructor(
     val optionD: String,
     val correctAnswers: String,
     var favourite: Int,
-    val learnedOnce: Int,
-    val learnedTwice: Int,
-    val failed: Int,
+    var learnedOnce: Int,
+    var learnedTwice: Int,
+    var failed: Int,
     val lastseen: String,
     @Ignore
     var isSelected: Int = 1,

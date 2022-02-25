@@ -27,18 +27,13 @@ class TrainingComponent {
     @Composable
     fun TrainingScreen(questionViewModel: QuestionViewModel) {
         val trainingViewModel: TrainingViewModel = viewModel()
+        val index: Int by trainingViewModel.index.observeAsState(0)
         val questions: List<Question> by questionViewModel.trainingData.observeAsState(listOf())
-        val index: Int by trainingViewModel.index.observeAsState(1)
         if (questions.isNotEmpty()) {
             TrainingContent(
                 trainingViewModel = trainingViewModel,
-                index = index,
-                questions = questions
-            )
-            TrainingContent(
-                trainingViewModel = trainingViewModel,
-                index = index,
-                questions = questions
+                questions = questions,
+                index = index
             )
         }
     }
@@ -46,30 +41,42 @@ class TrainingComponent {
     @Composable
     fun TrainingContent(
         trainingViewModel: TrainingViewModel,
-        index: Int,
-        questions: List<Question>
+        questions: List<Question>,
+        index: Int
     ) {
         val currentQuestion: Question by trainingViewModel.currentQuestion.observeAsState(questions[0])
-        val checkedAnswers: List<String> = trainingViewModel.currentCheckedAnswersList
-
-        val selectA: String by trainingViewModel.selectA.observeAsState("a")
-        val selectB: String by trainingViewModel.selectB.observeAsState("b")
-        val selectC: String by trainingViewModel.selectC.observeAsState("c")
-        val selectD: String by trainingViewModel.selectD.observeAsState("d")
+        val checkedAnswers: List<String> = trainingViewModel.checkedAnswers
 
         val checkedA: Boolean by trainingViewModel.checkedA.observeAsState(false)
         val checkedB: Boolean by trainingViewModel.checkedB.observeAsState(false)
         val checkedC: Boolean by trainingViewModel.checkedC.observeAsState(false)
         val checkedD: Boolean by trainingViewModel.checkedD.observeAsState(false)
 
-        val answerBtnText: String by trainingViewModel.answerBtnText.observeAsState("Antworten")
-        val optionCBColor: Color by trainingViewModel.optionCheckBoxColor.observeAsState(Color.Black)
+        val selectA: String by trainingViewModel.selectA.observeAsState("a")
+        val selectB: String by trainingViewModel.selectB.observeAsState("b")
+        val selectC: String by trainingViewModel.selectC.observeAsState("c")
+        val selectD: String by trainingViewModel.selectD.observeAsState("d")
 
-        val optionA: Pair<Boolean, String> = Pair(checkedA, selectA)
-        val optionB: Pair<Boolean, String> = Pair(checkedB, selectB)
-        val optionC: Pair<Boolean, String> = Pair(checkedC, selectC)
-        val optionD: Pair<Boolean, String> = Pair(checkedD, selectD)
-        val selections: List<Pair<Boolean, String>> = listOf(optionA, optionB, optionC, optionD)
+        val checkBoxColorA: Color by trainingViewModel.checkBoxColorA.observeAsState(Color.Black)
+        val checkBoxColorB: Color by trainingViewModel.checkBoxColorB.observeAsState(Color.Black)
+        val checkBoxColorC: Color by trainingViewModel.checkBoxColorC.observeAsState(Color.Black)
+        val checkBoxColorD: Color by trainingViewModel.checkBoxColorD.observeAsState(Color.Black)
+
+        val isButtonEnabled: Boolean by trainingViewModel.isButtonEnabled.observeAsState(true)
+        val answerBtnText: String by trainingViewModel.answerBtnText.observeAsState("Antworten")
+
+        val optionA: Pair<Pair<Boolean, Color>, String> =
+            Pair(Pair(checkedA, checkBoxColorA), selectA)
+        val optionB: Pair<Pair<Boolean, Color>, String> =
+            Pair(Pair(checkedB, checkBoxColorB), selectB)
+        val optionC: Pair<Pair<Boolean, Color>, String> =
+            Pair(Pair(checkedC, checkBoxColorC), selectC)
+        val optionD: Pair<Pair<Boolean, Color>, String> =
+            Pair(Pair(checkedD, checkBoxColorD), selectD)
+
+        //Used in order to create checkboxes
+        val selections: List<Pair<Pair<Boolean, Color>, String>> =
+            listOf(optionA, optionB, optionC, optionD)
 
         Column(
             modifier = Modifier
@@ -97,6 +104,7 @@ class TrainingComponent {
                         .padding(top = 35.dp)
                 ) {
                     Column {
+                        //Creates Checkboxes with state (default=unchecked) and value (a,b,c or d)
                         for (selection in selections) {
                             val currentQuestionText: String =
                                 trainingViewModel.setCurrentQuestionText(
@@ -107,18 +115,20 @@ class TrainingComponent {
                                 Modifier.padding(top = 10.dp, bottom = 10.dp)
                             ) {
                                 Checkbox(
-                                    colors = CheckboxDefaults.colors(optionCBColor),
-                                    checked = selection.first,
+                                    checked = selection.first.first,
+                                    colors = CheckboxDefaults.colors(selection.first.second),
                                     onCheckedChange = {
-                                        trainingViewModel.onChangeCurrentCheckedAnswersList(
-                                            selection.second
-                                        )
-                                        trainingViewModel.onChangeCheckedOption(
-                                            selection.first,
-                                            selection.second
-                                        )
-                                        trainingViewModel.onChangeSelection(selection.second)
-
+                                        if (answerBtnText != "Weiter") {
+                                            trainingViewModel.onChangeCheckedOption(
+                                                selection.first.first,
+                                                selection.second
+                                            )
+                                            trainingViewModel.onChangeSelection(selection.second)
+                                            trainingViewModel.currentSelection(
+                                                selection.first.first,
+                                                selection.second
+                                            )
+                                        }
                                     },
                                     modifier = Modifier.padding(start = 5.dp)
                                 )
@@ -140,7 +150,9 @@ class TrainingComponent {
                     Row(
                         modifier = Modifier.padding(bottom = 30.dp, end = 30.dp)
                     ) {
+                        //Loads first question
                         IconButton(
+                            enabled = isButtonEnabled,
                             onClick = {
                                 trainingViewModel.setNavTrainingButton(
                                     NavTrainingButton.FIRST_PAGE,
@@ -155,7 +167,9 @@ class TrainingComponent {
                                 tint = YELLOW_ARTEMIS
                             )
                         }
+                        //Loads previous question
                         IconButton(
+                            enabled = isButtonEnabled,
                             onClick = {
                                 trainingViewModel.setNavTrainingButton(
                                     NavTrainingButton.PREV_PAGE,
@@ -175,17 +189,43 @@ class TrainingComponent {
                         modifier = Modifier.padding(top = 5.dp)
                     ) {
                         Button(
+                            //Contains whole logic for further anwer processing
                             onClick = {
                                 if (answerBtnText == "Antworten") {
                                     trainingViewModel.onChangeAnswerButtonText("Weiter")
-                                    trainingViewModel.submitCheckedAnswers(
-                                        currentQuestion.correctAnswers,
-                                        checkedAnswers
-                                    )
-                                    trainingViewModel.onChangeOptionCheckBoxColor(Color.Green)
+                                    if (trainingViewModel.isSelectionCorrect(
+                                            currentQuestion,
+                                            checkedAnswers,
+                                            selections
+                                        )
+                                    ) {
+                                        if (currentQuestion.learnedOnce == 0) {
+                                            currentQuestion.learnedOnce = 1
+                                            Log.v(
+                                                "LearnedOnce",
+                                                currentQuestion.learnedOnce.toString()
+                                            )
+                                        } else if (currentQuestion.learnedTwice == 0) {
+                                            currentQuestion.learnedTwice = 1
+                                            Log.v(
+                                                "LearnedTwice",
+                                                currentQuestion.learnedTwice.toString()
+                                            )
+                                        }
+                                    } else if (!trainingViewModel.isSelectionCorrect(
+                                            currentQuestion,
+                                            checkedAnswers,
+                                            selections
+                                        )
+                                    ) {
+                                        currentQuestion.failed = 1
+                                        Log.v("Failed", currentQuestion.failed.toString())
+                                    }
+                                    trainingViewModel.onChangeEnableButtons(false)
                                 }
                                 if (answerBtnText == "Weiter") {
-                                    trainingViewModel.resetQuestion()
+                                    trainingViewModel.onChangeEnableButtons(true)
+                                    trainingViewModel.loadNextQuestion()
                                     Log.v("Current Question", currentQuestion.correctAnswers)
                                     trainingViewModel.setNavTrainingButton(
                                         NavTrainingButton.NEXT_PAGE,
@@ -202,7 +242,9 @@ class TrainingComponent {
                     Row(
                         modifier = Modifier.padding(bottom = 30.dp, start = 30.dp)
                     ) {
+                        //Loads next question
                         IconButton(
+                            enabled = isButtonEnabled,
                             onClick = {
                                 trainingViewModel.setNavTrainingButton(
                                     NavTrainingButton.NEXT_PAGE,
@@ -217,7 +259,9 @@ class TrainingComponent {
                                 tint = YELLOW_ARTEMIS
                             )
                         }
+                        //Loads last question
                         IconButton(
+                            enabled = isButtonEnabled,
                             onClick = {
                                 trainingViewModel.setNavTrainingButton(
                                     NavTrainingButton.LAST_PAGE,

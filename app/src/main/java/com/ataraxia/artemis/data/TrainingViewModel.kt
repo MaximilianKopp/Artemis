@@ -18,11 +18,23 @@ class TrainingViewModel : ViewModel() {
     private val _currentQuestion = MutableLiveData<Question>()
     val currentQuestion: LiveData<Question> = _currentQuestion
 
-    private val _currentCheckedAnswersList = mutableListOf<String>()
-    val currentCheckedAnswersList: List<String> = _currentCheckedAnswersList
+    private val _checkedAnswers = mutableListOf<String>()
+    val checkedAnswers: List<String> = _checkedAnswers
 
-    private val _index = MutableLiveData(0)
+    private val _index = MutableLiveData<Int>()
     val index: LiveData<Int> = _index
+
+    private val _checkBoxColorA = MutableLiveData<Color>()
+    val checkBoxColorA: LiveData<Color> = _checkBoxColorA
+
+    private val _checkBoxColorB = MutableLiveData<Color>()
+    val checkBoxColorB: LiveData<Color> = _checkBoxColorB
+
+    private val _checkBoxColorC = MutableLiveData<Color>()
+    val checkBoxColorC: LiveData<Color> = _checkBoxColorC
+
+    private val _checkBoxColorD = MutableLiveData<Color>()
+    val checkBoxColorD: LiveData<Color> = _checkBoxColorD
 
     private val _selectA = MutableLiveData<String>()
     val selectA: LiveData<String> = _selectA
@@ -48,8 +60,8 @@ class TrainingViewModel : ViewModel() {
     private val _checkedD = MutableLiveData<Boolean>()
     val checkedD: LiveData<Boolean> = _checkedD
 
-    private val _optionCheckBoxColor = MutableLiveData(Color.Black)
-    val optionCheckBoxColor: LiveData<Color> = _optionCheckBoxColor
+    private val _isButtonEnabled = MutableLiveData<Boolean>()
+    val isButtonEnabled: LiveData<Boolean> = _isButtonEnabled
 
     private val _answerBtnText = MutableLiveData("Antworten")
     val answerBtnText: LiveData<String> = _answerBtnText
@@ -69,6 +81,7 @@ class TrainingViewModel : ViewModel() {
         viewModelScope.launch {
             onChangeIndexCoroutine(newIndex)
         }
+        Log.v("Current index", (newIndex + 1).toString())
     }
 
     private suspend fun onChangeIndexCoroutine(newIndex: Int) =
@@ -120,75 +133,8 @@ class TrainingViewModel : ViewModel() {
                 Constants.TRAINING_SELECTION_A -> _selectA.postValue(selection)
                 Constants.TRAINING_SELECTION_B -> _selectB.postValue(selection)
                 Constants.TRAINING_SELECTION_C -> _selectC.postValue(selection)
-                "" -> _selectC.postValue("")
+                Constants.TRAINING_SELECTION_D -> _selectD.postValue(selection)
             }
-        }
-
-    fun onChangeCurrentCheckedAnswersList(checkedAnswer: String): String {
-        if (_currentCheckedAnswersList.contains(checkedAnswer)) {
-            _currentCheckedAnswersList.remove(checkedAnswer)
-        } else {
-            _currentCheckedAnswersList.add(checkedAnswer)
-        }
-        Log.v("Current answer list", currentCheckedAnswersList.toString())
-        return currentCheckedAnswersList.toString().trim()
-    }
-
-    fun submitCheckedAnswers(correctAnswers: String, currentCheckedAnswers: List<String>): Boolean {
-        var result = false
-        if (correctAnswers == currentCheckedAnswers.toString()) {
-            result = true
-        }
-        Log.v("Correct or not?", result.toString())
-        return result
-    }
-
-    fun setNavTrainingButton(direction: NavTrainingButton, index: Int, questions: List<Question>) {
-        when (direction) {
-            NavTrainingButton.FIRST_PAGE -> firstPage(index, questions)
-            NavTrainingButton.PREV_PAGE -> prevPage(index, questions)
-            NavTrainingButton.NEXT_PAGE -> nextPage(index, questions)
-            NavTrainingButton.LAST_PAGE -> lastPage(index, questions)
-        }
-    }
-
-    private fun firstPage(index: Int, questions: List<Question>) {
-        onChangeIndex(0)
-        onChangeCurrentQuestion(questions[0])
-        Log.v("Current index", index.toString())
-    }
-
-    private fun prevPage(index: Int, questions: List<Question>) {
-        if (index > 0) {
-            onChangeIndex(index - 1)
-            onChangeCurrentQuestion(questions[index - 1])
-            Log.v("Current index", index.toString())
-        }
-    }
-
-    private fun nextPage(index: Int, questions: List<Question>) {
-        if (index < Constants.TRAINING_SIZE - 1) {
-            onChangeIndex(index + 1)
-            onChangeCurrentQuestion(questions[index + 1])
-            Log.v("Current index", index.toString())
-        }
-    }
-
-    private fun lastPage(index: Int, questions: List<Question>) {
-        onChangeIndex(questions.size - 1)
-        onChangeCurrentQuestion(questions[questions.size - 1])
-        Log.v("Current index", index.toString())
-    }
-
-    fun onChangeOptionCheckBoxColor(cbColor: Color) {
-        viewModelScope.launch {
-            onChangeOptionCheckBoxColorCoroutine(cbColor)
-        }
-    }
-
-    private suspend fun onChangeOptionCheckBoxColorCoroutine(cbColor: Color) =
-        withContext(Dispatchers.IO) {
-            _optionCheckBoxColor.postValue(cbColor)
         }
 
     fun onChangeAnswerButtonText(answerBtnText: String) {
@@ -202,11 +148,107 @@ class TrainingViewModel : ViewModel() {
             _answerBtnText.postValue(answerBtnText)
         }
 
-    fun resetQuestion() {
+    fun currentSelection(isChecked: Boolean, option: String) {
+        if (!isChecked) {
+            _checkedAnswers.add(option)
+        } else {
+            _checkedAnswers.remove(option)
+        }
+        Log.v("Selected Options", checkedAnswers.toString())
+    }
+
+    fun isSelectionCorrect(
+        correctAnswers: Question,
+        currentCheckedAnswers: List<String>,
+        selections: List<Pair<Pair<Boolean, Color>, String>>
+    ): Boolean {
+        var result = false
+        if (correctAnswers.correctAnswers == currentCheckedAnswers.toString()) {
+            result = true
+        }
+        changeCheckboxColors(correctAnswers.correctAnswers, selections)
+        Log.v("Question answered", result.toString())
+        return result
+    }
+
+    //A selection is made of nested Pairs and contains all related checkbox values like isSelecte, Value and Checkbox color
+    private fun changeCheckboxColors(
+        correctAnswers: String,
+        selections: List<Pair<Pair<Boolean, Color>, String>>
+    ) {
+        selections.forEach { selection ->
+            if (selection.first.first && correctAnswers.contains(selection.second)) {
+                when (selection.second) {
+                    Constants.TRAINING_SELECTION_A -> _checkBoxColorA.postValue(Color.Green)
+                    Constants.TRAINING_SELECTION_B -> _checkBoxColorB.postValue(Color.Green)
+                    Constants.TRAINING_SELECTION_C -> _checkBoxColorC.postValue(Color.Green)
+                    Constants.TRAINING_SELECTION_D -> _checkBoxColorD.postValue(Color.Green)
+                }
+            } else {
+                when (selection.second) {
+                    Constants.TRAINING_SELECTION_A -> _checkBoxColorA.postValue(Color.Red)
+                    Constants.TRAINING_SELECTION_B -> _checkBoxColorB.postValue(Color.Red)
+                    Constants.TRAINING_SELECTION_C -> _checkBoxColorC.postValue(Color.Red)
+                    Constants.TRAINING_SELECTION_D -> _checkBoxColorD.postValue(Color.Red)
+                }
+            }
+        }
+    }
+
+    fun onChangeEnableButtons(enabled: Boolean) {
+        viewModelScope.launch {
+            onChangeEnableButtonsCoroutine(enabled)
+        }
+    }
+
+    private suspend fun onChangeEnableButtonsCoroutine(enabled: Boolean) =
+        withContext(Dispatchers.IO) {
+            _isButtonEnabled.postValue(enabled)
+        }
+
+    fun loadNextQuestion() {
         _checkedA.postValue(false)
         _checkedB.postValue(false)
         _checkedC.postValue(false)
         _checkedD.postValue(false)
-        _optionCheckBoxColor.postValue(Color.Black)
+        _checkBoxColorA.postValue(Color.Black)
+        _checkBoxColorB.postValue(Color.Black)
+        _checkBoxColorC.postValue(Color.Black)
+        _checkBoxColorD.postValue(Color.Black)
+        _checkedAnswers.clear()
+    }
+
+    //Navigation bar with buttons
+    fun setNavTrainingButton(direction: NavTrainingButton, index: Int, questions: List<Question>) {
+        when (direction) {
+            NavTrainingButton.FIRST_PAGE -> firstPage(questions)
+            NavTrainingButton.PREV_PAGE -> prevPage(index, questions)
+            NavTrainingButton.NEXT_PAGE -> nextPage(index, questions)
+            NavTrainingButton.LAST_PAGE -> lastPage(index, questions)
+        }
+    }
+
+    private fun firstPage(questions: List<Question>) {
+        onChangeIndex(0)
+        onChangeCurrentQuestion(questions[0])
+    }
+
+    private fun prevPage(index: Int, questions: List<Question>) {
+        if (index > 0) {
+            onChangeIndex(index - 1)
+            onChangeCurrentQuestion(questions[index - 1])
+        }
+    }
+
+    private fun nextPage(index: Int, questions: List<Question>) {
+        if (index < Constants.TRAINING_SIZE - 1) {
+            onChangeIndex(index + 1)
+            onChangeCurrentQuestion(questions[index + 1])
+        }
+    }
+
+    private fun lastPage(index: Int, questions: List<Question>) {
+        onChangeIndex(questions.size - 1)
+        onChangeCurrentQuestion(questions[questions.size - 1])
     }
 }
