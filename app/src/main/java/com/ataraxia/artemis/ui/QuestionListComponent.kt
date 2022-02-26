@@ -9,15 +9,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.ataraxia.artemis.data.QuestionViewModel
-import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.model.Question
 import com.ataraxia.artemis.model.Screen
 
@@ -25,44 +22,40 @@ class QuestionListComponent {
 
     @Composable
     fun ChapterScreen(
-        chapter: String,
         navController: NavController,
         isDialogOpen: Boolean,
         onOpenDialog: (Boolean) -> Unit,
-        questionViewModel: QuestionViewModel
+        questionViewModel: QuestionViewModel,
+        questionsByChapter: List<Question>,
+        questions: List<Question>
     ) {
-        val renewQuestions: List<Question> = questionViewModel.selectChapter(chapter)
-        val questions: List<Question> by questionViewModel.questions.observeAsState(
-            renewQuestions
-        )
         ChapterContent(
-            renewQuestions,
+            questionsByChapter,
             questions,
             isDialogOpen,
             onOpenDialog,
             questionViewModel,
-            navController,
+            navController
         )
     }
 
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
     fun ChapterContent(
-        renewQuestions: List<Question>,
-
+        questionsByChapter: List<Question>,
         questions: List<Question>,
         isDialogOpen: Boolean,
         onOpenDialog: (Boolean) -> Unit,
         questionViewModel: QuestionViewModel,
         navController: NavController
     ) {
-        val filterCriteria: String by questionViewModel.filterCriteria.observeAsState(Constants.FILTER_CRITERIA_ALL)
         LazyColumn {
             stickyHeader {
                 Button(
+                    enabled = questions.isNotEmpty(),
                     modifier = Modifier.padding(8.dp),
                     onClick = {
-                        questionViewModel.prepareTrainingData(renewQuestions, filterCriteria)
+                        questionViewModel.onChangeQuestionList(questions)
                         navController.navigate(Screen.DrawerScreen.Training.route)
                     }) {
                     Text(text = "Training starten")
@@ -137,8 +130,8 @@ class QuestionListComponent {
                     ) {
                         Button(
                             onClick = {
-                                questionViewModel.filterCriteria.postValue(Constants.FILTER_CRITERIA_ALL)
-                                questionViewModel.questions.postValue(renewQuestions.filter { it.isSelected == 1 })
+                                //Take all unfiltered Questions
+                                questionViewModel.onChangeQuestionList(questionsByChapter)
                                 onOpenDialog(false)
                             },
                             Modifier
@@ -152,8 +145,10 @@ class QuestionListComponent {
                         }
                         Button(
                             onClick = {
-                                questionViewModel.onUpdateList(renewQuestions.filter { it.learnedOnce == 1 && it.learnedTwice == 0 })
-                                questionViewModel.filterCriteria.postValue(Constants.FILTER_CRITERIA_NOT_LEARNED)
+                                //Take all not learned questions
+                                val notLearnedQuestions =
+                                    questionsByChapter.filter { it.learnedOnce == 1 }
+                                questionViewModel.onChangeQuestionList(notLearnedQuestions)
                                 onOpenDialog(false)
                             },
                             Modifier
@@ -167,8 +162,9 @@ class QuestionListComponent {
                         }
                         Button(
                             onClick = {
-                                questionViewModel.onUpdateList(renewQuestions.filter { it.failed == 1 })
-                                questionViewModel.filterCriteria.postValue(Constants.FILTER_CRITERIA_FAILED)
+                                //Take all failed questions
+                                val failedQuestions = questionsByChapter.filter { it.failed == 1 }
+                                questionViewModel.onChangeQuestionList(failedQuestions)
                                 onOpenDialog(false)
                             },
                             Modifier
@@ -182,8 +178,10 @@ class QuestionListComponent {
                         }
                         Button(
                             onClick = {
-                                questionViewModel.onUpdateList(renewQuestions.filter { it.favourite == 1 })
-                                questionViewModel.filterCriteria.postValue(Constants.FILTER_CRITERIA_FAVOURITES)
+                                //Take all questions marked as favourite
+                                val favouriteQuestions =
+                                    questionsByChapter.filter { it.favourite == 1 }
+                                questionViewModel.onChangeQuestionList(favouriteQuestions)
                                 onOpenDialog(false)
                             },
                             Modifier

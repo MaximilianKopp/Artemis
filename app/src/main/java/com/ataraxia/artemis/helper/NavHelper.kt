@@ -3,6 +3,8 @@ package com.ataraxia.artemis.helper
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -10,6 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.ataraxia.artemis.data.AppBarViewModel
 import com.ataraxia.artemis.data.QuestionViewModel
+import com.ataraxia.artemis.model.Question
 import com.ataraxia.artemis.model.Screen
 import com.ataraxia.artemis.model.Screen.DrawerScreen.*
 import com.ataraxia.artemis.ui.*
@@ -59,16 +62,22 @@ class NavHelper {
                         appBarViewModel.onHideFilter(Constants.FILTER_ALPHA_INVISIBLE)
                     }
                 }
-
                 for (screen in Screen.CHAPTER_SCREENS) {
                     composable(screen.route) {
                         screen.chapter?.let { chapter ->
+                            val questionsByChapter: List<Question> =
+                                questionViewModel.selectChapter(chapter)
+                            val questions: List<Question> by questionViewModel.questions.observeAsState(
+                                questionsByChapter
+                            )
+                            questionViewModel.onChangeQuestionList(questions)
                             questionListComponent.ChapterScreen(
-                                chapter,
                                 navController,
                                 isDialogOpen,
                                 onOpenDialog,
-                                questionViewModel
+                                questionViewModel,
+                                questionsByChapter,
+                                questions
                             )
                         }
                         appBarViewModel.onHideFilter(Constants.FILTER_ALPHA_VISIBLE)

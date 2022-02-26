@@ -171,13 +171,13 @@ class TrainingViewModel : ViewModel() {
         return result
     }
 
-    //A selection is made of nested Pairs and contains all related checkbox values like isSelecte, Value and Checkbox color
+    //A selection is made of nested Pairs and contains all related checkbox values like isSelect, Value and Checkbox color
     private fun changeCheckboxColors(
         correctAnswers: String,
         selections: List<Pair<Pair<Boolean, Color>, String>>
     ) {
         selections.forEach { selection ->
-            if (selection.first.first && correctAnswers.contains(selection.second)) {
+            if (correctAnswers.contains(selection.second)) {
                 when (selection.second) {
                     Constants.TRAINING_SELECTION_A -> _checkBoxColorA.postValue(Color.Green)
                     Constants.TRAINING_SELECTION_B -> _checkBoxColorB.postValue(Color.Green)
@@ -192,6 +192,11 @@ class TrainingViewModel : ViewModel() {
                     Constants.TRAINING_SELECTION_D -> _checkBoxColorD.postValue(Color.Red)
                 }
             }
+            //Check all Checkboxes in order to show correct and wrong selections
+            _checkedA.postValue(true)
+            _checkedB.postValue(true)
+            _checkedC.postValue(true)
+            _checkedD.postValue(true)
         }
     }
 
@@ -224,7 +229,7 @@ class TrainingViewModel : ViewModel() {
             NavTrainingButton.FIRST_PAGE -> firstPage(questions)
             NavTrainingButton.PREV_PAGE -> prevPage(index, questions)
             NavTrainingButton.NEXT_PAGE -> nextPage(index, questions)
-            NavTrainingButton.LAST_PAGE -> lastPage(index, questions)
+            NavTrainingButton.LAST_PAGE -> lastPage(questions)
         }
     }
 
@@ -241,13 +246,13 @@ class TrainingViewModel : ViewModel() {
     }
 
     private fun nextPage(index: Int, questions: List<Question>) {
-        if (index < Constants.TRAINING_SIZE - 1) {
+        if (index < questions.size - 1) {
             onChangeIndex(index + 1)
             onChangeCurrentQuestion(questions[index + 1])
         }
     }
 
-    private fun lastPage(index: Int, questions: List<Question>) {
+    private fun lastPage(questions: List<Question>) {
         onChangeIndex(questions.size - 1)
         onChangeCurrentQuestion(questions[questions.size - 1])
     }

@@ -3,6 +3,7 @@ package com.ataraxia.artemis.data
 import android.app.Application
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ataraxia.artemis.helper.Constants
@@ -13,13 +14,7 @@ import kotlinx.coroutines.withContext
 
 class QuestionViewModel(application: Application) : AndroidViewModel(application) {
     private val _questions = MutableLiveData<List<Question>>()
-    val questions = _questions
-
-    private val _trainingData = MutableLiveData<List<Question>>()
-    val trainingData = _trainingData
-
-    private val _filterCriteria = MutableLiveData<String>()
-    val filterCriteria = _filterCriteria
+    val questions: LiveData<List<Question>> = _questions
 
     private val questionRepository: QuestionRepository
     private val questionsChapter1: List<Question>
@@ -40,35 +35,22 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
         questionsChapter6 = questionRepository.getAllQuestionsFromChapterSix
     }
 
-    fun onUpdateList(newValue: List<Question>) {
+    fun onChangeQuestionList(newValue: List<Question>) {
         viewModelScope.launch {
-            onUpdateListCoroutine(newValue)
+            onChangeQuestionListCoroutine(newValue)
         }
     }
 
-    private suspend fun onUpdateListCoroutine(newValue: List<Question>) =
+    private suspend fun onChangeQuestionListCoroutine(newValue: List<Question>) =
         withContext(Dispatchers.IO) {
             _questions.postValue(newValue)
         }
-
 
     fun updateQuestion(question: Question) {
         viewModelScope.launch {
             questionRepository.updateQuestion(question)
         }
     }
-
-    fun onLoadQuestions(chapter: String) {
-        viewModelScope.launch {
-            onLoadQuestionsCoroutine(chapter)
-        }
-    }
-
-    private suspend fun onLoadQuestionsCoroutine(chapter: String) =
-        withContext(Dispatchers.IO) {
-            val questions = selectChapter(chapter)
-            _questions.postValue(questions)
-        }
 
     fun selectChapter(chapter: String): List<Question> {
         var questions = listOf<Question>()
@@ -83,39 +65,33 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
         return questions
     }
 
-    fun prepareTrainingData(questions: List<Question>, filterCriteria: String) {
-        viewModelScope.launch {
-            prepareTrainingDataCoroutine(questions, filterCriteria)
-        }
-    }
-
-    private suspend fun prepareTrainingDataCoroutine(
-        questions: List<Question>,
-        filterCriteria: String
-    ) = withContext(Dispatchers.IO) {
-        val learnedOnceQuestions = questions.filter { it.learnedOnce == 1 && it.learnedTwice == 0 }
-        val learnedTwiceQuestions = questions.filter { it.learnedTwice == 1 }
-        val failedQuestions = questions.filter { it.failed == 1 }
-        val favourites = questions.filter { it.favourite == 1 }
-        val openQuestions = questions.toMutableList()
-        openQuestions.removeAll(learnedOnceQuestions)
-        openQuestions.removeAll(learnedTwiceQuestions)
-        openQuestions.removeAll(failedQuestions)
-
-        val trainingDataWithoutFilter = mutableListOf<Question>()
-        trainingDataWithoutFilter.addAll(failedQuestions.take(8))
-        trainingDataWithoutFilter.addAll(learnedOnceQuestions.take(5))
-        trainingDataWithoutFilter.addAll(learnedTwiceQuestions.take(2))
-        val sizeDifference = 30 - trainingDataWithoutFilter.size
-        trainingDataWithoutFilter.addAll(openQuestions.take(Constants.TRAINING_SIZE))
-
-        when (filterCriteria) {
-            Constants.FILTER_CRITERIA_ALL -> _trainingData.postValue(trainingDataWithoutFilter)
-            Constants.FILTER_CRITERIA_NOT_LEARNED -> _trainingData.postValue(learnedOnceQuestions)
-            Constants.FILTER_CRITERIA_FAILED -> _trainingData.postValue(failedQuestions)
-            Constants.FILTER_CRITERIA_FAVOURITES -> _trainingData.postValue(favourites)
-        }
-    }
+//    private suspend fun prepareTrainingDataCoroutine(
+//        questions: List<Question>,
+//        filterCriteria: String
+//    ) = withContext(Dispatchers.IO) {
+//        val learnedOnceQuestions = questions.filter { it.learnedOnce == 1 && it.learnedTwice == 0 }
+//        val learnedTwiceQuestions = questions.filter { it.learnedTwice == 1 }
+//        val failedQuestions = questions.filter { it.failed == 1 }
+//        val favourites = questions.filter { it.favourite == 1 }
+//        val openQuestions = questions.toMutableList()
+//        openQuestions.removeAll(learnedOnceQuestions)
+//        openQuestions.removeAll(learnedTwiceQuestions)
+//        openQuestions.removeAll(failedQuestions)
+//
+//        val trainingDataWithoutFilter = mutableListOf<Question>()
+//        trainingDataWithoutFilter.addAll(failedQuestions.take(8))
+//        trainingDataWithoutFilter.addAll(learnedOnceQuestions.take(5))
+//        trainingDataWithoutFilter.addAll(learnedTwiceQuestions.take(2))
+//        val sizeDifference = 30 - trainingDataWithoutFilter.size
+//        trainingDataWithoutFilter.addAll(openQuestions.take(Constants.TRAINING_SIZE))
+//
+//        when (filterCriteria) {
+//            Constants.FILTER_CRITERIA_ALL -> _trainingData.postValue(trainingDataWithoutFilter)
+//            Constants.FILTER_CRITERIA_NOT_LEARNED -> _trainingData.postValue(learnedOnceQuestions)
+//            Constants.FILTER_CRITERIA_FAILED -> _trainingData.postValue(failedQuestions)
+//            Constants.FILTER_CRITERIA_FAVOURITES -> _trainingData.postValue(favourites)
+//        }
+//    }
 
     fun setQuestionStateColor(question: Question): Color {
         var result = Color.Black

@@ -34,14 +34,15 @@ class TrainingComponent {
         questionViewModel: QuestionViewModel
     ) {
         val trainingViewModel: TrainingViewModel = viewModel()
+
         val index: Int by trainingViewModel.index.observeAsState(0)
-        val questions: List<Question> by questionViewModel.trainingData.observeAsState(listOf())
+        val questions: List<Question> by questionViewModel.questions.observeAsState(listOf())
         if (questions.isNotEmpty()) {
             TrainingContent(
                 navController = navController,
                 trainingViewModel = trainingViewModel,
                 questionViewModel = questionViewModel,
-                questions = questions,
+                questions = questions.take(Constants.TRAINING_SIZE),
                 index = index
             )
         }
@@ -74,7 +75,7 @@ class TrainingComponent {
         val checkBoxColorD: Color by trainingViewModel.checkBoxColorD.observeAsState(Color.Black)
 
         val isButtonEnabled: Boolean by trainingViewModel.isButtonEnabled.observeAsState(true)
-        val answerBtnText: String by trainingViewModel.answerBtnText.observeAsState("Antworten")
+        val answerBtnText: String by trainingViewModel.answerBtnText.observeAsState("ten")
 
         val optionA: Pair<Pair<Boolean, Color>, String> =
             Pair(Pair(checkedA, checkBoxColorA), selectA)
@@ -200,7 +201,7 @@ class TrainingComponent {
                         modifier = Modifier.padding(top = 5.dp)
                     ) {
                         Button(
-                            //Contains whole logic for further anwer processing
+                            //Contains whole logic for further answer processing
                             onClick = {
                                 if (answerBtnText == "Antworten") {
                                     trainingViewModel.onChangeAnswerButtonText("Weiter")
@@ -237,7 +238,9 @@ class TrainingComponent {
                                         currentQuestion.failed = 1
                                         Log.v("Failed", currentQuestion.failed.toString())
                                     }
-                                    //questionViewModel.updateQuestion(currentQuestion)
+
+                                    //Saves all changes into database
+                                    questionViewModel.updateQuestion(currentQuestion)
                                     trainingViewModel.onChangeEnableButtons(false)
                                 }
                                 if (answerBtnText == "Weiter") {
@@ -259,11 +262,7 @@ class TrainingComponent {
                         modifier = Modifier.padding(bottom = 30.dp, start = 30.dp)
                     ) {
                         BackHandler(enabled = true) {
-                            questionViewModel.prepareTrainingData(
-                                questions,
-                                Constants.FILTER_CRITERIA_ALL
-                            )
-                            navController.navigate(Screen.CHAPTER_SCREENS[0].route)
+                            navController.navigate(Screen.DrawerScreen.Questions.route)
                         }
 
                         //Loads next question
