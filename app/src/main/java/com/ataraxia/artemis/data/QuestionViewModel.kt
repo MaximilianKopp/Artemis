@@ -65,6 +65,26 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
         return questions
     }
 
+    fun prepareQuestionData(questions: List<Question>, trainingSize: Int): List<Question> {
+        val learnedOnceQuestions = questions.filter { it.learnedOnce == 1 && it.learnedTwice == 0 }
+        val learnedTwiceQuestions = questions.filter { it.learnedTwice == 1 }
+        val failedQuestions = questions.filter { it.failed == 1 }
+        val remainingQuestions = questions.toMutableList()
+        remainingQuestions.also {
+            it.removeAll(learnedOnceQuestions)
+            it.removeAll(learnedTwiceQuestions)
+            it.removeAll(failedQuestions)
+        }
+        val trainingDataWithoutFilter = mutableListOf<Question>()
+        trainingDataWithoutFilter.addAll(failedQuestions.take(8))
+        trainingDataWithoutFilter.addAll(learnedOnceQuestions.take(5))
+        trainingDataWithoutFilter.addAll(learnedTwiceQuestions.take(2))
+        val sizeDifference = 30 - trainingDataWithoutFilter.size
+        trainingDataWithoutFilter.addAll(remainingQuestions.take(trainingSize))
+
+        return trainingDataWithoutFilter
+    }
+
 //    private suspend fun prepareTrainingDataCoroutine(
 //        questions: List<Question>,
 //        filterCriteria: String

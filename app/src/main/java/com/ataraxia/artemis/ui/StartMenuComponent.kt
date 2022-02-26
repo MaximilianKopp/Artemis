@@ -1,6 +1,5 @@
 package com.ataraxia.artemis.ui
 
-import com.ataraxia.artemis.data.AppBarViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -16,6 +15,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.ataraxia.artemis.R
+import com.ataraxia.artemis.data.AppBarViewModel
 import com.ataraxia.artemis.helper.NavHelper
 import com.ataraxia.artemis.model.Screen
 import com.ataraxia.artemis.templates.TextButtonTemplate
@@ -59,7 +59,7 @@ class StartMenuComponent {
                 )
             },
             drawerBackgroundColor = YELLOW_ARTEMIS
-        ) {
+        ) { it ->
             NavHelper.LoadNavigationRoutes(
                 navController = navController,
                 paddingValues = it,
