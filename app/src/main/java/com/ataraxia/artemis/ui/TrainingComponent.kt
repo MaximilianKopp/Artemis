@@ -1,5 +1,8 @@
 package com.ataraxia.artemis.ui
 
+import android.content.Context
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
@@ -15,6 +18,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -70,7 +74,7 @@ class TrainingComponent {
         isTrainingDialogOpen: Boolean,
         onOpenTrainingDialog: (Boolean) -> Unit
     ) {
-
+        val context = LocalContext.current
         val checkedAnswers: List<String> = trainingViewModel.checkedAnswers
         val currentQuestion: Question by trainingViewModel.currentQuestion.observeAsState(
             trainingData[0]
@@ -257,6 +261,15 @@ class TrainingComponent {
                                         currentQuestion.learnedOnce = 0
                                         currentQuestion.learnedTwice = 0
                                         currentQuestion.failed = 1
+
+                                        @Suppress("DEPRECATION") val vibration: Vibrator =
+                                            context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                                        vibration.vibrate(
+                                            VibrationEffect.createOneShot(
+                                                200,
+                                                VibrationEffect.DEFAULT_AMPLITUDE
+                                            )
+                                        )
                                         Log.v("Failed", currentQuestion.failed.toString())
                                     }
 

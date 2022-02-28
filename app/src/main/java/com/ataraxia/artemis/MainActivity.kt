@@ -8,7 +8,6 @@ import com.ataraxia.artemis.ui.theme.ArtemisTheme
 
 class MainActivity : ComponentActivity() {
     private val startMenuComposition = StartMenuComponent()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
