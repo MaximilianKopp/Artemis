@@ -11,8 +11,8 @@ class Constants {
         const val TRAINING = "training"
         const val TRAINING_SIZE = 30
 
-        const val FILTER_ALPHA_VISIBLE = 1f
-        const val FILTER_ALPHA_INVISIBLE = 0f
+        const val ALPHA_VISIBLE = 1f
+        const val ALPHA_INVISIBLE = 0f
 
         const val TRAINING_SELECTION_A = "a"
         const val TRAINING_SELECTION_B = "b"

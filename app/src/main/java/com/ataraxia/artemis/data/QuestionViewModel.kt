@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ataraxia.artemis.helper.Constants
+import com.ataraxia.artemis.helper.CriteriaFilter
 import com.ataraxia.artemis.model.Question
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -65,10 +66,25 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
         return questions
     }
 
-    fun prepareQuestionData(questions: List<Question>, trainingSize: Int): List<Question> {
-        val learnedOnceQuestions = questions.filter { it.learnedOnce == 1 && it.learnedTwice == 0 }
+    fun prepareQuestionData(
+        criteriaFilter: CriteriaFilter,
+        questions: List<Question>,
+        trainingSize: Int
+    ) {
+        viewModelScope.launch {
+            prepareQuestionDataCoroutine(criteriaFilter, questions, trainingSize)
+        }
+    }
+
+    private suspend fun prepareQuestionDataCoroutine(
+        criteriaFilter: CriteriaFilter,
+        questions: List<Question>,
+        trainingSize: Int
+    ) = withContext(Dispatchers.IO) {
+        val learnedOnceQuestions = questions.filter { it.learnedOnce == 1 }
         val learnedTwiceQuestions = questions.filter { it.learnedTwice == 1 }
         val failedQuestions = questions.filter { it.failed == 1 }
+        val favourites = questions.filter { it.favourite == 1 }
         val remainingQuestions = questions.toMutableList()
         remainingQuestions.also {
             it.removeAll(learnedOnceQuestions)
@@ -82,36 +98,14 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
         val sizeDifference = 30 - trainingDataWithoutFilter.size
         trainingDataWithoutFilter.addAll(remainingQuestions.take(trainingSize))
 
-        return trainingDataWithoutFilter
-    }
+        when (criteriaFilter) {
+            CriteriaFilter.ALL_QUESTIONS -> _questions.postValue(trainingDataWithoutFilter)
+            CriteriaFilter.NOT_LEARNED -> _questions.postValue(learnedOnceQuestions)
+            CriteriaFilter.FAILED -> _questions.postValue(failedQuestions)
+            CriteriaFilter.FAVOURITES -> _questions.postValue(favourites)
+        }
 
-//    private suspend fun prepareTrainingDataCoroutine(
-//        questions: List<Question>,
-//        filterCriteria: String
-//    ) = withContext(Dispatchers.IO) {
-//        val learnedOnceQuestions = questions.filter { it.learnedOnce == 1 && it.learnedTwice == 0 }
-//        val learnedTwiceQuestions = questions.filter { it.learnedTwice == 1 }
-//        val failedQuestions = questions.filter { it.failed == 1 }
-//        val favourites = questions.filter { it.favourite == 1 }
-//        val openQuestions = questions.toMutableList()
-//        openQuestions.removeAll(learnedOnceQuestions)
-//        openQuestions.removeAll(learnedTwiceQuestions)
-//        openQuestions.removeAll(failedQuestions)
-//
-//        val trainingDataWithoutFilter = mutableListOf<Question>()
-//        trainingDataWithoutFilter.addAll(failedQuestions.take(8))
-//        trainingDataWithoutFilter.addAll(learnedOnceQuestions.take(5))
-//        trainingDataWithoutFilter.addAll(learnedTwiceQuestions.take(2))
-//        val sizeDifference = 30 - trainingDataWithoutFilter.size
-//        trainingDataWithoutFilter.addAll(openQuestions.take(Constants.TRAINING_SIZE))
-//
-//        when (filterCriteria) {
-//            Constants.FILTER_CRITERIA_ALL -> _trainingData.postValue(trainingDataWithoutFilter)
-//            Constants.FILTER_CRITERIA_NOT_LEARNED -> _trainingData.postValue(learnedOnceQuestions)
-//            Constants.FILTER_CRITERIA_FAILED -> _trainingData.postValue(failedQuestions)
-//            Constants.FILTER_CRITERIA_FAVOURITES -> _trainingData.postValue(favourites)
-//        }
-//    }
+    }
 
     fun setQuestionStateColor(question: Question): Color {
         var result = Color.Black

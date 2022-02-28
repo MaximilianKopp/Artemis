@@ -27,8 +27,10 @@ class NavHelper {
             navController: NavHostController,
             paddingValues: PaddingValues,
             scope: CoroutineScope,
-            isDialogOpen: Boolean,
-            onOpenDialog: (Boolean) -> Unit
+            isFilterDialogOpen: Boolean,
+            onOpenFilterDialog: (Boolean) -> Unit,
+            isTrainingDialogClosed: Boolean,
+            onCloseTrainingDialog: (Boolean) -> Unit
         ) {
             val appBarViewModel: AppBarViewModel = viewModel()
             val startMenuComponent = StartMenuComponent()
@@ -59,7 +61,9 @@ class NavHelper {
                             Configuration.route -> configComponent.ConfigScreen()
                         }
                         appBarViewModel.onTopBarTitleChange(screen.title)
-                        appBarViewModel.onHideFilter(Constants.FILTER_ALPHA_INVISIBLE)
+                        appBarViewModel.onHideFilter(Constants.ALPHA_INVISIBLE)
+                        appBarViewModel.onCloseTrainingScreen(Constants.ALPHA_INVISIBLE)
+
                     }
                 }
                 for (screen in Screen.CHAPTER_SCREENS) {
@@ -73,17 +77,23 @@ class NavHelper {
                             questionViewModel.onChangeQuestionList(questions)
                             questionListComponent.ChapterScreen(
                                 navController,
-                                isDialogOpen,
-                                onOpenDialog,
+                                isFilterDialogOpen,
+                                onOpenFilterDialog,
                                 questionViewModel,
                                 questionsByChapter,
                                 questions
                             )
                         }
-                        appBarViewModel.onHideFilter(Constants.FILTER_ALPHA_VISIBLE)
+                        appBarViewModel.onHideFilter(Constants.ALPHA_VISIBLE)
                         if (screen.route == Constants.TRAINING) {
-                            trainingComponent.TrainingScreen(navController, questionViewModel)
-                            appBarViewModel.onHideFilter(Constants.FILTER_ALPHA_INVISIBLE)
+                            trainingComponent.TrainingScreen(
+                                navController,
+                                questionViewModel,
+                                isTrainingDialogClosed,
+                                onCloseTrainingDialog
+                            )
+                            appBarViewModel.onHideFilter(Constants.ALPHA_INVISIBLE)
+                            appBarViewModel.onCloseTrainingScreen(Constants.ALPHA_VISIBLE)
                         }
                         appBarViewModel.onTopBarTitleChange(screen.title)
                     }

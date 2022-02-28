@@ -1,6 +1,5 @@
 package com.ataraxia.artemis.ui
 
-import com.ataraxia.artemis.data.AppBarViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,6 +7,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.Composable
@@ -20,6 +20,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.ataraxia.artemis.data.AppBarViewModel
 import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.model.Screen
 import com.ataraxia.artemis.ui.theme.YELLOW_ARTEMIS
@@ -36,7 +37,10 @@ class AppBarComponent {
     ) {
         val topBarViewModel: AppBarViewModel = viewModel()
         val title: String by topBarViewModel.title.observeAsState("")
-        val filter: Float by topBarViewModel.filter.observeAsState(Constants.FILTER_ALPHA_INVISIBLE)
+        val questionFilter: Float by topBarViewModel.questionFilter.observeAsState(Constants.ALPHA_INVISIBLE)
+        val closeTrainingScreen: Float by topBarViewModel.closeTrainingScreen.observeAsState(
+            Constants.ALPHA_INVISIBLE
+        )
         TopAppBar(
             title = { Text(text = title) },
             backgroundColor = YELLOW_ARTEMIS,
@@ -48,9 +52,15 @@ class AppBarComponent {
             actions = {
                 IconButton(
                     onClick = { topBarViewModel.onOpenFilterDialog(true) },
-                    Modifier.alpha(filter)
+                    Modifier.alpha(questionFilter)
                 ) {
                     Icon(Icons.Default.FilterAlt, contentDescription = "Filter")
+                }
+                IconButton(
+                    onClick = { topBarViewModel.onOpenTrainingDialog(true) },
+                    Modifier.alpha(closeTrainingScreen)
+                ) {
+                    Icon(Icons.Default.Close, contentDescription = "Close")
                 }
             }
         )

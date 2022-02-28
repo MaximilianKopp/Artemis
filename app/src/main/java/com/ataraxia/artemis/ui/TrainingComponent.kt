@@ -31,19 +31,31 @@ class TrainingComponent {
     @Composable
     fun TrainingScreen(
         navController: NavController,
-        questionViewModel: QuestionViewModel
+        questionViewModel: QuestionViewModel,
+        isTrainingDialogOpen: Boolean,
+        onOpenTrainingDialog: (Boolean) -> Unit
     ) {
         val trainingViewModel: TrainingViewModel = viewModel()
 
         val index: Int by trainingViewModel.index.observeAsState(0)
-        val questions: List<Question> by questionViewModel.questions.observeAsState(listOf())
-        if (questions.isNotEmpty()) {
+        val questions = questionViewModel.questions.value
+        val trainingData: List<Question> by trainingViewModel.trainingQuestions.observeAsState(
+            questions!!
+        )
+        if (trainingData.size > Constants.TRAINING_SIZE) {
+            trainingViewModel.trainingQuestions.postValue(
+                questions?.shuffled()?.take(Constants.TRAINING_SIZE)
+            )
+        }
+        if (trainingData.isNotEmpty() && trainingData.size <= Constants.TRAINING_SIZE) {
             TrainingContent(
                 navController = navController,
                 trainingViewModel = trainingViewModel,
                 questionViewModel = questionViewModel,
-                questions = questions.take(Constants.TRAINING_SIZE),
-                index = index
+                trainingData = trainingData,
+                index = index,
+                isTrainingDialogOpen = isTrainingDialogOpen,
+                onOpenTrainingDialog = onOpenTrainingDialog
             )
         }
     }
@@ -53,11 +65,16 @@ class TrainingComponent {
         navController: NavController,
         trainingViewModel: TrainingViewModel,
         questionViewModel: QuestionViewModel,
-        questions: List<Question>,
-        index: Int
+        trainingData: List<Question>,
+        index: Int,
+        isTrainingDialogOpen: Boolean,
+        onOpenTrainingDialog: (Boolean) -> Unit
     ) {
-        val currentQuestion: Question by trainingViewModel.currentQuestion.observeAsState(questions[0])
+
         val checkedAnswers: List<String> = trainingViewModel.checkedAnswers
+        val currentQuestion: Question by trainingViewModel.currentQuestion.observeAsState(
+            trainingData[0]
+        )
 
         val checkedA: Boolean by trainingViewModel.checkedA.observeAsState(false)
         val checkedB: Boolean by trainingViewModel.checkedB.observeAsState(false)
@@ -76,6 +93,8 @@ class TrainingComponent {
 
         val isButtonEnabled: Boolean by trainingViewModel.isButtonEnabled.observeAsState(true)
         val answerBtnText: String by trainingViewModel.answerBtnText.observeAsState("ten")
+
+        val isNavDialogOpen: Boolean by trainingViewModel.isNavDialogOpen.observeAsState(false)
 
         val optionA: Pair<Pair<Boolean, Color>, String> =
             Pair(Pair(checkedA, checkBoxColorA), selectA)
@@ -157,10 +176,11 @@ class TrainingComponent {
                     }
                 }
             }
+            //Navigation Buttons
             Column {
                 Row {
                     Row(
-                        modifier = Modifier.padding(bottom = 30.dp, end = 30.dp)
+                        modifier = Modifier.padding(bottom = 30.dp)
                     ) {
                         //Loads first question
                         IconButton(
@@ -169,7 +189,7 @@ class TrainingComponent {
                                 trainingViewModel.setNavTrainingButton(
                                     NavTrainingButton.FIRST_PAGE,
                                     index,
-                                    questions
+                                    trainingData
                                 )
                             }) {
                             Icon(
@@ -186,7 +206,7 @@ class TrainingComponent {
                                 trainingViewModel.setNavTrainingButton(
                                     NavTrainingButton.PREV_PAGE,
                                     index,
-                                    questions
+                                    trainingData
                                 )
                             }) {
                             Icon(
@@ -198,9 +218,10 @@ class TrainingComponent {
                         }
                     }
                     Row(
-                        modifier = Modifier.padding(top = 5.dp)
+                        modifier = Modifier.padding(start = 25.dp, end = 25.dp)
                     ) {
                         Button(
+                            enabled = checkedA || checkedB || checkedC || checkedD,
                             //Contains whole logic for further answer processing
                             onClick = {
                                 if (answerBtnText == "Antworten") {
@@ -250,8 +271,11 @@ class TrainingComponent {
                                     trainingViewModel.setNavTrainingButton(
                                         NavTrainingButton.NEXT_PAGE,
                                         index,
-                                        questions
+                                        trainingData
                                     )
+                                    if (index == trainingData.size - 1) {
+                                        trainingViewModel.onOpenNavDialog(true)
+                                    }
                                     trainingViewModel.onChangeAnswerButtonText("Antworten")
                                 }
                             }) {
@@ -259,7 +283,7 @@ class TrainingComponent {
                         }
                     }
                     Row(
-                        modifier = Modifier.padding(bottom = 30.dp, start = 30.dp)
+                        modifier = Modifier.padding(bottom = 30.dp)
                     ) {
                         BackHandler(enabled = true) {
                             navController.navigate(Screen.DrawerScreen.Questions.route)
@@ -272,7 +296,7 @@ class TrainingComponent {
                                 trainingViewModel.setNavTrainingButton(
                                     NavTrainingButton.NEXT_PAGE,
                                     index,
-                                    questions
+                                    trainingData
                                 )
                             }) {
                             Icon(
@@ -282,6 +306,7 @@ class TrainingComponent {
                                 tint = YELLOW_ARTEMIS
                             )
                         }
+
                         //Loads last question
                         IconButton(
                             enabled = isButtonEnabled,
@@ -289,7 +314,7 @@ class TrainingComponent {
                                 trainingViewModel.setNavTrainingButton(
                                     NavTrainingButton.LAST_PAGE,
                                     index,
-                                    questions
+                                    trainingData
                                 )
                             }) {
                             Icon(
@@ -303,6 +328,64 @@ class TrainingComponent {
                 }
             }
         }
+        if (isTrainingDialogOpen) {
+            AlertDialog(
+                onDismissRequest = { onOpenTrainingDialog(false) },
+                text = {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "Möchtest du das Training abbrechen?",
+                            style = MaterialTheme.typography.body1
+                        )
+                    }
+                },
+                buttons = {
+                    Column(
+                        Modifier.padding(12.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Button(
+                            onClick = {
+                                onOpenTrainingDialog(false)
+                                navController.navigate(Screen.DrawerScreen.Questions.route)
+                            },
+                            Modifier
+                                .width(300.dp)
+                                .padding(4.dp)
+                        ) {
+                            Text(
+                                text = "Ja",
+                                style = MaterialTheme.typography.body1
+                            )
+                        }
+                        Button(
+                            onClick = {
+                                onOpenTrainingDialog(false)
+                            },
+                            Modifier
+                                .width(300.dp)
+                                .padding(4.dp)
+                        ) {
+                            Text(
+                                text = "Nein",
+                                style = MaterialTheme.typography.body1
+                            )
+                        }
+                    }
+                }
+            )
+        }
+        if (isNavDialogOpen) {
+            AlertDialog(
+                onDismissRequest = { trainingViewModel.onOpenNavDialog(false) },
+                buttons = {
+                    Button(onClick = {
+                        navController.navigate(Screen.DrawerScreen.Questions.route)
+                    }) {
+                        Text(text = "Zurück zum Menü")
+                    }
+                }
+            )
+        }
     }
 }
-

@@ -12,11 +12,17 @@ class AppBarViewModel : ViewModel() {
     private val _title = MutableLiveData("Artemis-Jägerprüfung")
     val title: LiveData<String> = _title
 
-    private val _filter = MutableLiveData<Float>()
-    val filter: LiveData<Float> = _filter
+    private val _questionFilter = MutableLiveData<Float>()
+    val questionFilter: LiveData<Float> = _questionFilter
 
     private val _filterDialog = MutableLiveData(false)
     val filterDialog: LiveData<Boolean> = _filterDialog
+
+    private val _openTrainingDialog = MutableLiveData(false)
+    val closeTrainingDialog: LiveData<Boolean> = _openTrainingDialog
+
+    private val _closeTrainingScreen = MutableLiveData<Float>()
+    val closeTrainingScreen: LiveData<Float> = _closeTrainingScreen
 
     fun onTopBarTitleChange(newTitle: String) {
         viewModelScope.launch {
@@ -37,7 +43,18 @@ class AppBarViewModel : ViewModel() {
 
     private suspend fun onHideFilterCoroutine(visible: Float) =
         withContext(Dispatchers.IO) {
-            _filter.postValue(visible)
+            _questionFilter.postValue(visible)
+        }
+
+    fun onCloseTrainingScreen(visible: Float) {
+        viewModelScope.launch {
+            onCloseTrainingScreenCoroutine(visible)
+        }
+    }
+
+    private suspend fun onCloseTrainingScreenCoroutine(visible: Float) =
+        withContext(Dispatchers.IO) {
+            _closeTrainingScreen.postValue(visible)
         }
 
     fun onOpenFilterDialog(isOpen: Boolean) {
@@ -49,5 +66,16 @@ class AppBarViewModel : ViewModel() {
     private suspend fun onOpenFilterDialogCoroutine(isOpen: Boolean) =
         withContext(Dispatchers.IO) {
             _filterDialog.postValue(isOpen)
+        }
+
+    fun onOpenTrainingDialog(isOpen: Boolean) {
+        viewModelScope.launch {
+            onOpenTrainingDialogCoroutine(isOpen)
+        }
+    }
+
+    private suspend fun onOpenTrainingDialogCoroutine(isOpen: Boolean) =
+        withContext(Dispatchers.IO) {
+            _openTrainingDialog.postValue(isOpen)
         }
 }

@@ -16,7 +16,10 @@ import kotlinx.coroutines.withContext
 class TrainingViewModel : ViewModel() {
 
     private val _currentQuestion = MutableLiveData<Question>()
-    val currentQuestion: LiveData<Question> = _currentQuestion
+    val currentQuestion = _currentQuestion
+
+    private val _trainingQuestions = MutableLiveData<List<Question>>()
+    val trainingQuestions = _trainingQuestions
 
     private val _checkedAnswers = mutableListOf<String>()
     val checkedAnswers: List<String> = _checkedAnswers
@@ -65,6 +68,9 @@ class TrainingViewModel : ViewModel() {
 
     private val _answerBtnText = MutableLiveData("Antworten")
     val answerBtnText: LiveData<String> = _answerBtnText
+
+    private val _isNavDialogOpen = MutableLiveData<Boolean>()
+    val isNavDialogOpen: LiveData<Boolean> = _isNavDialogOpen
 
     private fun onChangeCurrentQuestion(newQuestion: Question) {
         viewModelScope.launch {
@@ -255,5 +261,15 @@ class TrainingViewModel : ViewModel() {
     private fun lastPage(questions: List<Question>) {
         onChangeIndex(questions.size - 1)
         onChangeCurrentQuestion(questions[questions.size - 1])
+    }
+
+    fun onOpenNavDialog(isOpen: Boolean) {
+        viewModelScope.launch {
+            onOpenNavDialogCoroutine(isOpen)
+        }
+    }
+
+    private suspend fun onOpenNavDialogCoroutine(isOpen: Boolean) = withContext(Dispatchers.IO) {
+        _isNavDialogOpen.postValue(isOpen)
     }
 }

@@ -40,7 +40,10 @@ class StartMenuComponent {
         val navController = rememberNavController()
         val state = rememberScaffoldState(drawerState = DrawerState(DrawerValue.Closed))
         val scope = rememberCoroutineScope()
-        val isDialogOpen: Boolean by appBarViewModel.filterDialog.observeAsState(false)
+        val isFilterDialogOpen: Boolean by appBarViewModel.filterDialog.observeAsState(false)
+        val isTrainingDialogClosed: Boolean by appBarViewModel.closeTrainingDialog.observeAsState(
+            false
+        )
 
         Scaffold(
             scaffoldState = state,
@@ -64,8 +67,10 @@ class StartMenuComponent {
                 navController = navController,
                 paddingValues = it,
                 scope = scope,
-                isDialogOpen = isDialogOpen,
-                onOpenDialog = { appBarViewModel.onOpenFilterDialog(it) }
+                isFilterDialogOpen = isFilterDialogOpen,
+                onOpenFilterDialog = { appBarViewModel.onOpenFilterDialog(it) },
+                isTrainingDialogClosed = isTrainingDialogClosed,
+                onCloseTrainingDialog = { appBarViewModel.onOpenTrainingDialog(it) }
             )
         }
     }

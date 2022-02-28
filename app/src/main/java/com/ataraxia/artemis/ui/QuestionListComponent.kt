@@ -15,7 +15,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.ataraxia.artemis.data.QuestionViewModel
-import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.model.Question
 import com.ataraxia.artemis.model.Screen
 
@@ -24,17 +23,17 @@ class QuestionListComponent {
     @Composable
     fun ChapterScreen(
         navController: NavController,
-        isDialogOpen: Boolean,
-        onOpenDialog: (Boolean) -> Unit,
+        isFilterDialogOpen: Boolean,
+        onOpenFilterDialog: (Boolean) -> Unit,
         questionViewModel: QuestionViewModel,
         questionsByChapter: List<Question>,
-        questions: List<Question>
+        questions: List<Question>,
     ) {
         ChapterContent(
             questionsByChapter,
             questions,
-            isDialogOpen,
-            onOpenDialog,
+            isFilterDialogOpen,
+            onOpenFilterDialog,
             questionViewModel,
             navController
         )
@@ -56,7 +55,6 @@ class QuestionListComponent {
                     enabled = questions.isNotEmpty(),
                     modifier = Modifier.padding(8.dp),
                     onClick = {
-                        questionViewModel.onChangeQuestionList(questions)
                         navController.navigate(Screen.DrawerScreen.Training.route)
                     }) {
                     Text(text = "Training starten")
@@ -79,7 +77,6 @@ class QuestionListComponent {
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.CenterEnd
                             ) {
-
                                 Box(modifier = Modifier.padding(end = 4.dp)) {
                                     Row {
                                         //Icon for learned questions
@@ -131,13 +128,7 @@ class QuestionListComponent {
                     ) {
                         Button(
                             onClick = {
-                                //Take all unfiltered Questions
-                                val trainingData: List<Question> =
-                                    questionViewModel.prepareQuestionData(
-                                        questionsByChapter,
-                                        Constants.TRAINING_SIZE
-                                    )
-                                questionViewModel.onChangeQuestionList(trainingData)
+                                questionViewModel.onChangeQuestionList(questionsByChapter)
                                 onOpenDialog(false)
                             },
                             Modifier
