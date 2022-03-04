@@ -5,9 +5,9 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/artemis"
+        android:icon="@mipmap/artemisbow"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/artemis_round"
+        android:roundIcon="@mipmap/artemisbow_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Artemis">
         <activity

@@ -95,7 +95,6 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
         trainingDataWithoutFilter.addAll(failedQuestions.take(8))
         trainingDataWithoutFilter.addAll(learnedOnceQuestions.take(5))
         trainingDataWithoutFilter.addAll(learnedTwiceQuestions.take(2))
-        val sizeDifference = 30 - trainingDataWithoutFilter.size
         trainingDataWithoutFilter.addAll(remainingQuestions.take(trainingSize))
 
         when (criteriaFilter) {

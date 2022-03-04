@@ -10,7 +10,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.ataraxia.artemis.data.AppBarViewModel
+import com.ataraxia.artemis.data.GeneralViewModel
 import com.ataraxia.artemis.data.QuestionViewModel
 import com.ataraxia.artemis.model.Question
 import com.ataraxia.artemis.model.Screen
@@ -24,6 +24,7 @@ class NavHelper {
 
         @Composable
         fun LoadNavigationRoutes(
+            showStartScreenInfo: (Boolean) -> Unit,
             navController: NavHostController,
             paddingValues: PaddingValues,
             scope: CoroutineScope,
@@ -32,7 +33,7 @@ class NavHelper {
             isTrainingDialogClosed: Boolean,
             onCloseTrainingDialog: (Boolean) -> Unit
         ) {
-            val appBarViewModel: AppBarViewModel = viewModel()
+            val generalViewModel: GeneralViewModel = viewModel()
             val startMenuComponent = StartMenuComponent()
             val questionComponent = QuestionCatalogueComponent()
             val examComponent = ExamComponent()
@@ -47,22 +48,25 @@ class NavHelper {
                 Home.route,
                 Modifier.padding(paddingValues = paddingValues)
             ) {
-
                 for (screen in Screen.GENERAL_SCREENS) {
                     composable(screen.route) {
                         when (screen.route) {
                             Home.route -> startMenuComponent.StartMenu(navController = navController)
+                                .apply { generalViewModel.onShowStartScreenInfo(true) }
                             Questions.route -> questionComponent.QuestionScreen(
                                 navController,
                                 scope
-                            )
+                            ).apply { generalViewModel.onShowStartScreenInfo(false) }
                             Exam.route -> examComponent.ExamScreen()
+                                .apply { generalViewModel.onShowStartScreenInfo(false) }
                             Statistics.route -> statisticComponent.StatisticScreen()
+                                .apply { generalViewModel.onShowStartScreenInfo(false) }
                             Configuration.route -> configComponent.ConfigScreen()
+                                .apply { generalViewModel.onShowStartScreenInfo(false) }
                         }
-                        appBarViewModel.onTopBarTitleChange(screen.title)
-                        appBarViewModel.onHideFilter(Constants.ALPHA_INVISIBLE)
-                        appBarViewModel.onCloseTrainingScreen(Constants.ALPHA_INVISIBLE)
+                        generalViewModel.onTopBarTitleChange(screen.title)
+                        generalViewModel.onHideFilter(Constants.ALPHA_INVISIBLE)
+                        generalViewModel.onCloseTrainingScreen(Constants.ALPHA_INVISIBLE)
 
                     }
                 }
@@ -74,7 +78,7 @@ class NavHelper {
                             val questions: List<Question> by questionViewModel.questions.observeAsState(
                                 questionsByChapter
                             )
-                            questionViewModel.onChangeQuestionList(questions)
+                            questionViewModel.onChangeQuestionList(questionsByChapter)
                             questionListComponent.ChapterScreen(
                                 navController,
                                 isFilterDialogOpen,
@@ -84,7 +88,7 @@ class NavHelper {
                                 questions
                             )
                         }
-                        appBarViewModel.onHideFilter(Constants.ALPHA_VISIBLE)
+                        generalViewModel.onHideFilter(Constants.ALPHA_VISIBLE)
                         if (screen.route == Constants.TRAINING) {
                             trainingComponent.TrainingScreen(
                                 navController,
@@ -92,10 +96,10 @@ class NavHelper {
                                 isTrainingDialogClosed,
                                 onCloseTrainingDialog
                             )
-                            appBarViewModel.onHideFilter(Constants.ALPHA_INVISIBLE)
-                            appBarViewModel.onCloseTrainingScreen(Constants.ALPHA_VISIBLE)
+                            generalViewModel.onHideFilter(Constants.ALPHA_INVISIBLE)
+                            generalViewModel.onCloseTrainingScreen(Constants.ALPHA_VISIBLE)
                         }
-                        appBarViewModel.onTopBarTitleChange(screen.title)
+                        generalViewModel.onTopBarTitleChange(screen.title)
                     }
                 }
             }

@@ -9,13 +9,15 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.ataraxia.artemis.R
-import com.ataraxia.artemis.data.AppBarViewModel
+import com.ataraxia.artemis.data.GeneralViewModel
+import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.helper.NavHelper
 import com.ataraxia.artemis.model.Screen
 import com.ataraxia.artemis.templates.TextButtonTemplate
@@ -36,15 +38,17 @@ class StartMenuComponent {
     @Composable
     fun StartContent(
     ) {
-        val appBarViewModel: AppBarViewModel = viewModel()
+        val generalViewModel: GeneralViewModel = viewModel()
         val navController = rememberNavController()
         val state = rememberScaffoldState(drawerState = DrawerState(DrawerValue.Closed))
         val scope = rememberCoroutineScope()
-        val isFilterDialogOpen: Boolean by appBarViewModel.filterDialog.observeAsState(false)
-        val isTrainingDialogClosed: Boolean by appBarViewModel.closeTrainingDialog.observeAsState(
+        val isFilterDialogOpen: Boolean by generalViewModel.filterDialog.observeAsState(false)
+        val isTrainingDialogClosed: Boolean by generalViewModel.closeTrainingDialog.observeAsState(
             false
         )
-
+        val showStartScreenInfo: Boolean by generalViewModel.showStartScreenInfo.observeAsState(
+            true
+        )
         Scaffold(
             scaffoldState = state,
             backgroundColor = GREEN_ARTEMIS,
@@ -63,14 +67,18 @@ class StartMenuComponent {
             },
             drawerBackgroundColor = YELLOW_ARTEMIS
         ) { it ->
+            if (showStartScreenInfo) {
+                ShowStartScreenInfo()
+            }
             NavHelper.LoadNavigationRoutes(
+                showStartScreenInfo = { generalViewModel.onShowStartScreenInfo(it) },
                 navController = navController,
                 paddingValues = it,
                 scope = scope,
                 isFilterDialogOpen = isFilterDialogOpen,
-                onOpenFilterDialog = { appBarViewModel.onOpenFilterDialog(it) },
+                onOpenFilterDialog = { generalViewModel.onOpenFilterDialog(it) },
                 isTrainingDialogClosed = isTrainingDialogClosed,
-                onCloseTrainingDialog = { appBarViewModel.onOpenTrainingDialog(it) }
+                onCloseTrainingDialog = { generalViewModel.onOpenTrainingDialog(it) }
             )
         }
     }
@@ -152,6 +160,69 @@ class StartMenuComponent {
                     )
                 }
             }
+        }
+    }
+
+    @Composable
+    fun ShowStartScreenInfo() {
+        Column {
+            Row(
+                modifier = Modifier.padding(top = 5.dp)
+            ) {
+                Text(
+                    text = Constants.APP_NAME,
+                    color = Color.White,
+                    style = MaterialTheme.typography.h6,
+                    modifier = Modifier.padding(start = 25.dp, top = 25.dp, bottom = 10.dp)
+                )
+                Box(
+                    Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_coat_of_arms_of_rhineland_palatinate),
+                        contentDescription = "Coat of arms of RLP",
+                        modifier = Modifier.padding(end = 10.dp)
+                    )
+                }
+            }
+            Divider(thickness = 2.dp, color = Color.White, startIndent = 25.dp)
+            Text(
+                text = Constants.DESCRIPTION,
+                color = Color.White,
+                style = MaterialTheme.typography.body2,
+                modifier = Modifier.padding(start = 25.dp, top = 10.dp)
+            )
+            Text(
+                text = "Alle Fragen: 1024",
+                color = Color.White,
+                style = MaterialTheme.typography.body2,
+                modifier = Modifier.padding(start = 25.dp, top = 25.dp)
+            )
+            Text(
+                text = "1x richtig beantwortet: 345",
+                color = Color.White,
+                style = MaterialTheme.typography.body2,
+                modifier = Modifier.padding(start = 25.dp, top = 10.dp)
+            )
+            Text(
+                text = "2x richtig beantwortet: 123",
+                color = Color.White,
+                style = MaterialTheme.typography.body2,
+                modifier = Modifier.padding(start = 25.dp, top = 10.dp)
+            )
+            Text(
+                text = "Falsch beantwortet: 567",
+                color = Color.White,
+                style = MaterialTheme.typography.body2,
+                modifier = Modifier.padding(start = 25.dp, top = 10.dp)
+            )
+            Text(
+                text = "98.6% gelernt",
+                color = Color.White,
+                style = MaterialTheme.typography.body2,
+                modifier = Modifier.padding(start = 25.dp, top = 10.dp)
+            )
         }
     }
 }

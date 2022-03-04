@@ -8,7 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class AppBarViewModel : ViewModel() {
+class GeneralViewModel : ViewModel() {
     private val _title = MutableLiveData("Artemis-Jägerprüfung")
     val title: LiveData<String> = _title
 
@@ -23,6 +23,10 @@ class AppBarViewModel : ViewModel() {
 
     private val _closeTrainingScreen = MutableLiveData<Float>()
     val closeTrainingScreen: LiveData<Float> = _closeTrainingScreen
+
+    private val _showStartScreenInfo = MutableLiveData(true)
+    val showStartScreenInfo: LiveData<Boolean> = _showStartScreenInfo
+
 
     fun onTopBarTitleChange(newTitle: String) {
         viewModelScope.launch {
@@ -77,5 +81,16 @@ class AppBarViewModel : ViewModel() {
     private suspend fun onOpenTrainingDialogCoroutine(isOpen: Boolean) =
         withContext(Dispatchers.IO) {
             _openTrainingDialog.postValue(isOpen)
+        }
+
+    fun onShowStartScreenInfo(showStartInfo: Boolean) {
+        viewModelScope.launch {
+            onShowStartScreenInfoCoroutine(showStartInfo)
+        }
+    }
+
+    private suspend fun onShowStartScreenInfoCoroutine(showStartInfo: Boolean) =
+        withContext(Dispatchers.IO) {
+            _showStartScreenInfo.postValue(showStartInfo)
         }
 }

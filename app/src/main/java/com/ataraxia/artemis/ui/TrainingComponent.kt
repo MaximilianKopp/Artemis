@@ -130,7 +130,7 @@ class TrainingComponent {
                     Text(
                         modifier = Modifier.padding(6.dp),
                         text = currentQuestion.text,
-                        style = MaterialTheme.typography.h6,
+                        style = MaterialTheme.typography.body1,
                     )
                 }
                 Card(
@@ -150,6 +150,10 @@ class TrainingComponent {
                                 Modifier.padding(top = 10.dp, bottom = 10.dp)
                             ) {
                                 Checkbox(
+                                    /*
+                                     * selection.first = <Pair<Boolean, Color> => checkbox state & color
+                                     * selection.second = String => selection e.g: [a,b,c,d]
+                                     */
                                     checked = selection.first.first,
                                     colors = CheckboxDefaults.colors(selection.first.second),
                                     onCheckedChange = {
@@ -168,12 +172,9 @@ class TrainingComponent {
                                     modifier = Modifier.padding(start = 5.dp)
                                 )
                                 Text(
-                                    modifier = Modifier.padding(start = 4.dp),
-                                    text = trainingViewModel.setCurrentQuestionText(
-                                        currentQuestion,
-                                        selection.second
-                                    ),
-                                    style = if (currentQuestionText.length < 150) MaterialTheme.typography.h6 else MaterialTheme.typography.subtitle2
+                                    modifier = Modifier.padding(start = 4.dp, end = 2.dp),
+                                    text = currentQuestionText,
+                                    style = MaterialTheme.typography.caption
                                 )
                             }
                         }
@@ -339,6 +340,14 @@ class TrainingComponent {
                         }
                     }
                 }
+            }
+            Column {
+                Text(
+                    text = "${index + 1}/${trainingData.size}",
+                    style = MaterialTheme.typography.body2,
+                    color = Color.White,
+                    modifier = Modifier.padding(bottom = 5.dp)
+                )
             }
         }
         if (isTrainingDialogOpen) {

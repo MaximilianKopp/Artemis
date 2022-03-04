@@ -11,6 +11,10 @@ class Constants {
         const val TRAINING = "training"
         const val TRAINING_SIZE = 30
 
+        const val APP_NAME = "Artemis"
+        const val DESCRIPTION = "Prüfungstrainer zur staatlichen Jagdprüfung in \nRheinland-Pfalz"
+        const val FEDERAL_STATE = "Rheinland-Pfalz"
+
         const val ALPHA_VISIBLE = 1f
         const val ALPHA_INVISIBLE = 0f
 
