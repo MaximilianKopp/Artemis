@@ -25,6 +25,7 @@ import androidx.navigation.NavController
 import com.ataraxia.artemis.data.QuestionViewModel
 import com.ataraxia.artemis.data.TrainingViewModel
 import com.ataraxia.artemis.helper.Constants
+import com.ataraxia.artemis.helper.CriteriaFilter
 import com.ataraxia.artemis.helper.NavTrainingButton
 import com.ataraxia.artemis.model.Question
 import com.ataraxia.artemis.model.Screen
@@ -36,28 +37,31 @@ class TrainingComponent {
     fun TrainingScreen(
         navController: NavController,
         questionViewModel: QuestionViewModel,
+        filter: CriteriaFilter,
         isTrainingDialogOpen: Boolean,
-        onOpenTrainingDialog: (Boolean) -> Unit
+        onOpenTrainingDialog: (Boolean) -> Unit,
+        trainingData: List<Question>
     ) {
         val trainingViewModel: TrainingViewModel = viewModel()
-
-        val index: Int by trainingViewModel.index.observeAsState(0)
-        val questions = questionViewModel.questions.value
-        val trainingData: List<Question> by trainingViewModel.trainingQuestions.observeAsState(
-            questions!!
+        val navIndex: Int by trainingViewModel.index.observeAsState(0)
+        val questions: List<Question> by trainingViewModel.trainingQuestions.observeAsState(
+            trainingData
         )
-        if (trainingData.size > Constants.TRAINING_SIZE) {
+        if (questions.size > Constants.TRAINING_SIZE) {
             trainingViewModel.trainingQuestions.postValue(
-                questions?.shuffled()?.take(Constants.TRAINING_SIZE)
+                questions.shuffled().take(Constants.TRAINING_SIZE)
             )
         }
-        if (trainingData.isNotEmpty() && trainingData.size <= Constants.TRAINING_SIZE) {
+        if (filter == CriteriaFilter.SINGLE_QUESTION) {
+            trainingViewModel.trainingQuestions.postValue(trainingData)
+        }
+        if (questions.isNotEmpty() && questions.size <= Constants.TRAINING_SIZE) {
             TrainingContent(
                 navController = navController,
                 trainingViewModel = trainingViewModel,
                 questionViewModel = questionViewModel,
-                trainingData = trainingData,
-                index = index,
+                trainingData = questions,
+                index = navIndex,
                 isTrainingDialogOpen = isTrainingDialogOpen,
                 onOpenTrainingDialog = onOpenTrainingDialog
             )
@@ -246,6 +250,7 @@ class TrainingComponent {
                                             )
                                         } else if (currentQuestion.learnedTwice == 0) {
                                             currentQuestion.learnedTwice = 1
+                                            currentQuestion.learnedOnce = 0
                                             currentQuestion.failed = 0
                                             Log.v(
                                                 "LearnedTwice",
@@ -273,10 +278,10 @@ class TrainingComponent {
                                         )
                                         Log.v("Failed", currentQuestion.failed.toString())
                                     }
-
                                     //Saves all changes into database
                                     questionViewModel.updateQuestion(currentQuestion)
                                     trainingViewModel.onChangeEnableButtons(false)
+
                                 }
                                 if (answerBtnText == "Weiter") {
                                     trainingViewModel.onChangeEnableButtons(true)
@@ -300,9 +305,9 @@ class TrainingComponent {
                         modifier = Modifier.padding(bottom = 30.dp)
                     ) {
                         BackHandler(enabled = true) {
+                            questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS)
                             navController.navigate(Screen.DrawerScreen.Questions.route)
                         }
-
                         //Loads next question
                         IconButton(
                             enabled = isButtonEnabled,
@@ -403,6 +408,7 @@ class TrainingComponent {
                 buttons = {
                     Button(onClick = {
                         navController.navigate(Screen.DrawerScreen.Questions.route)
+                        questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS)
                     }) {
                         Text(text = "Zurück zum Menü")
                     }

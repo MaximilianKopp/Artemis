@@ -1,6 +1,8 @@
 package com.ataraxia.artemis.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -9,14 +11,18 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.ataraxia.artemis.data.QuestionViewModel
+import com.ataraxia.artemis.helper.CriteriaFilter
 import com.ataraxia.artemis.model.Question
 import com.ataraxia.artemis.model.Screen
+import com.ataraxia.artemis.ui.theme.Purple700
 
 class QuestionListComponent {
 
@@ -27,11 +33,9 @@ class QuestionListComponent {
         onOpenFilterDialog: (Boolean) -> Unit,
         questionViewModel: QuestionViewModel,
         questionsByChapter: List<Question>,
-        questions: List<Question>,
     ) {
         ChapterContent(
             questionsByChapter,
-            questions,
             isFilterDialogOpen,
             onOpenFilterDialog,
             questionViewModel,
@@ -43,18 +47,22 @@ class QuestionListComponent {
     @Composable
     fun ChapterContent(
         questionsByChapter: List<Question>,
-        questions: List<Question>,
         isDialogOpen: Boolean,
         onOpenDialog: (Boolean) -> Unit,
         questionViewModel: QuestionViewModel,
         navController: NavController
     ) {
+        val questions: List<Question> by questionViewModel.questions.observeAsState(
+            questionsByChapter
+        )
         LazyColumn {
             stickyHeader {
                 Button(
                     enabled = questions.isNotEmpty(),
                     modifier = Modifier.padding(8.dp),
+                    colors = ButtonDefaults.buttonColors(Purple700),
                     onClick = {
+                        questionViewModel.onChangeQuestionList(questionsByChapter)
                         navController.navigate(Screen.DrawerScreen.Training.route)
                     }) {
                     Text(text = "Training starten")
@@ -63,7 +71,13 @@ class QuestionListComponent {
             items(questions) { question ->
                 Card(
                     backgroundColor = Color.White,
-                    modifier = Modifier.padding(4.dp)
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .clickable {
+                            questionViewModel.onChangeQuestion(question)
+                            questionViewModel.onChangeFilter(CriteriaFilter.SINGLE_QUESTION)
+                            navController.navigate(Screen.DrawerScreen.Training.route)
+                        }
                 ) {
                     Column {
                         Row {
@@ -128,7 +142,8 @@ class QuestionListComponent {
                     ) {
                         Button(
                             onClick = {
-                                questionViewModel.onChangeQuestionList(questionsByChapter)
+                                //Take all questions
+                                questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS)
                                 onOpenDialog(false)
                             },
                             Modifier
@@ -143,9 +158,7 @@ class QuestionListComponent {
                         Button(
                             onClick = {
                                 //Take all not learned questions
-                                val notLearnedQuestions =
-                                    questionsByChapter.filter { it.learnedOnce == 1 }
-                                questionViewModel.onChangeQuestionList(notLearnedQuestions)
+                                questionViewModel.onChangeFilter(CriteriaFilter.NOT_LEARNED)
                                 onOpenDialog(false)
                             },
                             Modifier
@@ -160,8 +173,7 @@ class QuestionListComponent {
                         Button(
                             onClick = {
                                 //Take all failed questions
-                                val failedQuestions = questionsByChapter.filter { it.failed == 1 }
-                                questionViewModel.onChangeQuestionList(failedQuestions)
+                                questionViewModel.onChangeFilter(CriteriaFilter.FAILED)
                                 onOpenDialog(false)
                             },
                             Modifier
@@ -176,9 +188,7 @@ class QuestionListComponent {
                         Button(
                             onClick = {
                                 //Take all questions marked as favourite
-                                val favouriteQuestions =
-                                    questionsByChapter.filter { it.favourite == 1 }
-                                questionViewModel.onChangeQuestionList(favouriteQuestions)
+                                questionViewModel.onChangeFilter(CriteriaFilter.FAVOURITES)
                                 onOpenDialog(false)
                             },
                             Modifier
@@ -193,6 +203,10 @@ class QuestionListComponent {
                     }
                 }
             )
+        }
+        BackHandler(enabled = true) {
+            questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS)
+            navController.navigate(Screen.DrawerScreen.Questions.route)
         }
     }
 }

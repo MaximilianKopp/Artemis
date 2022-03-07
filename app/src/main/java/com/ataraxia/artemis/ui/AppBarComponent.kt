@@ -21,7 +21,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.ataraxia.artemis.data.GeneralViewModel
+import com.ataraxia.artemis.data.QuestionViewModel
 import com.ataraxia.artemis.helper.Constants
+import com.ataraxia.artemis.helper.CriteriaFilter
 import com.ataraxia.artemis.model.Screen
 import com.ataraxia.artemis.ui.theme.YELLOW_ARTEMIS
 import kotlinx.coroutines.CoroutineScope
@@ -32,6 +34,7 @@ class AppBarComponent {
 
     @Composable
     fun GeneralTopAppBar(
+        questionViewModel: QuestionViewModel,
         scope: CoroutineScope,
         state: ScaffoldState,
     ) {
@@ -68,6 +71,7 @@ class AppBarComponent {
 
     @Composable
     fun DrawerContent(
+        questionViewModel: QuestionViewModel,
         scope: CoroutineScope,
         state: ScaffoldState,
         navController: NavHostController
@@ -80,6 +84,7 @@ class AppBarComponent {
                         .also {
                             topBarViewModel.onTopBarTitleChange(screen.title)
                             navController.navigate(screen.route)
+                            questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS)
                         }
                 }) {
                 Row {

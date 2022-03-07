@@ -21,6 +21,9 @@ class TrainingViewModel : ViewModel() {
     private val _trainingQuestions = MutableLiveData<List<Question>>()
     val trainingQuestions = _trainingQuestions
 
+    private val _trainingData = MutableLiveData<List<Question>>()
+    val trainingData: LiveData<List<Question>> = _trainingData
+
     private val _checkedAnswers = mutableListOf<String>()
     val checkedAnswers: List<String> = _checkedAnswers
 
@@ -71,6 +74,17 @@ class TrainingViewModel : ViewModel() {
 
     private val _isNavDialogOpen = MutableLiveData<Boolean>()
     val isNavDialogOpen: LiveData<Boolean> = _isNavDialogOpen
+
+    fun onChangeTrainingData(traningData: List<Question>) {
+        viewModelScope.launch {
+            onChangeTrainingDataCoroutine(traningData)
+        }
+    }
+
+    private suspend fun onChangeTrainingDataCoroutine(newTrainingData: List<Question>) =
+        withContext(Dispatchers.IO) {
+            _trainingData.postValue(newTrainingData)
+        }
 
     private fun onChangeCurrentQuestion(newQuestion: Question) {
         viewModelScope.launch {

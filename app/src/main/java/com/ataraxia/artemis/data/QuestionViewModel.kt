@@ -6,35 +6,98 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.helper.CriteriaFilter
 import com.ataraxia.artemis.model.Question
+import com.ataraxia.artemis.model.Screen
+import com.ataraxia.artemis.model.Statistic
+import com.ataraxia.artemis.model.Topic
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 class QuestionViewModel(application: Application) : AndroidViewModel(application) {
     private val _questions = MutableLiveData<List<Question>>()
     val questions: LiveData<List<Question>> = _questions
 
+    private val _currentChapter = MutableLiveData<Int>()
+    val currentTopic: LiveData<Int> = _currentChapter
+
+    private val _filter = MutableLiveData<CriteriaFilter>()
+    val filter: LiveData<CriteriaFilter> = _filter
+
     private val questionRepository: QuestionRepository
-    private val questionsChapter1: List<Question>
-    private val questionsChapter2: List<Question>
-    private val questionsChapter3: List<Question>
-    private val questionsChapter4: List<Question>
-    private val questionsChapter5: List<Question>
-    private val questionsChapter6: List<Question>
+    val allQuestions: List<Question>
+
+    private val _currentQuestion = MutableLiveData<Question>()
+    val currentQuestion: LiveData<Question> = _currentQuestion
+
+    val onceLearnedQuestions: Int
+    val learnedQuestions: Int
+    val failedQuestions: Int
+    val progressInPercent: BigDecimal
 
     init {
         val questionDao = QuestionDatabase.getDatabase(application.applicationContext).questionDao()
         questionRepository = QuestionRepository(questionDao)
-        questionsChapter1 = questionRepository.getAllQuestionsFromChapterOne
-        questionsChapter2 = questionRepository.getAllQuestionsFromChapterTwo
-        questionsChapter3 = questionRepository.getAllQuestionsFromChapterThree
-        questionsChapter4 = questionRepository.getAllQuestionsFromChapterFour
-        questionsChapter5 = questionRepository.getAllQuestionsFromChapterFive
-        questionsChapter6 = questionRepository.getAllQuestionsFromChapterSix
+        allQuestions = questionRepository.getAllQuestions()
+        onceLearnedQuestions = allQuestions.filter { it.learnedTwice == 1 }.count()
+        learnedQuestions = allQuestions.filter { it.learnedTwice == 1 }.count()
+        failedQuestions = allQuestions.filter { it.failed == 1 }.count()
+        progressInPercent = calculatePercentage(learnedQuestions, allQuestions.count())
+
     }
+
+    private fun calculatePercentage(learnedQuestions: Int, allQuestions: Int): BigDecimal {
+        val learnedQuestionsInPercent =
+            BigDecimal(
+                (learnedQuestions.toDouble() / allQuestions.toDouble()) * 100.0
+            ).setScale(
+                2,
+                RoundingMode.HALF_UP
+            )
+        return learnedQuestionsInPercent.setScale(
+            if (
+                learnedQuestionsInPercent.compareTo(BigDecimal(100.0)) == 0 ||
+                learnedQuestionsInPercent.compareTo(BigDecimal(0.0)) == 0
+            )
+                0 else 2,
+            RoundingMode.HALF_UP
+        )
+    }
+
+    fun onChangeQuestion(newQuestion: Question) {
+        viewModelScope.launch {
+            onChangeQuestionCoroutine(newQuestion)
+        }
+    }
+
+    private suspend fun onChangeQuestionCoroutine(newQuestion: Question) =
+        withContext(Dispatchers.IO) {
+            _currentQuestion.postValue(newQuestion)
+        }
+
+    fun onChangeChapter(newChapter: Int) {
+        viewModelScope.launch {
+            onChangeChapterCoroutine(newChapter)
+        }
+    }
+
+    private suspend fun onChangeChapterCoroutine(newChapter: Int) = withContext(Dispatchers.IO) {
+        _currentChapter.postValue(newChapter)
+    }
+
+    fun onChangeFilter(newCriteriaFilter: CriteriaFilter) {
+        viewModelScope.launch {
+            onChangeFilterCoroutine(newCriteriaFilter)
+        }
+    }
+
+    private suspend fun onChangeFilterCoroutine(newCriteriaFilter: CriteriaFilter) =
+        withContext(Dispatchers.IO) {
+            _filter.postValue(newCriteriaFilter)
+        }
 
     fun onChangeQuestionList(newValue: List<Question>) {
         viewModelScope.launch {
@@ -53,17 +116,50 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun selectChapter(chapter: String): List<Question> {
+    fun selectTopic(topic: Int, criteriaFilter: CriteriaFilter): List<Question> {
         var questions = listOf<Question>()
-        when (chapter) {
-            Constants.CHAPTER_1 -> questions = questionsChapter1
-            Constants.CHAPTER_2 -> questions = questionsChapter2
-            Constants.CHAPTER_3 -> questions = questionsChapter3
-            Constants.CHAPTER_4 -> questions = questionsChapter4
-            Constants.CHAPTER_5 -> questions = questionsChapter5
-            Constants.CHAPTER_6 -> questions = questionsChapter6
+        when (topic) {
+            Topic.TOPIC_1.ordinal -> questions = filterQuestions(
+                criteriaFilter,
+                allQuestions.filter { it.topic == Topic.TOPIC_1.ordinal })
+            Topic.TOPIC_2.ordinal -> questions = filterQuestions(
+                criteriaFilter,
+                allQuestions.filter { it.topic == Topic.TOPIC_2.ordinal })
+            Topic.TOPIC_3.ordinal -> questions = filterQuestions(
+                criteriaFilter,
+                allQuestions.filter { it.topic == Topic.TOPIC_3.ordinal })
+            Topic.TOPIC_4.ordinal -> questions = filterQuestions(
+                criteriaFilter,
+                allQuestions.filter { it.topic == Topic.TOPIC_4.ordinal })
+            Topic.TOPIC_5.ordinal -> questions = filterQuestions(
+                criteriaFilter,
+                allQuestions.filter { it.topic == Topic.TOPIC_5.ordinal })
+            Topic.TOPIC_6.ordinal -> questions = filterQuestions(
+                criteriaFilter,
+                allQuestions.filter { it.topic == Topic.TOPIC_6.ordinal })
         }
         return questions
+    }
+
+    fun loadSingleQuestion(question: Question): List<Question> {
+        return listOf(question)
+    }
+
+    private fun filterQuestions(
+        criteriaFilter: CriteriaFilter,
+        questions: List<Question>
+    ): List<Question> {
+        val filteredQuestions: List<Question> = when (criteriaFilter) {
+            CriteriaFilter.ALL_QUESTIONS -> questions
+            CriteriaFilter.NOT_LEARNED -> questions.filter { it.learnedOnce == 1 }
+            CriteriaFilter.FAILED -> questions.filter { it.failed == 1 }
+            CriteriaFilter.FAVOURITES -> questions.filter { it.favourite == 1 }
+
+            else -> {
+                questions
+            }
+        }
+        return filteredQuestions
     }
 
     fun prepareQuestionData(
@@ -102,8 +198,44 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
             CriteriaFilter.NOT_LEARNED -> _questions.postValue(learnedOnceQuestions)
             CriteriaFilter.FAILED -> _questions.postValue(failedQuestions)
             CriteriaFilter.FAVOURITES -> _questions.postValue(favourites)
-        }
+            else -> {
 
+            }
+        }
+    }
+
+    fun extractStatisticsFromTopics(): List<Statistic> {
+
+
+        val topics = listOf(
+            Pair(Screen.DrawerScreen.TopicWildLife, Topic.TOPIC_1),
+            Pair(Screen.DrawerScreen.TopicHuntingOperations, Topic.TOPIC_2),
+            Pair(Screen.DrawerScreen.TopicWeaponsLawAndTechnology, Topic.TOPIC_3),
+            Pair(Screen.DrawerScreen.TopicWildLifeTreatment, Topic.TOPIC_4),
+            Pair(Screen.DrawerScreen.TopicHuntingLaw, Topic.TOPIC_5),
+            Pair(Screen.DrawerScreen.TopicPreservationOfWildLifeAndNature, Topic.TOPIC_6)
+        )
+        val statistics = mutableListOf<Statistic>()
+        topics.forEach { item ->
+            var filteredQuestions = allQuestions
+            filteredQuestions = filteredQuestions.filter { it.topic == item.second.ordinal }
+            val allQuestions: Int = filteredQuestions.size
+            val onceLearnedQuestions: Int = filteredQuestions.filter { it.learnedOnce == 1 }.count()
+            val learnedQuestions: Int = filteredQuestions.filter { it.learnedTwice == 1 }.count()
+            val failedQuestions: Int = filteredQuestions.filter { it.failed == 1 }.count()
+
+            statistics.add(
+                Statistic(
+                    item.first.title,
+                    allQuestions,
+                    onceLearnedQuestions,
+                    learnedQuestions,
+                    failedQuestions,
+                    calculatePercentage(learnedQuestions, allQuestions)
+                )
+            )
+        }
+        return statistics
     }
 
     fun setQuestionStateColor(question: Question): Color {

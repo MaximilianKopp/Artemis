@@ -17,6 +17,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.ataraxia.artemis.R
 import com.ataraxia.artemis.data.GeneralViewModel
+import com.ataraxia.artemis.data.QuestionViewModel
 import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.helper.NavHelper
 import com.ataraxia.artemis.model.Screen
@@ -38,6 +39,7 @@ class StartMenuComponent {
     @Composable
     fun StartContent(
     ) {
+        val questionViewModel: QuestionViewModel = viewModel()
         val generalViewModel: GeneralViewModel = viewModel()
         val navController = rememberNavController()
         val state = rememberScaffoldState(drawerState = DrawerState(DrawerValue.Closed))
@@ -56,10 +58,12 @@ class StartMenuComponent {
                 appBarComposition.GeneralTopAppBar(
                     scope = scope,
                     state = state,
+                    questionViewModel = questionViewModel
                 )
             },
             drawerContent = {
                 appBarComposition.DrawerContent(
+                    questionViewModel = questionViewModel,
                     scope = scope,
                     state = state,
                     navController = navController
@@ -68,13 +72,11 @@ class StartMenuComponent {
             drawerBackgroundColor = YELLOW_ARTEMIS
         ) { it ->
             if (showStartScreenInfo) {
-                ShowStartScreenInfo()
+                ShowStartScreenInfo(questionViewModel)
             }
             NavHelper.LoadNavigationRoutes(
-                showStartScreenInfo = { generalViewModel.onShowStartScreenInfo(it) },
                 navController = navController,
                 paddingValues = it,
-                scope = scope,
                 isFilterDialogOpen = isFilterDialogOpen,
                 onOpenFilterDialog = { generalViewModel.onOpenFilterDialog(it) },
                 isTrainingDialogClosed = isTrainingDialogClosed,
@@ -164,7 +166,13 @@ class StartMenuComponent {
     }
 
     @Composable
-    fun ShowStartScreenInfo() {
+    fun ShowStartScreenInfo(questionViewModel: QuestionViewModel) {
+        val allQuestions = questionViewModel.allQuestions
+        val onceLearnedQuestions = questionViewModel.onceLearnedQuestions
+        val learnedQuestions = questionViewModel.learnedQuestions
+        val failedQuestions = questionViewModel.failedQuestions
+        val progressInPercent = questionViewModel.progressInPercent
+
         Column {
             Row(
                 modifier = Modifier.padding(top = 5.dp)
@@ -194,31 +202,31 @@ class StartMenuComponent {
                 modifier = Modifier.padding(start = 25.dp, top = 10.dp)
             )
             Text(
-                text = "Alle Fragen: 1024",
+                text = "Alle Fragen: ${allQuestions.count()}",
                 color = Color.White,
                 style = MaterialTheme.typography.body2,
                 modifier = Modifier.padding(start = 25.dp, top = 25.dp)
             )
             Text(
-                text = "1x richtig beantwortet: 345",
+                text = "1x richtig beantwortet: $onceLearnedQuestions",
                 color = Color.White,
                 style = MaterialTheme.typography.body2,
                 modifier = Modifier.padding(start = 25.dp, top = 10.dp)
             )
             Text(
-                text = "2x richtig beantwortet: 123",
+                text = "2x richtig beantwortet: $learnedQuestions",
                 color = Color.White,
                 style = MaterialTheme.typography.body2,
                 modifier = Modifier.padding(start = 25.dp, top = 10.dp)
             )
             Text(
-                text = "Falsch beantwortet: 567",
+                text = "Falsch beantwortet: $failedQuestions",
                 color = Color.White,
                 style = MaterialTheme.typography.body2,
                 modifier = Modifier.padding(start = 25.dp, top = 10.dp)
             )
             Text(
-                text = "98.6% gelernt",
+                text = "$progressInPercent% gelernt",
                 color = Color.White,
                 style = MaterialTheme.typography.body2,
                 modifier = Modifier.padding(start = 25.dp, top = 10.dp)

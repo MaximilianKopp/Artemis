@@ -1,7 +1,6 @@
 package com.ataraxia.artemis.model
 
 import com.ataraxia.artemis.R
-import com.ataraxia.artemis.helper.Constants
 
 
 class Screen {
@@ -10,27 +9,27 @@ class Screen {
         val drawable: Int?,
         var title: String,
         var route: String,
-        var chapter: String?
+        var topic: Int
     ) {
-        constructor(drawable: Int?, title: String, route: String) : this(
+        constructor(drawable: Int, title: String, route: String) : this(
             drawable,
             title,
             route,
-            null
+            0
         )
 
-        constructor(title: String, route: String, chapter: String?) : this(
+        constructor(title: String, route: String, topic: Int) : this(
             null,
             title,
             route,
-            chapter
+            topic
         )
 
         constructor(title: String, route: String) : this(
             null,
             title,
             route,
-            null
+            0
         )
 
         object Home : DrawerScreen(
@@ -67,37 +66,37 @@ class Screen {
         object TopicWildLife : DrawerScreen(
             "Wildbiologie & Wildhege",
             "topicWildlife",
-            Constants.CHAPTER_1
+            Topic.TOPIC_1.ordinal
         )
 
         object TopicHuntingOperations : DrawerScreen(
             "Jagdbetrieb",
             "topicHuntingOperations",
-            Constants.CHAPTER_2
+            Topic.TOPIC_2.ordinal
         )
 
         object TopicWeaponsLawAndTechnology : DrawerScreen(
             "Waffenrecht & Technik",
             "topicWeaponsLawAndTechnology",
-            Constants.CHAPTER_3
+            Topic.TOPIC_3.ordinal
         )
 
         object TopicWildLifeTreatment : DrawerScreen(
             "Behandlung des Wildes",
             "topicWildLifeTreatment",
-            Constants.CHAPTER_4
+            Topic.TOPIC_4.ordinal
         )
 
         object TopicHuntingLaw : DrawerScreen(
             "Jagdrecht",
             "topicHuntingLaw",
-            Constants.CHAPTER_5
+            Topic.TOPIC_5.ordinal
         )
 
         object TopicPreservationOfWildLifeAndNature : DrawerScreen(
             "Tier- und Naturschutz",
             "topicPreservationOfWildLifeAndNature",
-            Constants.CHAPTER_6
+            Topic.TOPIC_6.ordinal
         )
 
         object Training : DrawerScreen(
@@ -115,7 +114,7 @@ class Screen {
             DrawerScreen.Configuration,
         )
 
-        val CHAPTER_SCREENS = listOf(
+        val TOPIC_SCREENS = listOf(
             DrawerScreen.TopicWildLife,
             DrawerScreen.TopicHuntingOperations,
             DrawerScreen.TopicWeaponsLawAndTechnology,
