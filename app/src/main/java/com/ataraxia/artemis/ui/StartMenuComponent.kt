@@ -13,7 +13,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.ataraxia.artemis.R
 import com.ataraxia.artemis.data.GeneralViewModel
@@ -58,11 +57,11 @@ class StartMenuComponent {
                 appBarComposition.GeneralTopAppBar(
                     scope = scope,
                     state = state,
-                    questionViewModel = questionViewModel
                 )
             },
             drawerContent = {
                 appBarComposition.DrawerContent(
+                    generalViewModel = generalViewModel,
                     questionViewModel = questionViewModel,
                     scope = scope,
                     state = state,
@@ -80,7 +79,7 @@ class StartMenuComponent {
                 isFilterDialogOpen = isFilterDialogOpen,
                 onOpenFilterDialog = { generalViewModel.onOpenFilterDialog(it) },
                 isTrainingDialogClosed = isTrainingDialogClosed,
-                onCloseTrainingDialog = { generalViewModel.onOpenTrainingDialog(it) }
+                onOpenTrainingDialog = { generalViewModel.onOpenTrainingDialog(it) }
             )
         }
     }
@@ -122,7 +121,9 @@ class StartMenuComponent {
     }
 
     @Composable
-    fun StartMenu(navController: NavController) {
+    fun StartMenu(
+        generalViewModel: GeneralViewModel
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -131,14 +132,18 @@ class StartMenuComponent {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row {
-                StartMenuButton(onClick = { navController.navigate(Screen.DrawerScreen.Questions.route) }) {
+                StartMenuButton(onClick = {
+                    generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Questions)
+                }) {
                     StartMenuContent(
                         drawable = R.drawable.ic_baseline_menu_book_24,
                         contentDescription = "Questions",
                         text = "Sachgebiete"
                     )
                 }
-                StartMenuButton(onClick = { navController.navigate(Screen.DrawerScreen.Exam.route) }) {
+                StartMenuButton(onClick = {
+                    generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Exam)
+                }) {
                     StartMenuContent(
                         drawable = R.drawable.ic_baseline_assignment_24,
                         contentDescription = "Examination",
@@ -147,14 +152,18 @@ class StartMenuComponent {
                 }
             }
             Row {
-                StartMenuButton(onClick = { navController.navigate(Screen.DrawerScreen.Statistics.route) }) {
+                StartMenuButton(onClick = {
+                    generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Statistics)
+                }) {
                     StartMenuContent(
                         drawable = R.drawable.ic_baseline_insert_chart_24,
                         contentDescription = "Statistics",
                         text = "Statistik"
                     )
                 }
-                StartMenuButton(onClick = { navController.navigate(Screen.DrawerScreen.Configuration.route) }) {
+                StartMenuButton(onClick = {
+                    generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Configuration)
+                }) {
                     StartMenuContent(
                         drawable = R.drawable.ic_baseline_build_circle_24,
                         contentDescription = "Configuration",

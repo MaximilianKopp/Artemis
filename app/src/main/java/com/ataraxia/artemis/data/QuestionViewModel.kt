@@ -21,17 +21,16 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
     private val _questions = MutableLiveData<List<Question>>()
     val questions: LiveData<List<Question>> = _questions
 
-    private val _currentChapter = MutableLiveData<Int>()
-    val currentTopic: LiveData<Int> = _currentChapter
+    private val _currentTopic = MutableLiveData<Int>()
+    val currentTopic: LiveData<Int> = _currentTopic
 
     private val _filter = MutableLiveData<CriteriaFilter>()
     val filter: LiveData<CriteriaFilter> = _filter
 
     private val questionRepository: QuestionRepository
+
     val allQuestions: List<Question>
 
-    private val _currentQuestion = MutableLiveData<Question>()
-    val currentQuestion: LiveData<Question> = _currentQuestion
 
     val onceLearnedQuestions: Int
     val learnedQuestions: Int
@@ -67,25 +66,14 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
         )
     }
 
-    fun onChangeQuestion(newQuestion: Question) {
-        viewModelScope.launch {
-            onChangeQuestionCoroutine(newQuestion)
-        }
-    }
-
-    private suspend fun onChangeQuestionCoroutine(newQuestion: Question) =
-        withContext(Dispatchers.IO) {
-            _currentQuestion.postValue(newQuestion)
-        }
-
-    fun onChangeChapter(newChapter: Int) {
+    fun onChangeTopic(newChapter: Int) {
         viewModelScope.launch {
             onChangeChapterCoroutine(newChapter)
         }
     }
 
     private suspend fun onChangeChapterCoroutine(newChapter: Int) = withContext(Dispatchers.IO) {
-        _currentChapter.postValue(newChapter)
+        _currentTopic.postValue(newChapter)
     }
 
     fun onChangeFilter(newCriteriaFilter: CriteriaFilter) {

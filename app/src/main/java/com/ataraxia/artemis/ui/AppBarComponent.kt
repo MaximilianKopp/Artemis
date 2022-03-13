@@ -34,7 +34,6 @@ class AppBarComponent {
 
     @Composable
     fun GeneralTopAppBar(
-        questionViewModel: QuestionViewModel,
         scope: CoroutineScope,
         state: ScaffoldState,
     ) {
@@ -71,6 +70,7 @@ class AppBarComponent {
 
     @Composable
     fun DrawerContent(
+        generalViewModel: GeneralViewModel,
         questionViewModel: QuestionViewModel,
         scope: CoroutineScope,
         state: ScaffoldState,
@@ -83,7 +83,7 @@ class AppBarComponent {
                     scope.launch { state.drawerState.close() }
                         .also {
                             topBarViewModel.onTopBarTitleChange(screen.title)
-                            navController.navigate(screen.route)
+                            generalViewModel.onChangeCurrentScreen(screen)
                             questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS)
                         }
                 }) {

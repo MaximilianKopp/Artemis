@@ -16,42 +16,42 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
+import com.ataraxia.artemis.data.GeneralViewModel
 import com.ataraxia.artemis.data.QuestionViewModel
 import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.helper.CriteriaFilter
 import com.ataraxia.artemis.model.Screen
-import com.ataraxia.artemis.model.Screen.DrawerScreen.Home
 import com.ataraxia.artemis.ui.theme.GREEN_ARTEMIS
 import com.ataraxia.artemis.ui.theme.RED_ARTEMIS
 import com.ataraxia.artemis.ui.theme.YELLOW_ARTEMIS
 
-class QuestionCatalogueComponent {
+class TopicCatalogueComponent {
 
     @Composable
     fun TopicCatalogueScreen(
-        questionViewModel: QuestionViewModel,
-        navController: NavHostController
+        generalViewModel: GeneralViewModel,
+        questionViewModel: QuestionViewModel
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.padding(top = 25.dp)
         ) {
+
             TopicCatalogueContent(
+                generalViewModel = generalViewModel,
                 questionViewModel = questionViewModel,
-                navController = navController
             )
         }
     }
 
     @Composable
     fun TopicCatalogueContent(
+        generalViewModel: GeneralViewModel,
         questionViewModel: QuestionViewModel,
-        navController: NavHostController
     ) {
         BackHandler(enabled = true) {
-            navController.navigate(Home.route)
+
         }
         val topicScreens = Screen.TOPIC_SCREENS
         var countFailedQuestions: Int
@@ -75,7 +75,13 @@ class QuestionCatalogueComponent {
                     .size(400.dp, 35.dp)
                     .border(BorderStroke(2.dp, Color.White), RoundedCornerShape(15.dp))
                     .clickable {
-                        navController.navigate(topicScreen.route)
+                        val questions = questionViewModel.selectTopic(
+                            topicScreen.topic,
+                            CriteriaFilter.ALL_QUESTIONS
+                        )
+                        questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS)
+                        questionViewModel.onChangeQuestionList(questions)
+                        generalViewModel.onChangeCurrentScreen(topicScreen)
                     }
             ) {
                 Row(

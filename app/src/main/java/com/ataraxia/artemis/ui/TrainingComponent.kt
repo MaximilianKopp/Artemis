@@ -20,11 +20,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.ataraxia.artemis.data.GeneralViewModel
 import com.ataraxia.artemis.data.QuestionViewModel
 import com.ataraxia.artemis.data.TrainingViewModel
-import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.helper.CriteriaFilter
 import com.ataraxia.artemis.helper.NavTrainingButton
 import com.ataraxia.artemis.model.Question
@@ -36,34 +35,29 @@ class TrainingComponent {
     @Composable
     fun TrainingScreen(
         navController: NavController,
-        questionViewModel: QuestionViewModel,
-        filter: CriteriaFilter,
         isTrainingDialogOpen: Boolean,
         onOpenTrainingDialog: (Boolean) -> Unit,
-        trainingData: List<Question>
+        questionViewModel: QuestionViewModel,
+        trainingViewModel: TrainingViewModel,
+        generalViewModel: GeneralViewModel,
     ) {
-        val trainingViewModel: TrainingViewModel = viewModel()
         val navIndex: Int by trainingViewModel.index.observeAsState(0)
-        val questions: List<Question> by trainingViewModel.trainingQuestions.observeAsState(
-            trainingData
-        )
-        if (questions.size > Constants.TRAINING_SIZE) {
-            trainingViewModel.trainingQuestions.postValue(
-                questions.shuffled().take(Constants.TRAINING_SIZE)
-            )
-        }
-        if (filter == CriteriaFilter.SINGLE_QUESTION) {
-            trainingViewModel.trainingQuestions.postValue(trainingData)
-        }
-        if (questions.isNotEmpty() && questions.size <= Constants.TRAINING_SIZE) {
+        val currentFilter = questionViewModel.filter.observeAsState()
+        val trainingData = trainingViewModel.trainingData.observeAsState(listOf())
+
+        Log.v("Current TrainingData", trainingData.value.forEach(::println).toString())
+        Log.v("Current Filter", currentFilter.value.toString())
+
+        if (trainingData.value.isNotEmpty()) {
             TrainingContent(
                 navController = navController,
                 trainingViewModel = trainingViewModel,
                 questionViewModel = questionViewModel,
-                trainingData = questions,
+                generalViewModel = generalViewModel,
+                trainingData = trainingData.value,
                 index = navIndex,
                 isTrainingDialogOpen = isTrainingDialogOpen,
-                onOpenTrainingDialog = onOpenTrainingDialog
+                onOpenTrainingDialog = onOpenTrainingDialog,
             )
         }
     }
@@ -73,10 +67,11 @@ class TrainingComponent {
         navController: NavController,
         trainingViewModel: TrainingViewModel,
         questionViewModel: QuestionViewModel,
+        generalViewModel: GeneralViewModel,
         trainingData: List<Question>,
         index: Int,
         isTrainingDialogOpen: Boolean,
-        onOpenTrainingDialog: (Boolean) -> Unit
+        onOpenTrainingDialog: (Boolean) -> Unit,
     ) {
         val context = LocalContext.current
         val checkedAnswers: List<String> = trainingViewModel.checkedAnswers
@@ -305,8 +300,7 @@ class TrainingComponent {
                         modifier = Modifier.padding(bottom = 30.dp)
                     ) {
                         BackHandler(enabled = true) {
-                            questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS)
-                            navController.navigate(Screen.DrawerScreen.Questions.route)
+                            generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Questions)
                         }
                         //Loads next question
                         IconButton(
@@ -404,11 +398,27 @@ class TrainingComponent {
         }
         if (isNavDialogOpen) {
             AlertDialog(
-                onDismissRequest = { trainingViewModel.onOpenNavDialog(false) },
+                onDismissRequest = {
+                    trainingViewModel.onOpenNavDialog(false)
+                },
                 buttons = {
                     Button(onClick = {
-                        navController.navigate(Screen.DrawerScreen.Questions.route)
-                        questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS)
+                        val currentTopic = questionViewModel.currentTopic.value
+                        val loadScreen =
+                            currentTopic?.let { generalViewModel.loadScreenByTopic(it) }
+                        Log.v("Current Topic", currentTopic.toString())
+                        val renewQuestions =
+                            currentTopic?.let {
+                                questionViewModel.selectTopic(
+                                    it,
+                                    CriteriaFilter.ALL_QUESTIONS
+                                )
+                            }
+                        if (loadScreen != null && renewQuestions != null) {
+                            questionViewModel.onChangeQuestionList(renewQuestions)
+                            generalViewModel.onChangeCurrentScreen(loadScreen)
+                            trainingViewModel.onOpenNavDialog(false)
+                        }
                     }) {
                         Text(text = "Zurück zum Menü")
                     }

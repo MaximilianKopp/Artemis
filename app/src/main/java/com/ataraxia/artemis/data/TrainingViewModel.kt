@@ -86,7 +86,7 @@ class TrainingViewModel : ViewModel() {
             _trainingData.postValue(newTrainingData)
         }
 
-    private fun onChangeCurrentQuestion(newQuestion: Question) {
+    fun onChangeCurrentQuestion(newQuestion: Question) {
         viewModelScope.launch {
             onChangeCurrentQuestionCoroutine(newQuestion)
         }

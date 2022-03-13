@@ -6,5 +6,5 @@ enum class Topic(i: Int) {
     TOPIC_3(2),
     TOPIC_4(3),
     TOPIC_5(4),
-    TOPIC_6(5)
+    TOPIC_6(5),
 }

@@ -1,5 +1,6 @@
 package com.ataraxia.artemis.ui
 
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
@@ -11,72 +12,96 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.ataraxia.artemis.data.GeneralViewModel
 import com.ataraxia.artemis.data.QuestionViewModel
+import com.ataraxia.artemis.data.TrainingViewModel
+import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.helper.CriteriaFilter
-import com.ataraxia.artemis.model.Question
 import com.ataraxia.artemis.model.Screen
 import com.ataraxia.artemis.ui.theme.Purple700
 
 class QuestionListComponent {
 
     @Composable
-    fun ChapterScreen(
+    fun CurrentTopicScreen(
         navController: NavController,
         isFilterDialogOpen: Boolean,
         onOpenFilterDialog: (Boolean) -> Unit,
         questionViewModel: QuestionViewModel,
-        questionsByChapter: List<Question>,
+        trainingViewModel: TrainingViewModel,
+        generalViewModel: GeneralViewModel,
+        currentTopic: Int
     ) {
-        ChapterContent(
-            questionsByChapter,
+        CurrentTopicContent(
             isFilterDialogOpen,
             onOpenFilterDialog,
+            navController,
             questionViewModel,
-            navController
+            trainingViewModel,
+            generalViewModel,
+            currentTopic
         )
     }
 
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
-    fun ChapterContent(
-        questionsByChapter: List<Question>,
+    fun CurrentTopicContent(
         isDialogOpen: Boolean,
         onOpenDialog: (Boolean) -> Unit,
+        navController: NavController,
         questionViewModel: QuestionViewModel,
-        navController: NavController
+        trainingViewModel: TrainingViewModel,
+        generalViewModel: GeneralViewModel,
+        currentTopic: Int
     ) {
-        val questions: List<Question> by questionViewModel.questions.observeAsState(
-            questionsByChapter
-        )
+        val filterAbleQuestions =
+            questionViewModel.selectTopic(currentTopic, CriteriaFilter.ALL_QUESTIONS)
+        val questionsLiveData = questionViewModel.questions.observeAsState(filterAbleQuestions)
+        val currentFilter = questionViewModel.filter.observeAsState()
+
+        Log.v("Current Filter", currentFilter.toString())
+
         LazyColumn {
             stickyHeader {
                 Button(
-                    enabled = questions.isNotEmpty(),
+                    enabled = questionsLiveData.value.isNotEmpty(),
                     modifier = Modifier.padding(8.dp),
                     colors = ButtonDefaults.buttonColors(Purple700),
                     onClick = {
-                        questionViewModel.onChangeQuestionList(questionsByChapter)
-                        navController.navigate(Screen.DrawerScreen.Training.route)
+                        if (currentFilter.value == CriteriaFilter.ALL_QUESTIONS) {
+                            val preparedTrainingData = questionsLiveData.value.shuffled().take(
+                                Constants.TRAINING_SIZE
+                            )
+                            trainingViewModel.onChangeTrainingData(
+                                preparedTrainingData
+                            )
+                            if (preparedTrainingData.isNotEmpty()) {
+                                trainingViewModel.onChangeCurrentQuestion(preparedTrainingData[0])
+                            }
+                        } else {
+                            trainingViewModel.onChangeTrainingData(questionsLiveData.value)
+                        }
+                        generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Training)
                     }) {
                     Text(text = "Training starten")
                 }
             }
-            items(questions) { question ->
+            items(questionsLiveData.value) { question ->
                 Card(
                     backgroundColor = Color.White,
                     modifier = Modifier
                         .padding(4.dp)
                         .clickable {
-                            questionViewModel.onChangeQuestion(question)
                             questionViewModel.onChangeFilter(CriteriaFilter.SINGLE_QUESTION)
-                            navController.navigate(Screen.DrawerScreen.Training.route)
+                            trainingViewModel.onChangeTrainingData(listOf(question))
+                            trainingViewModel.onChangeCurrentQuestion(question)
+                            generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Training)
                         }
                 ) {
                     Column {
@@ -144,6 +169,7 @@ class QuestionListComponent {
                             onClick = {
                                 //Take all questions
                                 questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS)
+                                questionViewModel.onChangeQuestionList(filterAbleQuestions)
                                 onOpenDialog(false)
                             },
                             Modifier
@@ -159,6 +185,7 @@ class QuestionListComponent {
                             onClick = {
                                 //Take all not learned questions
                                 questionViewModel.onChangeFilter(CriteriaFilter.NOT_LEARNED)
+                                questionViewModel.onChangeQuestionList(filterAbleQuestions.filter { it.learnedOnce == 1 })
                                 onOpenDialog(false)
                             },
                             Modifier
@@ -174,6 +201,7 @@ class QuestionListComponent {
                             onClick = {
                                 //Take all failed questions
                                 questionViewModel.onChangeFilter(CriteriaFilter.FAILED)
+                                questionViewModel.onChangeQuestionList(filterAbleQuestions.filter { it.failed == 1 })
                                 onOpenDialog(false)
                             },
                             Modifier
@@ -189,6 +217,7 @@ class QuestionListComponent {
                             onClick = {
                                 //Take all questions marked as favourite
                                 questionViewModel.onChangeFilter(CriteriaFilter.FAVOURITES)
+                                questionViewModel.onChangeQuestionList(filterAbleQuestions.filter { it.favourite == 1 })
                                 onOpenDialog(false)
                             },
                             Modifier
@@ -205,8 +234,7 @@ class QuestionListComponent {
             )
         }
         BackHandler(enabled = true) {
-            questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS)
-            navController.navigate(Screen.DrawerScreen.Questions.route)
+//            navController.navigate(Screen.DrawerScreen.Questions.route)
         }
     }
 }
