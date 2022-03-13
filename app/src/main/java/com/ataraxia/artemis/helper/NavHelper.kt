@@ -1,10 +1,8 @@
 package com.ataraxia.artemis.helper
 
-import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -39,63 +37,141 @@ class NavHelper {
             val configComponent = ConfigComponent()
             val questionListComponent = QuestionListComponent()
             val trainingComponent = TrainingComponent()
-            val currentScreen = generalViewModel.currentScreen.observeAsState(Home)
 
             NavHost(
                 navController,
-                currentScreen.value.route,
+                Home.route,
                 Modifier.padding(paddingValues = paddingValues)
             ) {
-                composable(currentScreen.value.route) {
-                    when (currentScreen.value.route) {
-                        Home.route -> startMenuComponent.StartMenu(generalViewModel)
-                            .apply { generalViewModel.onShowStartScreenInfo(true) }
-                        Questions.route -> questionComponent.TopicCatalogueScreen(
-                            generalViewModel, questionViewModel
-                        ).apply { generalViewModel.onShowStartScreenInfo(false) }
-                        Exam.route -> examComponent.ExamScreen()
-                            .apply {
-                                generalViewModel.onShowStartScreenInfo(false)
+                for (generalScreen in Screen.GENERAL_SCREENS) {
+                    composable(generalScreen.route) {
+                        when (generalScreen.route) {
+                            Home.route -> startMenuComponent.StartMenu(
+                                generalViewModel,
+                                navController
+                            )
+                                .apply { generalViewModel.onShowStartScreenInfo(true) }
+                            Questions.route -> questionComponent.TopicCatalogueScreen(
+                                generalViewModel, questionViewModel, navController
+                            ).apply { generalViewModel.onShowStartScreenInfo(false) }
+                            Exam.route -> examComponent.ExamScreen()
+                                .apply {
+                                    generalViewModel.onShowStartScreenInfo(false)
+                                }
+                            Statistics.route -> statisticComponent.StatisticScreen(questionViewModel = questionViewModel)
+                                .apply { generalViewModel.onShowStartScreenInfo(false) }
+                            Configuration.route -> configComponent.ConfigScreen()
+                                .apply { generalViewModel.onShowStartScreenInfo(false) }
+                            Training.route -> trainingComponent.TrainingScreen(
+                                navController = navController,
+                                isTrainingDialogOpen = isFilterDialogOpen,
+                                onOpenTrainingDialog = onOpenTrainingDialog,
+                                questionViewModel = questionViewModel,
+                                trainingViewModel = trainingViewModel,
+                                generalViewModel = generalViewModel
+                            )
+                        }
+                        generalViewModel.onHideFilter(Constants.ALPHA_INVISIBLE)
+                        generalViewModel.onTopBarTitleChange(generalScreen.title)
+                    }
+                    for (topicScreen in Screen.TOPIC_SCREENS) {
+                        if (topicScreen.route != Training.route) {
+                            composable(topicScreen.route) {
+                                when (topicScreen.route) {
+                                    TopicWildLife.route -> questionListComponent.CurrentTopicScreen(
+                                        navController = navController,
+                                        isFilterDialogOpen = isFilterDialogOpen,
+                                        onOpenFilterDialog = onOpenFilterDialog,
+                                        questionViewModel = questionViewModel,
+                                        trainingViewModel = trainingViewModel,
+                                        generalViewModel = generalViewModel,
+                                        currentTopic = topicScreen.topic
+                                    ).apply {
+                                        questionViewModel.onChangeTopic(topicScreen.topic)
+                                        generalViewModel.onHideFilter(Constants.ALPHA_VISIBLE)
+                                    }
+                                    TopicHuntingOperations.route -> questionListComponent.CurrentTopicScreen(
+                                        navController = navController,
+                                        isFilterDialogOpen = isFilterDialogOpen,
+                                        onOpenFilterDialog = onOpenFilterDialog,
+                                        questionViewModel = questionViewModel,
+                                        trainingViewModel = trainingViewModel,
+                                        generalViewModel = generalViewModel,
+                                        currentTopic = topicScreen.topic
+                                    ).apply {
+                                        questionViewModel.onChangeTopic(topicScreen.topic)
+                                        generalViewModel.onHideFilter(Constants.ALPHA_VISIBLE)
+                                    }
+                                    TopicWeaponsLawAndTechnology.route -> questionListComponent.CurrentTopicScreen(
+                                        navController = navController,
+                                        isFilterDialogOpen = isFilterDialogOpen,
+                                        onOpenFilterDialog = onOpenFilterDialog,
+                                        questionViewModel = questionViewModel,
+                                        trainingViewModel = trainingViewModel,
+                                        generalViewModel = generalViewModel,
+                                        currentTopic = topicScreen.topic
+                                    ).apply {
+                                        questionViewModel.onChangeTopic(topicScreen.topic)
+                                        generalViewModel.onHideFilter(Constants.ALPHA_VISIBLE)
+                                    }
+                                    TopicWildLifeTreatment.route -> questionListComponent.CurrentTopicScreen(
+                                        navController = navController,
+                                        isFilterDialogOpen = isFilterDialogOpen,
+                                        onOpenFilterDialog = onOpenFilterDialog,
+                                        questionViewModel = questionViewModel,
+                                        trainingViewModel = trainingViewModel,
+                                        generalViewModel = generalViewModel,
+                                        currentTopic = topicScreen.topic
+                                    ).apply {
+                                        questionViewModel.onChangeTopic(topicScreen.topic)
+                                        generalViewModel.onHideFilter(Constants.ALPHA_VISIBLE)
+                                    }
+                                    TopicHuntingLaw.route -> questionListComponent.CurrentTopicScreen(
+                                        navController = navController,
+                                        isFilterDialogOpen = isFilterDialogOpen,
+                                        onOpenFilterDialog = onOpenFilterDialog,
+                                        questionViewModel = questionViewModel,
+                                        trainingViewModel = trainingViewModel,
+                                        generalViewModel = generalViewModel,
+                                        currentTopic = topicScreen.topic
+                                    ).apply {
+                                        questionViewModel.onChangeTopic(topicScreen.topic)
+                                        generalViewModel.onHideFilter(Constants.ALPHA_VISIBLE)
+                                    }
+                                    TopicPreservationOfWildLifeAndNature.route -> questionListComponent.CurrentTopicScreen(
+                                        navController = navController,
+                                        isFilterDialogOpen = isFilterDialogOpen,
+                                        onOpenFilterDialog = onOpenFilterDialog,
+                                        questionViewModel = questionViewModel,
+                                        trainingViewModel = trainingViewModel,
+                                        generalViewModel = generalViewModel,
+                                        currentTopic = topicScreen.topic
+                                    ).apply {
+                                        questionViewModel.onChangeTopic(topicScreen.topic)
+                                        generalViewModel.onHideFilter(Constants.ALPHA_VISIBLE)
+                                    }
+
+                                }
+                                generalViewModel.onCloseTrainingScreen(Constants.ALPHA_INVISIBLE)
+                                generalViewModel.onTopBarTitleChange(topicScreen.title)
                             }
-                        Statistics.route -> statisticComponent.StatisticScreen(questionViewModel = questionViewModel)
-                            .apply { generalViewModel.onShowStartScreenInfo(false) }
-                        Configuration.route -> configComponent.ConfigScreen()
-                            .apply { generalViewModel.onShowStartScreenInfo(false) }
-                        Training.route -> trainingComponent.TrainingScreen(
+                            generalViewModel.onTopBarTitleChange(topicScreen.title)
+                        }
+                    }
+                    composable(Training.route) {
+                        trainingComponent.TrainingScreen(
                             navController = navController,
-                            isTrainingDialogOpen = isFilterDialogOpen,
-                            onOpenTrainingDialog = onOpenTrainingDialog,
                             questionViewModel = questionViewModel,
                             trainingViewModel = trainingViewModel,
-                            generalViewModel = generalViewModel
+                            generalViewModel = generalViewModel,
+                            isTrainingDialogOpen = isTrainingDialogClosed,
+                            onOpenTrainingDialog = onOpenTrainingDialog
                         )
-                    }
-                    generalViewModel.onHideFilter(Constants.ALPHA_INVISIBLE)
-                    if (currentScreen.value.route != Training.route) {
-                        for (topicScreen in Screen.TOPIC_SCREENS) {
-                            when (currentScreen.value.route) {
-                                topicScreen.route -> questionListComponent.CurrentTopicScreen(
-                                    navController = navController,
-                                    isFilterDialogOpen = isFilterDialogOpen,
-                                    onOpenFilterDialog = onOpenFilterDialog,
-                                    questionViewModel = questionViewModel,
-                                    trainingViewModel = trainingViewModel,
-                                    generalViewModel = generalViewModel,
-                                    currentTopic = currentScreen.value.topic
-                                ).apply {
-                                    questionViewModel.onChangeTopic(topicScreen.topic)
-                                    generalViewModel.onHideFilter(Constants.ALPHA_VISIBLE)
-                                }
-                            }
-                            generalViewModel.onCloseTrainingScreen(Constants.ALPHA_INVISIBLE)
-                            generalViewModel.onTopBarTitleChange(currentScreen.value.title)
-                        }
-                    } else if (currentScreen.value.route == Training.route) {
+                        generalViewModel.onTopBarTitleChange(Training.title)
+                        generalViewModel.onHideFilter(Constants.ALPHA_INVISIBLE)
                         generalViewModel.onCloseTrainingScreen(Constants.ALPHA_VISIBLE)
                     }
                 }
-                Log.v("Load CurrentTopicScreen", "Value: " + currentScreen.value.title)
-                generalViewModel.onTopBarTitleChange(currentScreen.value.title)
             }
         }
     }

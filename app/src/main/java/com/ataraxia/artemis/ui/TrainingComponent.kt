@@ -4,6 +4,8 @@ import android.content.Context
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.Log
+import android.view.Gravity
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -224,6 +226,7 @@ class TrainingComponent {
                     Row(
                         modifier = Modifier.padding(start = 25.dp, end = 25.dp)
                     ) {
+//                        val context = LocalContext.current
                         Button(
                             enabled = checkedA || checkedB || checkedC || checkedD,
                             //Contains whole logic for further answer processing
@@ -236,6 +239,7 @@ class TrainingComponent {
                                             selections
                                         )
                                     ) {
+                                        showMessage(context, "Korrekt")
                                         if (currentQuestion.learnedOnce == 0) {
                                             currentQuestion.learnedOnce = 1
                                             currentQuestion.failed = 0
@@ -259,6 +263,7 @@ class TrainingComponent {
                                             selections
                                         )
                                     ) {
+                                        showMessage(context, "Falsch")
                                         currentQuestion.learnedOnce = 0
                                         currentQuestion.learnedTwice = 0
                                         currentQuestion.failed = 1
@@ -416,7 +421,7 @@ class TrainingComponent {
                             }
                         if (loadScreen != null && renewQuestions != null) {
                             questionViewModel.onChangeQuestionList(renewQuestions)
-                            generalViewModel.onChangeCurrentScreen(loadScreen)
+                            navController.navigate(loadScreen.route)
                             trainingViewModel.onOpenNavDialog(false)
                         }
                     }) {
@@ -425,5 +430,12 @@ class TrainingComponent {
                 }
             )
         }
+    }
+}
+
+fun showMessage(context: Context, message: String) {
+    Toast.makeText(context, message, Toast.LENGTH_SHORT).apply {
+        this.setGravity(Gravity.CENTER, 0, 0)
+        this.show()
     }
 }

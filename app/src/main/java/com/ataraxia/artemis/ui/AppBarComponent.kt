@@ -83,7 +83,7 @@ class AppBarComponent {
                     scope.launch { state.drawerState.close() }
                         .also {
                             topBarViewModel.onTopBarTitleChange(screen.title)
-                            generalViewModel.onChangeCurrentScreen(screen)
+                            navController.navigate(screen.route)
                             questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS)
                         }
                 }) {

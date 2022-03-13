@@ -87,7 +87,7 @@ class QuestionListComponent {
                         } else {
                             trainingViewModel.onChangeTrainingData(questionsLiveData.value)
                         }
-                        generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Training)
+                        navController.navigate(Screen.DrawerScreen.Training.route)
                     }) {
                     Text(text = "Training starten")
                 }
@@ -101,7 +101,7 @@ class QuestionListComponent {
                             questionViewModel.onChangeFilter(CriteriaFilter.SINGLE_QUESTION)
                             trainingViewModel.onChangeTrainingData(listOf(question))
                             trainingViewModel.onChangeCurrentQuestion(question)
-                            generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Training)
+                            navController.navigate(Screen.DrawerScreen.Training.route)
                         }
                 ) {
                     Column {

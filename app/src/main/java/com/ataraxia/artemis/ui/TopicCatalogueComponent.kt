@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.ataraxia.artemis.data.GeneralViewModel
 import com.ataraxia.artemis.data.QuestionViewModel
 import com.ataraxia.artemis.helper.Constants
@@ -30,7 +31,8 @@ class TopicCatalogueComponent {
     @Composable
     fun TopicCatalogueScreen(
         generalViewModel: GeneralViewModel,
-        questionViewModel: QuestionViewModel
+        questionViewModel: QuestionViewModel,
+        navController: NavController
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -41,6 +43,7 @@ class TopicCatalogueComponent {
             TopicCatalogueContent(
                 generalViewModel = generalViewModel,
                 questionViewModel = questionViewModel,
+                navController = navController
             )
         }
     }
@@ -49,6 +52,7 @@ class TopicCatalogueComponent {
     fun TopicCatalogueContent(
         generalViewModel: GeneralViewModel,
         questionViewModel: QuestionViewModel,
+        navController: NavController
     ) {
         BackHandler(enabled = true) {
 
@@ -79,9 +83,10 @@ class TopicCatalogueComponent {
                             topicScreen.topic,
                             CriteriaFilter.ALL_QUESTIONS
                         )
+                        navController.navigate(topicScreen.route)
                         questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS)
                         questionViewModel.onChangeQuestionList(questions)
-                        generalViewModel.onChangeCurrentScreen(topicScreen)
+//                        generalViewModel.onChangeCurrentScreen(topicScreen)
                     }
             ) {
                 Row(

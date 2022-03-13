@@ -12,6 +12,7 @@ import com.ataraxia.artemis.model.Question
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.*
 
 class TrainingViewModel : ViewModel() {
 
@@ -183,10 +184,14 @@ class TrainingViewModel : ViewModel() {
         selections: List<Pair<Pair<Boolean, Color>, String>>
     ): Boolean {
         var result = false
+        Collections.sort(currentCheckedAnswers)
+
         if (correctAnswers.correctAnswers == currentCheckedAnswers.toString()) {
             result = true
         }
         changeCheckboxColors(correctAnswers.correctAnswers, selections)
+        Log.v("Correct Answers", correctAnswers.correctAnswers)
+        Log.v("Current Answers", currentCheckedAnswers.toString())
         Log.v("Question answered", result.toString())
         return result
     }

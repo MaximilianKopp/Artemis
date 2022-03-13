@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.ataraxia.artemis.R
 import com.ataraxia.artemis.data.GeneralViewModel
@@ -122,7 +123,8 @@ class StartMenuComponent {
 
     @Composable
     fun StartMenu(
-        generalViewModel: GeneralViewModel
+        generalViewModel: GeneralViewModel,
+        navController: NavController
     ) {
         Column(
             modifier = Modifier
@@ -133,7 +135,7 @@ class StartMenuComponent {
         ) {
             Row {
                 StartMenuButton(onClick = {
-                    generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Questions)
+                    navController.navigate(Screen.DrawerScreen.Questions.route)
                 }) {
                     StartMenuContent(
                         drawable = R.drawable.ic_baseline_menu_book_24,
@@ -142,7 +144,7 @@ class StartMenuComponent {
                     )
                 }
                 StartMenuButton(onClick = {
-                    generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Exam)
+                    navController.navigate(Screen.DrawerScreen.Exam.route)
                 }) {
                     StartMenuContent(
                         drawable = R.drawable.ic_baseline_assignment_24,
@@ -153,7 +155,7 @@ class StartMenuComponent {
             }
             Row {
                 StartMenuButton(onClick = {
-                    generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Statistics)
+                    navController.navigate(Screen.DrawerScreen.Statistics.route)
                 }) {
                     StartMenuContent(
                         drawable = R.drawable.ic_baseline_insert_chart_24,
@@ -162,7 +164,7 @@ class StartMenuComponent {
                     )
                 }
                 StartMenuButton(onClick = {
-                    generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Configuration)
+                    navController.navigate(Screen.DrawerScreen.Configuration.route)
                 }) {
                     StartMenuContent(
                         drawable = R.drawable.ic_baseline_build_circle_24,

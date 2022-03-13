@@ -44,8 +44,11 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
         onceLearnedQuestions = allQuestions.filter { it.learnedTwice == 1 }.count()
         learnedQuestions = allQuestions.filter { it.learnedTwice == 1 }.count()
         failedQuestions = allQuestions.filter { it.failed == 1 }.count()
-        progressInPercent = calculatePercentage(learnedQuestions, allQuestions.count())
-
+        progressInPercent = if (allQuestions.isNotEmpty()) {
+            calculatePercentage(learnedQuestions, allQuestions.count())
+        } else {
+            BigDecimal.ZERO
+        }
     }
 
     private fun calculatePercentage(learnedQuestions: Int, allQuestions: Int): BigDecimal {
