@@ -18,13 +18,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.ataraxia.artemis.data.GeneralViewModel
-import com.ataraxia.artemis.data.QuestionViewModel
-import com.ataraxia.artemis.data.TrainingViewModel
 import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.helper.CriteriaFilter
 import com.ataraxia.artemis.model.Screen
 import com.ataraxia.artemis.ui.theme.Purple700
+import com.ataraxia.artemis.viewModel.GeneralViewModel
+import com.ataraxia.artemis.viewModel.QuestionViewModel
+import com.ataraxia.artemis.viewModel.TrainingViewModel
 
 class QuestionListComponent {
 

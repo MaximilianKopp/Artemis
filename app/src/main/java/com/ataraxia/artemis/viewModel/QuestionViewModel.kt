@@ -1,4 +1,4 @@
-package com.ataraxia.artemis.data
+package com.ataraxia.artemis.viewModel
 
 import android.app.Application
 import androidx.compose.ui.graphics.Color
@@ -6,10 +6,12 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.ataraxia.artemis.data.db.QuestionDatabase
+import com.ataraxia.artemis.data.questions.QuestionRepository
 import com.ataraxia.artemis.helper.CriteriaFilter
 import com.ataraxia.artemis.model.Question
 import com.ataraxia.artemis.model.Screen
-import com.ataraxia.artemis.model.Statistic
+import com.ataraxia.artemis.model.StatisticProjection
 import com.ataraxia.artemis.model.Topic
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -195,9 +197,7 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun extractStatisticsFromTopics(): List<Statistic> {
-
-
+    fun extractStatisticsFromTopics(): List<StatisticProjection> {
         val topics = listOf(
             Pair(Screen.DrawerScreen.TopicWildLife, Topic.TOPIC_1),
             Pair(Screen.DrawerScreen.TopicHuntingOperations, Topic.TOPIC_2),
@@ -206,7 +206,7 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
             Pair(Screen.DrawerScreen.TopicHuntingLaw, Topic.TOPIC_5),
             Pair(Screen.DrawerScreen.TopicPreservationOfWildLifeAndNature, Topic.TOPIC_6)
         )
-        val statistics = mutableListOf<Statistic>()
+        val statistics = mutableListOf<StatisticProjection>()
         topics.forEach { item ->
             var filteredQuestions = allQuestions
             filteredQuestions = filteredQuestions.filter { it.topic == item.second.ordinal }
@@ -216,7 +216,7 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
             val failedQuestions: Int = filteredQuestions.filter { it.failed == 1 }.count()
 
             statistics.add(
-                Statistic(
+                StatisticProjection(
                     item.first.title,
                     allQuestions,
                     onceLearnedQuestions,

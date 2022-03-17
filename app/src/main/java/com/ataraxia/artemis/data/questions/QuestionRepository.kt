@@ -1,4 +1,4 @@
-package com.ataraxia.artemis.data
+package com.ataraxia.artemis.data.questions
 
 import com.ataraxia.artemis.model.Question
 

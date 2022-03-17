@@ -23,14 +23,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.ataraxia.artemis.data.GeneralViewModel
-import com.ataraxia.artemis.data.QuestionViewModel
-import com.ataraxia.artemis.data.TrainingViewModel
 import com.ataraxia.artemis.helper.CriteriaFilter
 import com.ataraxia.artemis.helper.NavTrainingButton
 import com.ataraxia.artemis.model.Question
 import com.ataraxia.artemis.model.Screen
 import com.ataraxia.artemis.ui.theme.YELLOW_ARTEMIS
+import com.ataraxia.artemis.viewModel.GeneralViewModel
+import com.ataraxia.artemis.viewModel.QuestionViewModel
+import com.ataraxia.artemis.viewModel.StatisticViewModel
+import com.ataraxia.artemis.viewModel.TrainingViewModel
 
 class TrainingComponent {
 
@@ -42,6 +43,7 @@ class TrainingComponent {
         questionViewModel: QuestionViewModel,
         trainingViewModel: TrainingViewModel,
         generalViewModel: GeneralViewModel,
+        statisticViewModel: StatisticViewModel,
     ) {
         val navIndex: Int by trainingViewModel.index.observeAsState(0)
         val currentFilter = questionViewModel.filter.observeAsState()
@@ -56,6 +58,7 @@ class TrainingComponent {
                 trainingViewModel = trainingViewModel,
                 questionViewModel = questionViewModel,
                 generalViewModel = generalViewModel,
+                statisticViewModel = statisticViewModel,
                 trainingData = trainingData.value,
                 index = navIndex,
                 isTrainingDialogOpen = isTrainingDialogOpen,
@@ -70,6 +73,7 @@ class TrainingComponent {
         trainingViewModel: TrainingViewModel,
         questionViewModel: QuestionViewModel,
         generalViewModel: GeneralViewModel,
+        statisticViewModel: StatisticViewModel,
         trainingData: List<Question>,
         index: Int,
         isTrainingDialogOpen: Boolean,
@@ -297,6 +301,7 @@ class TrainingComponent {
                                     }
                                     trainingViewModel.onChangeAnswerButtonText("Antworten")
                                 }
+                                statisticViewModel.onChangeTotalStatisticsFromStartScreen()
                             }) {
                             Text(text = answerBtnText)
                         }

@@ -4,16 +4,16 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.ataraxia.artemis.data.GeneralViewModel
-import com.ataraxia.artemis.data.QuestionViewModel
-import com.ataraxia.artemis.data.TrainingViewModel
 import com.ataraxia.artemis.model.Screen
 import com.ataraxia.artemis.model.Screen.DrawerScreen.*
 import com.ataraxia.artemis.ui.*
+import com.ataraxia.artemis.viewModel.GeneralViewModel
+import com.ataraxia.artemis.viewModel.QuestionViewModel
+import com.ataraxia.artemis.viewModel.StatisticViewModel
+import com.ataraxia.artemis.viewModel.TrainingViewModel
 
 class NavHelper {
 
@@ -25,11 +25,13 @@ class NavHelper {
             isFilterDialogOpen: Boolean,
             onOpenFilterDialog: (Boolean) -> Unit,
             isTrainingDialogClosed: Boolean,
-            onOpenTrainingDialog: (Boolean) -> Unit
+            onOpenTrainingDialog: (Boolean) -> Unit,
+            generalViewModel: GeneralViewModel,
+            questionViewModel: QuestionViewModel,
+            trainingViewModel: TrainingViewModel,
+            statisticViewModel: StatisticViewModel
         ) {
-            val generalViewModel: GeneralViewModel = viewModel()
-            val questionViewModel: QuestionViewModel = viewModel()
-            val trainingViewModel: TrainingViewModel = viewModel()
+
             val startMenuComponent = StartMenuComponent()
             val questionComponent = TopicCatalogueComponent()
             val examComponent = ExamComponent()
@@ -47,7 +49,6 @@ class NavHelper {
                     composable(generalScreen.route) {
                         when (generalScreen.route) {
                             Home.route -> startMenuComponent.StartMenu(
-                                generalViewModel,
                                 navController
                             )
                                 .apply { generalViewModel.onShowStartScreenInfo(true) }
@@ -68,7 +69,8 @@ class NavHelper {
                                 onOpenTrainingDialog = onOpenTrainingDialog,
                                 questionViewModel = questionViewModel,
                                 trainingViewModel = trainingViewModel,
-                                generalViewModel = generalViewModel
+                                generalViewModel = generalViewModel,
+                                statisticViewModel = statisticViewModel
                             )
                         }
                         generalViewModel.onHideFilter(Constants.ALPHA_INVISIBLE)
@@ -165,7 +167,8 @@ class NavHelper {
                             trainingViewModel = trainingViewModel,
                             generalViewModel = generalViewModel,
                             isTrainingDialogOpen = isTrainingDialogClosed,
-                            onOpenTrainingDialog = onOpenTrainingDialog
+                            onOpenTrainingDialog = onOpenTrainingDialog,
+                            statisticViewModel = statisticViewModel
                         )
                         generalViewModel.onTopBarTitleChange(Training.title)
                         generalViewModel.onHideFilter(Constants.ALPHA_INVISIBLE)

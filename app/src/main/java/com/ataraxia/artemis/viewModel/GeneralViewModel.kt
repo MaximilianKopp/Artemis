@@ -1,4 +1,4 @@
-package com.ataraxia.artemis.data
+package com.ataraxia.artemis.viewModel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

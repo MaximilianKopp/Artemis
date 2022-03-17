@@ -12,12 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.ataraxia.artemis.R
-import com.ataraxia.artemis.data.GeneralViewModel
-import com.ataraxia.artemis.data.QuestionViewModel
 import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.helper.NavHelper
 import com.ataraxia.artemis.model.Screen
@@ -25,22 +22,36 @@ import com.ataraxia.artemis.templates.TextButtonTemplate
 import com.ataraxia.artemis.templates.TextTemplate
 import com.ataraxia.artemis.ui.theme.GREEN_ARTEMIS
 import com.ataraxia.artemis.ui.theme.YELLOW_ARTEMIS
+import com.ataraxia.artemis.viewModel.GeneralViewModel
+import com.ataraxia.artemis.viewModel.QuestionViewModel
+import com.ataraxia.artemis.viewModel.StatisticViewModel
+import com.ataraxia.artemis.viewModel.TrainingViewModel
 
 class StartMenuComponent {
     private val appBarComposition = AppBarComponent()
 
     @Composable
     fun StartScreen(
-
+        generalViewModel: GeneralViewModel,
+        questionViewModel: QuestionViewModel,
+        trainingViewModel: TrainingViewModel,
+        statisticViewModel: StatisticViewModel
     ) {
-        StartContent()
+        StartContent(
+            generalViewModel,
+            questionViewModel,
+            trainingViewModel,
+            statisticViewModel
+        )
     }
 
     @Composable
     fun StartContent(
+        generalViewModel: GeneralViewModel,
+        questionViewModel: QuestionViewModel,
+        trainingViewModel: TrainingViewModel,
+        statisticViewModel: StatisticViewModel
     ) {
-        val questionViewModel: QuestionViewModel = viewModel()
-        val generalViewModel: GeneralViewModel = viewModel()
         val navController = rememberNavController()
         val state = rememberScaffoldState(drawerState = DrawerState(DrawerValue.Closed))
         val scope = rememberCoroutineScope()
@@ -72,7 +83,10 @@ class StartMenuComponent {
             drawerBackgroundColor = YELLOW_ARTEMIS
         ) { it ->
             if (showStartScreenInfo) {
-                ShowStartScreenInfo(questionViewModel)
+                ShowStartScreenInfo(
+                    questionViewModel,
+                    statisticViewModel
+                )
             }
             NavHelper.LoadNavigationRoutes(
                 navController = navController,
@@ -80,7 +94,11 @@ class StartMenuComponent {
                 isFilterDialogOpen = isFilterDialogOpen,
                 onOpenFilterDialog = { generalViewModel.onOpenFilterDialog(it) },
                 isTrainingDialogClosed = isTrainingDialogClosed,
-                onOpenTrainingDialog = { generalViewModel.onOpenTrainingDialog(it) }
+                onOpenTrainingDialog = { generalViewModel.onOpenTrainingDialog(it) },
+                generalViewModel = generalViewModel,
+                questionViewModel = questionViewModel,
+                trainingViewModel = trainingViewModel,
+                statisticViewModel = statisticViewModel
             )
         }
     }
@@ -123,7 +141,6 @@ class StartMenuComponent {
 
     @Composable
     fun StartMenu(
-        generalViewModel: GeneralViewModel,
         navController: NavController
     ) {
         Column(
@@ -177,11 +194,16 @@ class StartMenuComponent {
     }
 
     @Composable
-    fun ShowStartScreenInfo(questionViewModel: QuestionViewModel) {
-        val allQuestions = questionViewModel.allQuestions
-        val onceLearnedQuestions = questionViewModel.onceLearnedQuestions
-        val learnedQuestions = questionViewModel.learnedQuestions
-        val failedQuestions = questionViewModel.failedQuestions
+    fun ShowStartScreenInfo(
+        questionViewModel: QuestionViewModel,
+        statisticViewModel: StatisticViewModel
+    ) {
+        val allQuestions: Int by statisticViewModel.allQuestionsCount.observeAsState(0)
+        val onceLearnedQuestions: Int by statisticViewModel.allLearnedOnceQuestionsCount.observeAsState(
+            0
+        )
+        val learnedQuestions: Int by statisticViewModel.allLearnedQuestionsCount.observeAsState(0)
+        val failedQuestions: Int by statisticViewModel.allFailedQuestionCount.observeAsState(0)
         val progressInPercent = questionViewModel.progressInPercent
 
         Column {
@@ -213,7 +235,7 @@ class StartMenuComponent {
                 modifier = Modifier.padding(start = 25.dp, top = 10.dp)
             )
             Text(
-                text = "Alle Fragen: ${allQuestions.count()}",
+                text = "Alle Fragen: $allQuestions",
                 color = Color.White,
                 style = MaterialTheme.typography.body2,
                 modifier = Modifier.padding(start = 25.dp, top = 25.dp)
@@ -244,4 +266,73 @@ class StartMenuComponent {
             )
         }
     }
+
+//    @Composable
+//    fun ShowStartScreenInfo(questionViewModel: QuestionViewModel) {
+//        val allQuestions = questionViewModel.allQuestions
+//        val onceLearnedQuestions = questionViewModel.onceLearnedQuestions
+//        val learnedQuestions = questionViewModel.learnedQuestions
+//        val failedQuestions = questionViewModel.failedQuestions
+//        val progressInPercent = questionViewModel.progressInPercent
+//
+//        Column {
+//            Row(
+//                modifier = Modifier.padding(top = 5.dp)
+//            ) {
+//                Text(
+//                    text = Constants.APP_NAME,
+//                    color = Color.White,
+//                    style = MaterialTheme.typography.h6,
+//                    modifier = Modifier.padding(start = 25.dp, top = 25.dp, bottom = 10.dp)
+//                )
+//                Box(
+//                    Modifier.fillMaxWidth(),
+//                    contentAlignment = Alignment.CenterEnd
+//                ) {
+//                    Image(
+//                        painter = painterResource(id = R.drawable.ic_coat_of_arms_of_rhineland_palatinate),
+//                        contentDescription = "Coat of arms of RLP",
+//                        modifier = Modifier.padding(end = 10.dp)
+//                    )
+//                }
+//            }
+//            Divider(thickness = 2.dp, color = Color.White, startIndent = 25.dp)
+//            Text(
+//                text = Constants.DESCRIPTION,
+//                color = Color.White,
+//                style = MaterialTheme.typography.body2,
+//                modifier = Modifier.padding(start = 25.dp, top = 10.dp)
+//            )
+//            Text(
+//                text = "Alle Fragen: ${allQuestions.count()}",
+//                color = Color.White,
+//                style = MaterialTheme.typography.body2,
+//                modifier = Modifier.padding(start = 25.dp, top = 25.dp)
+//            )
+//            Text(
+//                text = "1x richtig beantwortet: $onceLearnedQuestions",
+//                color = Color.White,
+//                style = MaterialTheme.typography.body2,
+//                modifier = Modifier.padding(start = 25.dp, top = 10.dp)
+//            )
+//            Text(
+//                text = "2x richtig beantwortet: $learnedQuestions",
+//                color = Color.White,
+//                style = MaterialTheme.typography.body2,
+//                modifier = Modifier.padding(start = 25.dp, top = 10.dp)
+//            )
+//            Text(
+//                text = "Falsch beantwortet: $failedQuestions",
+//                color = Color.White,
+//                style = MaterialTheme.typography.body2,
+//                modifier = Modifier.padding(start = 25.dp, top = 10.dp)
+//            )
+//            Text(
+//                text = "$progressInPercent% gelernt",
+//                color = Color.White,
+//                style = MaterialTheme.typography.body2,
+//                modifier = Modifier.padding(start = 25.dp, top = 10.dp)
+//            )
+//        }
+//    }
 }

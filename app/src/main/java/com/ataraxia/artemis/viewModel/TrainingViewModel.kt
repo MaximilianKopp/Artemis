@@ -1,4 +1,4 @@
-package com.ataraxia.artemis.data
+package com.ataraxia.artemis.viewModel
 
 import android.util.Log
 import androidx.compose.ui.graphics.Color

@@ -1,12 +1,14 @@
 package com.ataraxia.artemis.model
 
-import java.math.BigDecimal
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 
-class Statistic(
-    val topic: String,
-    val totalSize: Int,
-    val totalOnceLearned: Int,
-    val totalLearned: Int,
-    val totalFailed: Int,
-    val totalPercentage: BigDecimal
+@Entity(tableName = "statistics")
+data class Statistic(
+    @PrimaryKey
+    val id: Int,
+    val topic: Int,
+    val name: String,
+    val value: Int,
+    val description: String
 )

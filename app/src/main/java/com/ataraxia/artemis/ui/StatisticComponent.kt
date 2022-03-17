@@ -18,12 +18,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
-import com.ataraxia.artemis.data.QuestionViewModel
 import com.ataraxia.artemis.helper.RowScopeExtension.Companion.TableCell
 import com.ataraxia.artemis.model.Screen.DrawerScreen.Statistics
 import com.ataraxia.artemis.ui.theme.GREEN_ARTEMIS
 import com.ataraxia.artemis.ui.theme.RED_ARTEMIS
 import com.ataraxia.artemis.ui.theme.YELLOW_ARTEMIS
+import com.ataraxia.artemis.viewModel.QuestionViewModel
 
 class StatisticComponent {
 
