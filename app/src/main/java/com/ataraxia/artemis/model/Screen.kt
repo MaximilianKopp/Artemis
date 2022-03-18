@@ -103,11 +103,6 @@ class Screen {
             "Training",
             "training"
         )
-
-        object TrainingSingleQuestion : DrawerScreen(
-            "Training",
-            "singleQuestion"
-        )
     }
 
     companion object {
@@ -127,7 +122,6 @@ class Screen {
             DrawerScreen.TopicHuntingLaw,
             DrawerScreen.TopicPreservationOfWildLifeAndNature,
             DrawerScreen.Training,
-            DrawerScreen.TrainingSingleQuestion
         )
     }
 }

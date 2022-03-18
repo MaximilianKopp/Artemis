@@ -10,7 +10,7 @@ import com.ataraxia.artemis.model.Question
 interface QuestionDao {
 
     @Query("SELECT * FROM questions ORDER BY topic")
-    fun getAllQuestions(): List<Question>
+    suspend fun getAllQuestions(): List<Question>
 
     @Update(onConflict = REPLACE)
     suspend fun updateQuestion(question: Question)

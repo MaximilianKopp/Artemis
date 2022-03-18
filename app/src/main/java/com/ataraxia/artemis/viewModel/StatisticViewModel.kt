@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ataraxia.artemis.data.db.QuestionDatabase
 import com.ataraxia.artemis.data.statistics.StatisticRepository
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -29,10 +30,12 @@ class StatisticViewModel(application: Application) : AndroidViewModel(Applicatio
         StatisticRepository(QuestionDatabase.getDatabase(application).statisticDao())
 
     init {
-        _allQuestionsCount.postValue(statisticRepository.getAllQuestionsCount())
-        _allLearnedOnceQuestionCount.postValue(statisticRepository.getAllLearnedOnceQuestionsCount())
-        _allLearnedQuestionCount.postValue(statisticRepository.getAllLearnedQuestionsCount())
-        _allFailedQuestionCount.postValue(statisticRepository.getAllFailedQuestionsCount())
+        CoroutineScope(Dispatchers.IO).launch {
+            _allQuestionsCount.postValue(statisticRepository.getAllQuestionsCount())
+            _allLearnedOnceQuestionCount.postValue(statisticRepository.getAllLearnedOnceQuestionsCount())
+            _allLearnedQuestionCount.postValue(statisticRepository.getAllLearnedQuestionsCount())
+            _allFailedQuestionCount.postValue(statisticRepository.getAllFailedQuestionsCount())
+        }
     }
 
     fun onChangeTotalStatisticsFromStartScreen() {

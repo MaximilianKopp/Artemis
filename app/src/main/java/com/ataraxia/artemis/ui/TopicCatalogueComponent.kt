@@ -85,8 +85,8 @@ class TopicCatalogueComponent {
                         )
                         navController.navigate(topicScreen.route)
                         questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS)
+                        questionViewModel.onChangeTopic(topicScreen.topic)
                         questionViewModel.onChangeQuestionList(questions)
-//                        generalViewModel.onChangeCurrentScreen(topicScreen)
                     }
             ) {
                 Row(

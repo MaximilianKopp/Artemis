@@ -234,7 +234,8 @@ class QuestionListComponent {
             )
         }
         BackHandler(enabled = true) {
-//            navController.navigate(Screen.DrawerScreen.Questions.route)
+            questionViewModel.onChangeQuestionList(filterAbleQuestions)
+            navController.navigate(Screen.DrawerScreen.Questions.route)
         }
     }
 }

@@ -13,6 +13,7 @@ import com.ataraxia.artemis.model.Question
 import com.ataraxia.artemis.model.Screen
 import com.ataraxia.artemis.model.StatisticProjection
 import com.ataraxia.artemis.model.Topic
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -29,28 +30,32 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
     private val _filter = MutableLiveData<CriteriaFilter>()
     val filter: LiveData<CriteriaFilter> = _filter
 
-    private val questionRepository: QuestionRepository
+    private lateinit var questionRepository: QuestionRepository
 
-    val allQuestions: List<Question>
+    lateinit var allQuestions: List<Question>
 
 
-    val onceLearnedQuestions: Int
-    val learnedQuestions: Int
-    val failedQuestions: Int
-    val progressInPercent: BigDecimal
+    var onceLearnedQuestions: Int = 0
+    var learnedQuestions: Int = 0
+    var failedQuestions: Int = 0
+    lateinit var progressInPercent: BigDecimal
 
     init {
-        val questionDao = QuestionDatabase.getDatabase(application.applicationContext).questionDao()
-        questionRepository = QuestionRepository(questionDao)
-        allQuestions = questionRepository.getAllQuestions()
-        onceLearnedQuestions = allQuestions.filter { it.learnedTwice == 1 }.count()
-        learnedQuestions = allQuestions.filter { it.learnedTwice == 1 }.count()
-        failedQuestions = allQuestions.filter { it.failed == 1 }.count()
-        progressInPercent = if (allQuestions.isNotEmpty()) {
-            calculatePercentage(learnedQuestions, allQuestions.count())
-        } else {
-            BigDecimal.ZERO
+        CoroutineScope(Dispatchers.IO).launch {
+            val questionDao =
+                QuestionDatabase.getDatabase(application.applicationContext).questionDao()
+            questionRepository = QuestionRepository(questionDao)
+            allQuestions = questionRepository.getAllQuestions()
+            onceLearnedQuestions = allQuestions.filter { it.learnedTwice == 1 }.count()
+            learnedQuestions = allQuestions.filter { it.learnedTwice == 1 }.count()
+            failedQuestions = allQuestions.filter { it.failed == 1 }.count()
+            progressInPercent = if (allQuestions.isNotEmpty()) {
+                calculatePercentage(learnedQuestions, allQuestions.count())
+            } else {
+                BigDecimal.ZERO
+            }
         }
+
     }
 
     private fun calculatePercentage(learnedQuestions: Int, allQuestions: Int): BigDecimal {
@@ -72,7 +77,7 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun onChangeTopic(newChapter: Int) {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             onChangeChapterCoroutine(newChapter)
         }
     }
@@ -82,7 +87,7 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun onChangeFilter(newCriteriaFilter: CriteriaFilter) {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             onChangeFilterCoroutine(newCriteriaFilter)
         }
     }
@@ -93,7 +98,7 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
         }
 
     fun onChangeQuestionList(newValue: List<Question>) {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             onChangeQuestionListCoroutine(newValue)
         }
     }
@@ -104,7 +109,7 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
         }
 
     fun updateQuestion(question: Question) {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             questionRepository.updateQuestion(question)
         }
     }

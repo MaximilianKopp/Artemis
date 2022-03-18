@@ -98,7 +98,7 @@ class TrainingViewModel : ViewModel() {
             _currentQuestion.postValue(newQuestion)
         }
 
-    private fun onChangeIndex(newIndex: Int) {
+    fun onChangeIndex(newIndex: Int) {
         viewModelScope.launch {
             onChangeIndexCoroutine(newIndex)
         }
