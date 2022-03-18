@@ -118,6 +118,18 @@ class TrainingComponent {
         val selections: List<Pair<Pair<Boolean, Color>, String>> =
             listOf(optionA, optionB, optionC, optionD)
 
+        val currentTopic = questionViewModel.currentTopic.value
+        val loadScreen =
+            currentTopic?.let { generalViewModel.loadScreenByTopic(it) }
+        Log.v("Current Topic", currentTopic.toString())
+        val renewQuestions =
+            currentTopic?.let {
+                questionViewModel.selectTopic(
+                    it,
+                    CriteriaFilter.ALL_QUESTIONS
+                )
+            }
+
         Column(
             modifier = Modifier
                 .fillMaxWidth(),
@@ -310,7 +322,12 @@ class TrainingComponent {
                         modifier = Modifier.padding(bottom = 30.dp)
                     ) {
                         BackHandler(enabled = true) {
-                            generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Questions)
+                            if (loadScreen != null && renewQuestions != null) {
+                                navController.navigate(loadScreen.route)
+                                questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS)
+                                trainingViewModel.onChangeIndex(0)
+                                trainingViewModel.onOpenNavDialog(false)
+                            }
                         }
                         //Loads next question
                         IconButton(
@@ -377,8 +394,13 @@ class TrainingComponent {
                     ) {
                         Button(
                             onClick = {
-                                onOpenTrainingDialog(false)
-                                navController.navigate(Screen.DrawerScreen.Questions.route)
+                                if (loadScreen != null && renewQuestions != null) {
+                                    navController.navigate(Screen.DrawerScreen.Questions.route)
+                                    questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS)
+                                    onOpenTrainingDialog(false)
+                                    trainingViewModel.onChangeIndex(0)
+                                    trainingViewModel.onOpenNavDialog(false)
+                                }
                             },
                             Modifier
                                 .width(300.dp)
@@ -413,20 +435,10 @@ class TrainingComponent {
                 },
                 buttons = {
                     Button(onClick = {
-                        val currentTopic = questionViewModel.currentTopic.value
-                        val loadScreen =
-                            currentTopic?.let { generalViewModel.loadScreenByTopic(it) }
-                        Log.v("Current Topic", currentTopic.toString())
-                        val renewQuestions =
-                            currentTopic?.let {
-                                questionViewModel.selectTopic(
-                                    it,
-                                    CriteriaFilter.ALL_QUESTIONS
-                                )
-                            }
                         if (loadScreen != null && renewQuestions != null) {
-                            questionViewModel.onChangeQuestionList(renewQuestions)
                             navController.navigate(loadScreen.route)
+                            questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS)
+                            trainingViewModel.onChangeIndex(0)
                             trainingViewModel.onOpenNavDialog(false)
                         }
                     }) {
