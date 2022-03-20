@@ -1,4 +1,4 @@
-package com.ataraxia.artemis.data
+package com.ataraxia.artemis.viewModel
 
 import android.util.Log
 import androidx.compose.ui.graphics.Color
@@ -12,11 +12,18 @@ import com.ataraxia.artemis.model.Question
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.*
 
 class TrainingViewModel : ViewModel() {
 
     private val _currentQuestion = MutableLiveData<Question>()
-    val currentQuestion: LiveData<Question> = _currentQuestion
+    val currentQuestion = _currentQuestion
+
+    private val _trainingQuestions = MutableLiveData<List<Question>>()
+    val trainingQuestions = _trainingQuestions
+
+    private val _trainingData = MutableLiveData<List<Question>>()
+    val trainingData: LiveData<List<Question>> = _trainingData
 
     private val _checkedAnswers = mutableListOf<String>()
     val checkedAnswers: List<String> = _checkedAnswers
@@ -66,7 +73,21 @@ class TrainingViewModel : ViewModel() {
     private val _answerBtnText = MutableLiveData("Antworten")
     val answerBtnText: LiveData<String> = _answerBtnText
 
-    private fun onChangeCurrentQuestion(newQuestion: Question) {
+    private val _isNavDialogOpen = MutableLiveData<Boolean>()
+    val isNavDialogOpen: LiveData<Boolean> = _isNavDialogOpen
+
+    fun onChangeTrainingData(traningData: List<Question>) {
+        viewModelScope.launch {
+            onChangeTrainingDataCoroutine(traningData)
+        }
+    }
+
+    private suspend fun onChangeTrainingDataCoroutine(newTrainingData: List<Question>) =
+        withContext(Dispatchers.IO) {
+            _trainingData.postValue(newTrainingData)
+        }
+
+    fun onChangeCurrentQuestion(newQuestion: Question) {
         viewModelScope.launch {
             onChangeCurrentQuestionCoroutine(newQuestion)
         }
@@ -77,7 +98,7 @@ class TrainingViewModel : ViewModel() {
             _currentQuestion.postValue(newQuestion)
         }
 
-    private fun onChangeIndex(newIndex: Int) {
+    fun onChangeIndex(newIndex: Int) {
         viewModelScope.launch {
             onChangeIndexCoroutine(newIndex)
         }
@@ -163,21 +184,25 @@ class TrainingViewModel : ViewModel() {
         selections: List<Pair<Pair<Boolean, Color>, String>>
     ): Boolean {
         var result = false
+        Collections.sort(currentCheckedAnswers)
+
         if (correctAnswers.correctAnswers == currentCheckedAnswers.toString()) {
             result = true
         }
         changeCheckboxColors(correctAnswers.correctAnswers, selections)
+        Log.v("Correct Answers", correctAnswers.correctAnswers)
+        Log.v("Current Answers", currentCheckedAnswers.toString())
         Log.v("Question answered", result.toString())
         return result
     }
 
-    //A selection is made of nested Pairs and contains all related checkbox values like isSelecte, Value and Checkbox color
+    //A selection is made of nested Pairs and contains all related checkbox values like isSelect, Value and Checkbox color
     private fun changeCheckboxColors(
         correctAnswers: String,
         selections: List<Pair<Pair<Boolean, Color>, String>>
     ) {
         selections.forEach { selection ->
-            if (selection.first.first && correctAnswers.contains(selection.second)) {
+            if (correctAnswers.contains(selection.second)) {
                 when (selection.second) {
                     Constants.TRAINING_SELECTION_A -> _checkBoxColorA.postValue(Color.Green)
                     Constants.TRAINING_SELECTION_B -> _checkBoxColorB.postValue(Color.Green)
@@ -192,6 +217,11 @@ class TrainingViewModel : ViewModel() {
                     Constants.TRAINING_SELECTION_D -> _checkBoxColorD.postValue(Color.Red)
                 }
             }
+            //Check all Checkboxes in order to show correct and wrong selections
+            _checkedA.postValue(true)
+            _checkedB.postValue(true)
+            _checkedC.postValue(true)
+            _checkedD.postValue(true)
         }
     }
 
@@ -224,7 +254,7 @@ class TrainingViewModel : ViewModel() {
             NavTrainingButton.FIRST_PAGE -> firstPage(questions)
             NavTrainingButton.PREV_PAGE -> prevPage(index, questions)
             NavTrainingButton.NEXT_PAGE -> nextPage(index, questions)
-            NavTrainingButton.LAST_PAGE -> lastPage(index, questions)
+            NavTrainingButton.LAST_PAGE -> lastPage(questions)
         }
     }
 
@@ -241,14 +271,24 @@ class TrainingViewModel : ViewModel() {
     }
 
     private fun nextPage(index: Int, questions: List<Question>) {
-        if (index < Constants.TRAINING_SIZE - 1) {
+        if (index < questions.size - 1) {
             onChangeIndex(index + 1)
             onChangeCurrentQuestion(questions[index + 1])
         }
     }
 
-    private fun lastPage(index: Int, questions: List<Question>) {
+    private fun lastPage(questions: List<Question>) {
         onChangeIndex(questions.size - 1)
         onChangeCurrentQuestion(questions[questions.size - 1])
+    }
+
+    fun onOpenNavDialog(isOpen: Boolean) {
+        viewModelScope.launch {
+            onOpenNavDialogCoroutine(isOpen)
+        }
+    }
+
+    private suspend fun onOpenNavDialogCoroutine(isOpen: Boolean) = withContext(Dispatchers.IO) {
+        _isNavDialogOpen.postValue(isOpen)
     }
 }

@@ -1,6 +1,11 @@
 package com.ataraxia.artemis.ui
 
+import android.content.Context
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.util.Log
+import android.view.Gravity
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -15,34 +20,49 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.ataraxia.artemis.data.QuestionViewModel
-import com.ataraxia.artemis.data.TrainingViewModel
-import com.ataraxia.artemis.helper.Constants
+import com.ataraxia.artemis.helper.CriteriaFilter
 import com.ataraxia.artemis.helper.NavTrainingButton
 import com.ataraxia.artemis.model.Question
 import com.ataraxia.artemis.model.Screen
 import com.ataraxia.artemis.ui.theme.YELLOW_ARTEMIS
+import com.ataraxia.artemis.viewModel.GeneralViewModel
+import com.ataraxia.artemis.viewModel.QuestionViewModel
+import com.ataraxia.artemis.viewModel.StatisticViewModel
+import com.ataraxia.artemis.viewModel.TrainingViewModel
 
 class TrainingComponent {
 
     @Composable
     fun TrainingScreen(
         navController: NavController,
-        questionViewModel: QuestionViewModel
+        isTrainingDialogOpen: Boolean,
+        onOpenTrainingDialog: (Boolean) -> Unit,
+        questionViewModel: QuestionViewModel,
+        trainingViewModel: TrainingViewModel,
+        generalViewModel: GeneralViewModel,
+        statisticViewModel: StatisticViewModel,
     ) {
-        val trainingViewModel: TrainingViewModel = viewModel()
-        val index: Int by trainingViewModel.index.observeAsState(0)
-        val questions: List<Question> by questionViewModel.trainingData.observeAsState(listOf())
-        if (questions.isNotEmpty()) {
+        val navIndex: Int by trainingViewModel.index.observeAsState(0)
+        val currentFilter = questionViewModel.filter.observeAsState()
+        val trainingData = trainingViewModel.trainingData.observeAsState(listOf())
+
+        Log.v("Current TrainingData", trainingData.value.forEach(::println).toString())
+        Log.v("Current Filter", currentFilter.value.toString())
+
+        if (trainingData.value.isNotEmpty()) {
             TrainingContent(
                 navController = navController,
                 trainingViewModel = trainingViewModel,
                 questionViewModel = questionViewModel,
-                questions = questions,
-                index = index
+                generalViewModel = generalViewModel,
+                statisticViewModel = statisticViewModel,
+                trainingData = trainingData.value,
+                index = navIndex,
+                isTrainingDialogOpen = isTrainingDialogOpen,
+                onOpenTrainingDialog = onOpenTrainingDialog,
             )
         }
     }
@@ -52,11 +72,18 @@ class TrainingComponent {
         navController: NavController,
         trainingViewModel: TrainingViewModel,
         questionViewModel: QuestionViewModel,
-        questions: List<Question>,
-        index: Int
+        generalViewModel: GeneralViewModel,
+        statisticViewModel: StatisticViewModel,
+        trainingData: List<Question>,
+        index: Int,
+        isTrainingDialogOpen: Boolean,
+        onOpenTrainingDialog: (Boolean) -> Unit,
     ) {
-        val currentQuestion: Question by trainingViewModel.currentQuestion.observeAsState(questions[0])
+        val context = LocalContext.current
         val checkedAnswers: List<String> = trainingViewModel.checkedAnswers
+        val currentQuestion: Question by trainingViewModel.currentQuestion.observeAsState(
+            trainingData[0]
+        )
 
         val checkedA: Boolean by trainingViewModel.checkedA.observeAsState(false)
         val checkedB: Boolean by trainingViewModel.checkedB.observeAsState(false)
@@ -74,7 +101,9 @@ class TrainingComponent {
         val checkBoxColorD: Color by trainingViewModel.checkBoxColorD.observeAsState(Color.Black)
 
         val isButtonEnabled: Boolean by trainingViewModel.isButtonEnabled.observeAsState(true)
-        val answerBtnText: String by trainingViewModel.answerBtnText.observeAsState("Antworten")
+        val answerBtnText: String by trainingViewModel.answerBtnText.observeAsState("ten")
+
+        val isNavDialogOpen: Boolean by trainingViewModel.isNavDialogOpen.observeAsState(false)
 
         val optionA: Pair<Pair<Boolean, Color>, String> =
             Pair(Pair(checkedA, checkBoxColorA), selectA)
@@ -88,6 +117,18 @@ class TrainingComponent {
         //Used in order to create checkboxes
         val selections: List<Pair<Pair<Boolean, Color>, String>> =
             listOf(optionA, optionB, optionC, optionD)
+
+        val currentTopic = questionViewModel.currentTopic.value
+        val loadScreen =
+            currentTopic?.let { generalViewModel.loadScreenByTopic(it) }
+        Log.v("Current Topic", currentTopic.toString())
+        val renewQuestions =
+            currentTopic?.let {
+                questionViewModel.selectTopic(
+                    it,
+                    CriteriaFilter.ALL_QUESTIONS
+                )
+            }
 
         Column(
             modifier = Modifier
@@ -106,7 +147,7 @@ class TrainingComponent {
                     Text(
                         modifier = Modifier.padding(6.dp),
                         text = currentQuestion.text,
-                        style = MaterialTheme.typography.h6,
+                        style = MaterialTheme.typography.body1,
                     )
                 }
                 Card(
@@ -126,6 +167,10 @@ class TrainingComponent {
                                 Modifier.padding(top = 10.dp, bottom = 10.dp)
                             ) {
                                 Checkbox(
+                                    /*
+                                     * selection.first = <Pair<Boolean, Color> => checkbox state & color
+                                     * selection.second = String => selection e.g: [a,b,c,d]
+                                     */
                                     checked = selection.first.first,
                                     colors = CheckboxDefaults.colors(selection.first.second),
                                     onCheckedChange = {
@@ -144,22 +189,20 @@ class TrainingComponent {
                                     modifier = Modifier.padding(start = 5.dp)
                                 )
                                 Text(
-                                    modifier = Modifier.padding(start = 4.dp),
-                                    text = trainingViewModel.setCurrentQuestionText(
-                                        currentQuestion,
-                                        selection.second
-                                    ),
-                                    style = if (currentQuestionText.length < 150) MaterialTheme.typography.h6 else MaterialTheme.typography.subtitle2
+                                    modifier = Modifier.padding(start = 4.dp, end = 2.dp),
+                                    text = currentQuestionText,
+                                    style = MaterialTheme.typography.caption
                                 )
                             }
                         }
                     }
                 }
             }
+            //Navigation Buttons
             Column {
                 Row {
                     Row(
-                        modifier = Modifier.padding(bottom = 30.dp, end = 30.dp)
+                        modifier = Modifier.padding(bottom = 30.dp)
                     ) {
                         //Loads first question
                         IconButton(
@@ -168,7 +211,7 @@ class TrainingComponent {
                                 trainingViewModel.setNavTrainingButton(
                                     NavTrainingButton.FIRST_PAGE,
                                     index,
-                                    questions
+                                    trainingData
                                 )
                             }) {
                             Icon(
@@ -185,7 +228,7 @@ class TrainingComponent {
                                 trainingViewModel.setNavTrainingButton(
                                     NavTrainingButton.PREV_PAGE,
                                     index,
-                                    questions
+                                    trainingData
                                 )
                             }) {
                             Icon(
@@ -197,10 +240,12 @@ class TrainingComponent {
                         }
                     }
                     Row(
-                        modifier = Modifier.padding(top = 5.dp)
+                        modifier = Modifier.padding(start = 25.dp, end = 25.dp)
                     ) {
+//                        val context = LocalContext.current
                         Button(
-                            //Contains whole logic for further anwer processing
+                            enabled = checkedA || checkedB || checkedC || checkedD,
+                            //Contains whole logic for further answer processing
                             onClick = {
                                 if (answerBtnText == "Antworten") {
                                     trainingViewModel.onChangeAnswerButtonText("Weiter")
@@ -210,6 +255,7 @@ class TrainingComponent {
                                             selections
                                         )
                                     ) {
+                                        showMessage(context, "Korrekt")
                                         if (currentQuestion.learnedOnce == 0) {
                                             currentQuestion.learnedOnce = 1
                                             currentQuestion.failed = 0
@@ -219,6 +265,7 @@ class TrainingComponent {
                                             )
                                         } else if (currentQuestion.learnedTwice == 0) {
                                             currentQuestion.learnedTwice = 1
+                                            currentQuestion.learnedOnce = 0
                                             currentQuestion.failed = 0
                                             Log.v(
                                                 "LearnedTwice",
@@ -232,13 +279,25 @@ class TrainingComponent {
                                             selections
                                         )
                                     ) {
+                                        showMessage(context, "Falsch")
                                         currentQuestion.learnedOnce = 0
                                         currentQuestion.learnedTwice = 0
                                         currentQuestion.failed = 1
+
+                                        @Suppress("DEPRECATION") val vibration: Vibrator =
+                                            context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                                        vibration.vibrate(
+                                            VibrationEffect.createOneShot(
+                                                200,
+                                                VibrationEffect.DEFAULT_AMPLITUDE
+                                            )
+                                        )
                                         Log.v("Failed", currentQuestion.failed.toString())
                                     }
-                                    //questionViewModel.updateQuestion(currentQuestion)
+                                    //Saves all changes into database
+                                    questionViewModel.updateQuestion(currentQuestion)
                                     trainingViewModel.onChangeEnableButtons(false)
+
                                 }
                                 if (answerBtnText == "Weiter") {
                                     trainingViewModel.onChangeEnableButtons(true)
@@ -247,25 +306,29 @@ class TrainingComponent {
                                     trainingViewModel.setNavTrainingButton(
                                         NavTrainingButton.NEXT_PAGE,
                                         index,
-                                        questions
+                                        trainingData
                                     )
+                                    if (index == trainingData.size - 1) {
+                                        trainingViewModel.onOpenNavDialog(true)
+                                    }
                                     trainingViewModel.onChangeAnswerButtonText("Antworten")
                                 }
+                                statisticViewModel.onChangeTotalStatisticsFromStartScreen()
                             }) {
                             Text(text = answerBtnText)
                         }
                     }
                     Row(
-                        modifier = Modifier.padding(bottom = 30.dp, start = 30.dp)
+                        modifier = Modifier.padding(bottom = 30.dp)
                     ) {
                         BackHandler(enabled = true) {
-                            questionViewModel.prepareTrainingData(
-                                questions,
-                                Constants.FILTER_CRITERIA_ALL
-                            )
-                            navController.navigate(Screen.CHAPTER_SCREENS[0].route)
+                            if (loadScreen != null && renewQuestions != null) {
+                                navController.navigate(loadScreen.route)
+                                questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS)
+                                trainingViewModel.onChangeIndex(0)
+                                trainingViewModel.onOpenNavDialog(false)
+                            }
                         }
-
                         //Loads next question
                         IconButton(
                             enabled = isButtonEnabled,
@@ -273,7 +336,7 @@ class TrainingComponent {
                                 trainingViewModel.setNavTrainingButton(
                                     NavTrainingButton.NEXT_PAGE,
                                     index,
-                                    questions
+                                    trainingData
                                 )
                             }) {
                             Icon(
@@ -283,6 +346,7 @@ class TrainingComponent {
                                 tint = YELLOW_ARTEMIS
                             )
                         }
+
                         //Loads last question
                         IconButton(
                             enabled = isButtonEnabled,
@@ -290,7 +354,7 @@ class TrainingComponent {
                                 trainingViewModel.setNavTrainingButton(
                                     NavTrainingButton.LAST_PAGE,
                                     index,
-                                    questions
+                                    trainingData
                                 )
                             }) {
                             Icon(
@@ -303,7 +367,92 @@ class TrainingComponent {
                     }
                 }
             }
+            Column {
+                Text(
+                    text = "${index + 1}/${trainingData.size}",
+                    style = MaterialTheme.typography.body2,
+                    color = Color.White,
+                    modifier = Modifier.padding(bottom = 5.dp)
+                )
+            }
+        }
+        if (isTrainingDialogOpen) {
+            AlertDialog(
+                onDismissRequest = { onOpenTrainingDialog(false) },
+                text = {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "Möchtest du das Training abbrechen?",
+                            style = MaterialTheme.typography.body1
+                        )
+                    }
+                },
+                buttons = {
+                    Column(
+                        Modifier.padding(12.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Button(
+                            onClick = {
+                                if (loadScreen != null && renewQuestions != null) {
+                                    navController.navigate(Screen.DrawerScreen.Questions.route)
+                                    questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS)
+                                    onOpenTrainingDialog(false)
+                                    trainingViewModel.onChangeIndex(0)
+                                    trainingViewModel.onOpenNavDialog(false)
+                                }
+                            },
+                            Modifier
+                                .width(300.dp)
+                                .padding(4.dp)
+                        ) {
+                            Text(
+                                text = "Ja",
+                                style = MaterialTheme.typography.body1
+                            )
+                        }
+                        Button(
+                            onClick = {
+                                onOpenTrainingDialog(false)
+                            },
+                            Modifier
+                                .width(300.dp)
+                                .padding(4.dp)
+                        ) {
+                            Text(
+                                text = "Nein",
+                                style = MaterialTheme.typography.body1
+                            )
+                        }
+                    }
+                }
+            )
+        }
+        if (isNavDialogOpen) {
+            AlertDialog(
+                onDismissRequest = {
+                    trainingViewModel.onOpenNavDialog(false)
+                },
+                buttons = {
+                    Button(onClick = {
+                        if (loadScreen != null && renewQuestions != null) {
+                            navController.navigate(loadScreen.route)
+                            questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS)
+                            trainingViewModel.onChangeIndex(0)
+                            trainingViewModel.onOpenNavDialog(false)
+                        }
+                    }) {
+                        Text(text = "Zurück zum Menü")
+                    }
+                }
+            )
         }
     }
 }
 
+fun showMessage(context: Context, message: String) {
+    Toast.makeText(context, message, Toast.LENGTH_SHORT).apply {
+        this.setGravity(Gravity.CENTER, 0, 0)
+        this.show()
+    }
+}
