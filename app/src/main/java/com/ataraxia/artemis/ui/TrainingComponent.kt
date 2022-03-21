@@ -8,6 +8,8 @@ import android.view.Gravity
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
@@ -136,10 +138,12 @@ class TrainingComponent {
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            val scrollstate = rememberScrollState()
             Column(
                 Modifier
                     .wrapContentHeight()
                     .weight(1f, fill = true)
+                    .verticalScroll(scrollstate, true)
             ) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -242,7 +246,6 @@ class TrainingComponent {
                     Row(
                         modifier = Modifier.padding(start = 25.dp, end = 25.dp)
                     ) {
-//                        val context = LocalContext.current
                         Button(
                             enabled = checkedA || checkedB || checkedC || checkedD,
                             //Contains whole logic for further answer processing

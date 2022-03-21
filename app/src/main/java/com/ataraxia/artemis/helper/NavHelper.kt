@@ -51,6 +51,7 @@ class NavHelper {
                     composable(generalScreen.route) {
                         when (generalScreen.route) {
                             Home.route -> startMenuComponent.StartMenu(
+                                statisticViewModel,
                                 navController
                             )
                                 .apply { generalViewModel.onShowStartScreenInfo(true) }

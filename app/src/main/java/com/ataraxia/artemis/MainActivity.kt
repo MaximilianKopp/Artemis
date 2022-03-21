@@ -29,7 +29,7 @@ class MainActivity : ComponentActivity() {
                     generalViewModel,
                     questionViewModel,
                     trainingViewModel,
-                    statisticViewModel
+                    statisticViewModel,
                 )
             }
         }

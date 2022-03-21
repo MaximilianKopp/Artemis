@@ -1,10 +1,11 @@
 package com.ataraxia.artemis.ui
 
-import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -13,10 +14,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.ataraxia.artemis.R
 import com.ataraxia.artemis.helper.Constants
@@ -41,7 +42,7 @@ class StartMenuComponent {
         generalViewModel: GeneralViewModel,
         questionViewModel: QuestionViewModel,
         trainingViewModel: TrainingViewModel,
-        statisticViewModel: StatisticViewModel
+        statisticViewModel: StatisticViewModel,
     ) {
         StartContent(
             generalViewModel,
@@ -59,17 +60,13 @@ class StartMenuComponent {
         trainingViewModel: TrainingViewModel,
         statisticViewModel: StatisticViewModel
     ) {
-        val navController = rememberNavController()
+        val navController: NavHostController = rememberNavController()
         val state = rememberScaffoldState(drawerState = DrawerState(DrawerValue.Closed))
         val scope = rememberCoroutineScope()
         val isFilterDialogOpen: Boolean by generalViewModel.filterDialog.observeAsState(false)
         val isTrainingDialogClosed: Boolean by generalViewModel.closeTrainingDialog.observeAsState(
             false
         )
-        val showStartScreenInfo: Boolean by generalViewModel.showStartScreenInfo.observeAsState(
-            true
-        )
-
         BackHandler {
             navController.navigate(Screen.DrawerScreen.Home.route) {
                 navController.popBackStack()
@@ -95,11 +92,6 @@ class StartMenuComponent {
             },
             drawerBackgroundColor = Artemis_Yellow
         ) { it ->
-            if (showStartScreenInfo) {
-                ShowStartScreenInfo(
-                    statisticViewModel
-                )
-            }
             NavHelper.LoadNavigationRoutes(
                 navController = navController,
                 paddingValues = it,
@@ -153,22 +145,22 @@ class StartMenuComponent {
 
     @Composable
     fun StartMenu(
+        statisticViewModel: StatisticViewModel,
         navController: NavController
     ) {
-        val configuration = LocalConfiguration.current
+        val scrollState = rememberScrollState()
         Column(
-            modifier = if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                Modifier
-                    .fillMaxSize()
-                    .padding(bottom = 10.dp)
-            } else {
-                Modifier
-                    .fillMaxSize()
-                    .padding(start = 30.dp, bottom = 10.dp)
-            },
-            verticalArrangement = Arrangement.Bottom,
+            modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(bottom = 10.dp)
+                .verticalScroll(scrollState, true),
+            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
+
         ) {
+            ShowStartScreenInfo(statisticViewModel)
+            Spacer(modifier = Modifier.padding(top = 50.dp))
             Row {
                 StartMenuButton(onClick = {
                     navController.navigate(Screen.DrawerScreen.Questions.route)
@@ -228,24 +220,26 @@ class StartMenuComponent {
 
         Column {
             Row(
-                modifier = Modifier.padding(top = 5.dp)
+                modifier = Modifier.padding(top = 5.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = Constants.APP_NAME,
                     color = Color.White,
-                    style = MaterialTheme.typography.h6,
-                    modifier = Modifier.padding(start = 25.dp, top = 25.dp, bottom = 10.dp)
+                    style = MaterialTheme.typography.h5,
+                    modifier = Modifier
+                        .padding(start = 25.dp)
+                        .weight(0.75f)
                 )
-                Box(
-                    Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.CenterEnd
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_coat_of_arms_of_rhineland_palatinate),
-                        contentDescription = "Coat of arms of RLP",
-                        modifier = Modifier.padding(end = 10.dp)
-                    )
-                }
+                Image(
+                    painter = painterResource(id = R.drawable.ic_coat_of_arms_of_rhineland_palatinate),
+                    contentDescription = "Coat of arms of RLP",
+                    modifier = Modifier
+                        .padding(bottom = 5.dp, end = 10.dp)
+                        .weight(0.25f)
+                )
+
             }
             Divider(thickness = 2.dp, color = Color.White, startIndent = 25.dp)
             Text(
