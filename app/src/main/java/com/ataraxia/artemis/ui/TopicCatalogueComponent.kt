@@ -1,11 +1,7 @@
 package com.ataraxia.artemis.ui
 
-import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
@@ -15,7 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -62,30 +57,33 @@ class TopicCatalogueComponent {
         var countLearnedQuestions: Int
         var countAllQuestionsByTopic: Int
 
-        val configuration = LocalConfiguration.current
 
-        topicScreens.filter { it.title != Constants.TRAINING }.forEach { topicScreen ->
-            countFailedQuestions =
-                questionViewModel.selectTopic(
-                    topicScreen.topic,
-                    CriteriaFilter.ALL_QUESTIONS_SHUFFLED
-                )
-                    .filter { it.failed == 1 }.count()
-            countLearnedQuestions =
-                questionViewModel.selectTopic(
-                    topicScreen.topic,
-                    CriteriaFilter.ALL_QUESTIONS_SHUFFLED
-                )
-                    .filter { it.learnedTwice == 1 }.count()
-            countAllQuestionsByTopic =
-                questionViewModel.selectTopic(
-                    topicScreen.topic,
-                    CriteriaFilter.ALL_QUESTIONS_SHUFFLED
-                )
-                    .count()
-            Card(
-                shape = RoundedCornerShape(15.dp),
-                modifier = if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+        val scrollState = rememberScrollState()
+        Column(
+            modifier = Modifier.verticalScroll(scrollState, true)
+        ) {
+            topicScreens.filter { it.title != Constants.TRAINING }.forEach { topicScreen ->
+                countFailedQuestions =
+                    questionViewModel.selectTopic(
+                        topicScreen.topic,
+                        CriteriaFilter.ALL_QUESTIONS_SHUFFLED
+                    )
+                        .filter { it.failed == 1 }.count()
+                countLearnedQuestions =
+                    questionViewModel.selectTopic(
+                        topicScreen.topic,
+                        CriteriaFilter.ALL_QUESTIONS_SHUFFLED
+                    )
+                        .filter { it.learnedTwice == 1 }.count()
+                countAllQuestionsByTopic =
+                    questionViewModel.selectTopic(
+                        topicScreen.topic,
+                        CriteriaFilter.ALL_QUESTIONS_SHUFFLED
+                    )
+                        .count()
+                Card(
+                    shape = RoundedCornerShape(15.dp),
+                    modifier =
                     Modifier
                         .padding(15.dp)
                         .size(400.dp, 35.dp)
@@ -100,49 +98,34 @@ class TopicCatalogueComponent {
                             questionViewModel.onChangeTopic(topicScreen.topic)
                             questionViewModel.onChangeQuestionList(questions)
                         }
-                } else {
-                    Modifier
-                        .padding(10.dp)
-                        .size(400.dp, 25.dp)
-                        .border(BorderStroke(2.dp, Color.White), RoundedCornerShape(15.dp))
-                        .clickable {
-                            val questions = questionViewModel.selectTopic(
-                                topicScreen.topic,
-                                CriteriaFilter.ALL_QUESTIONS_SHUFFLED
-                            )
-                            navController.navigate(topicScreen.route)
-                            questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
-                            questionViewModel.onChangeTopic(topicScreen.topic)
-                            questionViewModel.onChangeQuestionList(questions)
-                        }
-                }
-            ) {
-                Row(
-                    modifier = Modifier.background(Artemis_Yellow),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        modifier = Modifier.weight(0.8f),
-                        text = "$countFailedQuestions Fehler",
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.caption,
-                        color = if (countFailedQuestions == 0) Artemis_Green else Artemis_Red
-                    )
-                    Text(
-                        modifier = Modifier.weight(1.4f),
-                        text = topicScreen.title,
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.body2,
-                        color = Color.Black,
-                    )
-                    Text(
-                        modifier = Modifier.weight(0.8f),
-                        text = "$countLearnedQuestions/$countAllQuestionsByTopic",
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.body2,
-                        color = Color.Black,
-                    )
+                    Row(
+                        modifier = Modifier.background(Artemis_Yellow),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            modifier = Modifier.weight(0.8f),
+                            text = "$countFailedQuestions Fehler",
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.caption,
+                            color = if (countFailedQuestions == 0) Artemis_Green else Artemis_Red
+                        )
+                        Text(
+                            modifier = Modifier.weight(1.4f),
+                            text = topicScreen.title,
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.body2,
+                            color = Color.Black,
+                        )
+                        Text(
+                            modifier = Modifier.weight(0.8f),
+                            text = "$countLearnedQuestions/$countAllQuestionsByTopic",
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.body2,
+                            color = Color.Black,
+                        )
+                    }
                 }
             }
         }
