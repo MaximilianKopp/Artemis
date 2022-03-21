@@ -1,5 +1,8 @@
 package com.ataraxia.artemis.ui
 
+import android.content.res.Configuration
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -10,6 +13,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -20,16 +24,18 @@ import com.ataraxia.artemis.helper.NavHelper
 import com.ataraxia.artemis.model.Screen
 import com.ataraxia.artemis.templates.TextButtonTemplate
 import com.ataraxia.artemis.templates.TextTemplate
-import com.ataraxia.artemis.ui.theme.GREEN_ARTEMIS
-import com.ataraxia.artemis.ui.theme.YELLOW_ARTEMIS
+import com.ataraxia.artemis.ui.theme.Artemis_Green
+import com.ataraxia.artemis.ui.theme.Artemis_Yellow
 import com.ataraxia.artemis.viewModel.GeneralViewModel
 import com.ataraxia.artemis.viewModel.QuestionViewModel
 import com.ataraxia.artemis.viewModel.StatisticViewModel
 import com.ataraxia.artemis.viewModel.TrainingViewModel
+import java.math.BigDecimal
 
 class StartMenuComponent {
     private val appBarComposition = AppBarComponent()
 
+    @ExperimentalFoundationApi
     @Composable
     fun StartScreen(
         generalViewModel: GeneralViewModel,
@@ -45,6 +51,7 @@ class StartMenuComponent {
         )
     }
 
+    @ExperimentalFoundationApi
     @Composable
     fun StartContent(
         generalViewModel: GeneralViewModel,
@@ -62,9 +69,16 @@ class StartMenuComponent {
         val showStartScreenInfo: Boolean by generalViewModel.showStartScreenInfo.observeAsState(
             true
         )
+
+        BackHandler {
+            navController.navigate(Screen.DrawerScreen.Home.route) {
+                navController.popBackStack()
+            }
+        }
+
         Scaffold(
             scaffoldState = state,
-            backgroundColor = GREEN_ARTEMIS,
+            backgroundColor = Artemis_Green,
             topBar = {
                 appBarComposition.GeneralTopAppBar(
                     scope = scope,
@@ -73,18 +87,16 @@ class StartMenuComponent {
             },
             drawerContent = {
                 appBarComposition.DrawerContent(
-                    generalViewModel = generalViewModel,
                     questionViewModel = questionViewModel,
                     scope = scope,
                     state = state,
                     navController = navController
                 )
             },
-            drawerBackgroundColor = YELLOW_ARTEMIS
+            drawerBackgroundColor = Artemis_Yellow
         ) { it ->
             if (showStartScreenInfo) {
                 ShowStartScreenInfo(
-                    questionViewModel,
                     statisticViewModel
                 )
             }
@@ -143,10 +155,17 @@ class StartMenuComponent {
     fun StartMenu(
         navController: NavController
     ) {
+        val configuration = LocalConfiguration.current
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = 10.dp),
+            modifier = if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 10.dp)
+            } else {
+                Modifier
+                    .fillMaxSize()
+                    .padding(start = 30.dp, bottom = 10.dp)
+            },
             verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -195,7 +214,6 @@ class StartMenuComponent {
 
     @Composable
     fun ShowStartScreenInfo(
-        questionViewModel: QuestionViewModel,
         statisticViewModel: StatisticViewModel
     ) {
         val allQuestions: Int by statisticViewModel.allQuestionsCount.observeAsState(0)
@@ -204,7 +222,9 @@ class StartMenuComponent {
         )
         val learnedQuestions: Int by statisticViewModel.allLearnedQuestionsCount.observeAsState(0)
         val failedQuestions: Int by statisticViewModel.allFailedQuestionCount.observeAsState(0)
-        val progressInPercent = questionViewModel.progressInPercent
+        val progressInPercent: BigDecimal by statisticViewModel.progressInPercent.observeAsState(
+            BigDecimal.ZERO
+        )
 
         Column {
             Row(

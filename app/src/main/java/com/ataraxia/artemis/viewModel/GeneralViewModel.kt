@@ -1,21 +1,25 @@
 package com.ataraxia.artemis.viewModel
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ataraxia.artemis.data.configuration.ConfigurationRepository
+import com.ataraxia.artemis.data.db.ArtemisDatabase
 import com.ataraxia.artemis.model.Screen
 import com.ataraxia.artemis.model.Topic
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class GeneralViewModel : ViewModel() {
-    private val _title = MutableLiveData("Artemis-Jägerprüfung")
+class GeneralViewModel(application: Application) : AndroidViewModel(application) {
+    private val _title = MutableLiveData("")
     val title: LiveData<String> = _title
 
-    private val _questionFilter = MutableLiveData<Float>()
-    val questionFilter: LiveData<Float> = _questionFilter
+    private val _questionFilter = MutableLiveData<Pair<Float, Boolean>>()
+    val questionFilter: LiveData<Pair<Float, Boolean>> = _questionFilter
 
     private val _filterDialog = MutableLiveData(false)
     val filterDialog: LiveData<Boolean> = _filterDialog
@@ -23,14 +27,30 @@ class GeneralViewModel : ViewModel() {
     private val _openTrainingDialog = MutableLiveData(false)
     val closeTrainingDialog: LiveData<Boolean> = _openTrainingDialog
 
-    private val _closeTrainingScreen = MutableLiveData<Float>()
-    val closeTrainingScreen: LiveData<Float> = _closeTrainingScreen
+    private val _closeTrainingScreen = MutableLiveData<Pair<Float, Boolean>>()
+    val closeTrainingScreen: LiveData<Pair<Float, Boolean>> = _closeTrainingScreen
 
     private val _showStartScreenInfo = MutableLiveData(true)
     val showStartScreenInfo: LiveData<Boolean> = _showStartScreenInfo
 
     private val _currentScreen = MutableLiveData<Screen.DrawerScreen>()
-    val currentScreen: LiveData<Screen.DrawerScreen> = _currentScreen
+
+    private val _isVibrating = MutableLiveData<Int>()
+    val isVibrating: LiveData<Int> = _isVibrating
+
+    private val _sizeOfTrainingUnit = MutableLiveData<Int>()
+    val sizeOfTrainingUnit: LiveData<Int> = _sizeOfTrainingUnit
+
+    private val configurationRepository: ConfigurationRepository
+
+    init {
+        val configurationDao = ArtemisDatabase.getDatabase(application).configurationDao()
+        configurationRepository = ConfigurationRepository(configurationDao)
+        CoroutineScope(Dispatchers.IO).launch {
+            _isVibrating.postValue(configurationRepository.getVibrationConfig().toInt())
+            _sizeOfTrainingUnit.postValue(configurationRepository.getSizePerTrainingUnit().toInt())
+        }
+    }
 
     fun loadScreenByTopic(topic: Int): Screen.DrawerScreen {
         var currentScreen: Screen.DrawerScreen = Screen.DrawerScreen.TopicWildLife
@@ -47,11 +67,30 @@ class GeneralViewModel : ViewModel() {
         return currentScreen
     }
 
-    fun onChangeCurrentScreen(currentScreen: Screen.DrawerScreen) {
+    fun onChangeSizeOfTrainingUnit(size: Int) {
         viewModelScope.launch {
-            onChangeCurrentScreenCoroutine(currentScreen)
+            onChangeSizeOfTrainingUnitCoroutine(size)
         }
     }
+
+    private suspend fun onChangeSizeOfTrainingUnitCoroutine(size: Int) =
+        withContext(Dispatchers.IO) {
+            _sizeOfTrainingUnit.postValue(size)
+            configurationRepository.updateSizeOfTrainingUnit(size.toString())
+        }
+
+    fun onChangeEnableVibration(isVibrating: Int) {
+        viewModelScope.launch {
+            onChangeEnableVibrationCoroutine(isVibrating)
+        }
+    }
+
+    private suspend fun onChangeEnableVibrationCoroutine(isVibrating: Int) =
+        withContext(Dispatchers.IO) {
+            _isVibrating.postValue(isVibrating)
+            configurationRepository.updateVibrationConfig(isVibrating.toString())
+        }
+
 
     private suspend fun onChangeCurrentScreenCoroutine(currentScreen: Screen.DrawerScreen) =
         withContext(Dispatchers.IO) {
@@ -69,24 +108,24 @@ class GeneralViewModel : ViewModel() {
             _title.postValue(newTitle)
         }
 
-    fun onHideFilter(visible: Float) {
+    fun onHideFilter(visibility: Pair<Float, Boolean>) {
         viewModelScope.launch {
-            onHideFilterCoroutine(visible)
+            onHideFilterCoroutine(visibility)
         }
     }
 
-    private suspend fun onHideFilterCoroutine(visible: Float) =
+    private suspend fun onHideFilterCoroutine(visible: Pair<Float, Boolean>) =
         withContext(Dispatchers.IO) {
             _questionFilter.postValue(visible)
         }
 
-    fun onCloseTrainingScreen(visible: Float) {
+    fun onCloseTrainingScreen(visibility: Pair<Float, Boolean>) {
         viewModelScope.launch {
-            onCloseTrainingScreenCoroutine(visible)
+            onCloseTrainingScreenCoroutine(visibility)
         }
     }
 
-    private suspend fun onCloseTrainingScreenCoroutine(visible: Float) =
+    private suspend fun onCloseTrainingScreenCoroutine(visible: Pair<Float, Boolean>) =
         withContext(Dispatchers.IO) {
             _closeTrainingScreen.postValue(visible)
         }

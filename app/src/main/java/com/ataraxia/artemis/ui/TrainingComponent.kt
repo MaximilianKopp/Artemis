@@ -23,11 +23,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.helper.CriteriaFilter
 import com.ataraxia.artemis.helper.NavTrainingButton
 import com.ataraxia.artemis.model.Question
-import com.ataraxia.artemis.model.Screen
-import com.ataraxia.artemis.ui.theme.YELLOW_ARTEMIS
+import com.ataraxia.artemis.ui.theme.Artemis_Yellow
 import com.ataraxia.artemis.viewModel.GeneralViewModel
 import com.ataraxia.artemis.viewModel.QuestionViewModel
 import com.ataraxia.artemis.viewModel.StatisticViewModel
@@ -126,7 +126,7 @@ class TrainingComponent {
             currentTopic?.let {
                 questionViewModel.selectTopic(
                     it,
-                    CriteriaFilter.ALL_QUESTIONS
+                    CriteriaFilter.ALL_QUESTIONS_SHUFFLED
                 )
             }
 
@@ -218,7 +218,7 @@ class TrainingComponent {
                                 Icons.Filled.FirstPage,
                                 contentDescription = "First page button",
                                 modifier = Modifier.size(50.dp),
-                                tint = YELLOW_ARTEMIS
+                                tint = Artemis_Yellow
                             )
                         }
                         //Loads previous question
@@ -235,7 +235,7 @@ class TrainingComponent {
                                 Icons.Filled.ChevronLeft,
                                 contentDescription = "Prev question button",
                                 modifier = Modifier.size(50.dp),
-                                tint = YELLOW_ARTEMIS
+                                tint = Artemis_Yellow
                             )
                         }
                     }
@@ -323,8 +323,12 @@ class TrainingComponent {
                     ) {
                         BackHandler(enabled = true) {
                             if (loadScreen != null && renewQuestions != null) {
-                                navController.navigate(loadScreen.route)
-                                questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS)
+                                navController.navigate(loadScreen.route) {
+                                    popUpTo(0) {
+                                        inclusive = true
+                                    }
+                                }
+                                questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
                                 trainingViewModel.onChangeIndex(0)
                                 trainingViewModel.onOpenNavDialog(false)
                             }
@@ -343,7 +347,7 @@ class TrainingComponent {
                                 Icons.Filled.ChevronRight,
                                 contentDescription = "Next question button",
                                 modifier = Modifier.size(50.dp),
-                                tint = YELLOW_ARTEMIS
+                                tint = Artemis_Yellow
                             )
                         }
 
@@ -361,7 +365,7 @@ class TrainingComponent {
                                 Icons.Filled.LastPage,
                                 contentDescription = "Last page button",
                                 modifier = Modifier.size(50.dp),
-                                tint = YELLOW_ARTEMIS
+                                tint = Artemis_Yellow
                             )
                         }
                     }
@@ -395,9 +399,18 @@ class TrainingComponent {
                         Button(
                             onClick = {
                                 if (loadScreen != null && renewQuestions != null) {
-                                    navController.navigate(Screen.DrawerScreen.Questions.route)
-                                    questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS)
+
+                                    navController.navigate(loadScreen.route)
+                                    questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
+                                    trainingViewModel.onChangeIndex(0)
+                                    trainingViewModel.onOpenNavDialog(false)
                                     onOpenTrainingDialog(false)
+                                    generalViewModel.onCloseTrainingScreen(
+                                        Pair(
+                                            Constants.ALPHA_INVISIBLE,
+                                            Constants.DISABLED
+                                        )
+                                    )
                                     trainingViewModel.onChangeIndex(0)
                                     trainingViewModel.onOpenNavDialog(false)
                                 }
@@ -437,7 +450,7 @@ class TrainingComponent {
                     Button(onClick = {
                         if (loadScreen != null && renewQuestions != null) {
                             navController.navigate(loadScreen.route)
-                            questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS)
+                            questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
                             trainingViewModel.onChangeIndex(0)
                             trainingViewModel.onOpenNavDialog(false)
                         }
@@ -448,11 +461,13 @@ class TrainingComponent {
             )
         }
     }
-}
 
-fun showMessage(context: Context, message: String) {
-    Toast.makeText(context, message, Toast.LENGTH_SHORT).apply {
-        this.setGravity(Gravity.CENTER, 0, 0)
-        this.show()
+    private fun showMessage(context: Context, message: String) {
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).apply {
+            this.setGravity(Gravity.CENTER, 0, 0)
+            this.show()
+        }
     }
 }
+
+

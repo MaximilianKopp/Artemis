@@ -23,7 +23,7 @@ import androidx.navigation.NavHostController
 import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.helper.CriteriaFilter
 import com.ataraxia.artemis.model.Screen
-import com.ataraxia.artemis.ui.theme.YELLOW_ARTEMIS
+import com.ataraxia.artemis.ui.theme.Artemis_Yellow
 import com.ataraxia.artemis.viewModel.GeneralViewModel
 import com.ataraxia.artemis.viewModel.QuestionViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -37,15 +37,17 @@ class AppBarComponent {
         scope: CoroutineScope,
         state: ScaffoldState,
     ) {
-        val topBarViewModel: GeneralViewModel = viewModel()
-        val title: String by topBarViewModel.title.observeAsState("")
-        val questionFilter: Float by topBarViewModel.questionFilter.observeAsState(Constants.ALPHA_INVISIBLE)
-        val closeTrainingScreen: Float by topBarViewModel.closeTrainingScreen.observeAsState(
-            Constants.ALPHA_INVISIBLE
+        val generalViewModel: GeneralViewModel = viewModel()
+        val title: String by generalViewModel.title.observeAsState("")
+        val questionFilter: Pair<Float, Boolean> by generalViewModel.questionFilter.observeAsState(
+            Pair(Constants.ALPHA_VISIBLE, Constants.ENABLED)
+        )
+        val closeTrainingScreen: Pair<Float, Boolean> by generalViewModel.closeTrainingScreen.observeAsState(
+            Pair(Constants.ALPHA_INVISIBLE, Constants.DISABLED)
         )
         TopAppBar(
             title = { Text(text = title) },
-            backgroundColor = YELLOW_ARTEMIS,
+            backgroundColor = Artemis_Yellow,
             navigationIcon = {
                 IconButton(onClick = { scope.launch { state.drawerState.open() } }) {
                     Icon(Icons.Default.Menu, contentDescription = "Menu")
@@ -53,14 +55,16 @@ class AppBarComponent {
             },
             actions = {
                 IconButton(
-                    onClick = { topBarViewModel.onOpenFilterDialog(true) },
-                    Modifier.alpha(questionFilter)
+                    onClick = { generalViewModel.onOpenFilterDialog(true) },
+                    Modifier.alpha(questionFilter.first),
+                    enabled = questionFilter.second,
                 ) {
                     Icon(Icons.Default.FilterAlt, contentDescription = "Filter")
                 }
                 IconButton(
-                    onClick = { topBarViewModel.onOpenTrainingDialog(true) },
-                    Modifier.alpha(closeTrainingScreen)
+                    onClick = { generalViewModel.onOpenTrainingDialog(true) },
+                    Modifier.alpha(closeTrainingScreen.first),
+                    enabled = closeTrainingScreen.second
                 ) {
                     Icon(Icons.Default.Close, contentDescription = "Close")
                 }
@@ -70,7 +74,6 @@ class AppBarComponent {
 
     @Composable
     fun DrawerContent(
-        generalViewModel: GeneralViewModel,
         questionViewModel: QuestionViewModel,
         scope: CoroutineScope,
         state: ScaffoldState,
@@ -83,8 +86,12 @@ class AppBarComponent {
                     scope.launch { state.drawerState.close() }
                         .also {
                             topBarViewModel.onTopBarTitleChange(screen.title)
-                            navController.navigate(screen.route)
-                            questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS)
+                            navController.apply {
+                                navigate(screen.route) {
+                                    popUpTo(0)
+                                }
+                            }
+                            questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
                         }
                 }) {
                 Row {
