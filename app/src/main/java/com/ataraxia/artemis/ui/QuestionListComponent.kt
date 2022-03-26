@@ -2,6 +2,7 @@ package com.ataraxia.artemis.ui
 
 import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -13,11 +14,13 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material.icons.rounded.ChevronRight
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.helper.CriteriaFilter
+import com.ataraxia.artemis.model.Question
 import com.ataraxia.artemis.model.Screen
 import com.ataraxia.artemis.ui.theme.Artemis_Blue
 import com.ataraxia.artemis.ui.theme.Artemis_Green
@@ -74,6 +78,10 @@ class QuestionListComponent {
         val isVibrating: Int by generalViewModel.isVibrating.observeAsState(1)
         val sizeOfTrainingUnit: Int by generalViewModel.sizeOfTrainingUnit.observeAsState(20)
 
+        if (currentFilter.value == CriteriaFilter.ALL_QUESTIONS_SHUFFLED) {
+            questionViewModel.onChangeQuestionList(filterAbleQuestions)
+        }
+
         Log.v("Current Filter", currentFilter.toString())
 
         LazyColumn {
@@ -83,18 +91,16 @@ class QuestionListComponent {
                     modifier = Modifier.padding(8.dp),
                     colors = ButtonDefaults.buttonColors(Artemis_Blue),
                     onClick = {
+                        val preparedTrainingData: List<Question>
                         if (currentFilter.value == CriteriaFilter.ALL_QUESTIONS_SHUFFLED) {
-                            val preparedTrainingData = questionsLiveData.value.shuffled().take(
-                                sizeOfTrainingUnit
-                            )
-                            trainingViewModel.onChangeTrainingData(
-                                preparedTrainingData
-                            )
-                            if (preparedTrainingData.isNotEmpty()) {
-                                trainingViewModel.onChangeCurrentQuestion(preparedTrainingData[0])
-                            } // no else
+                            preparedTrainingData =
+                                questionsLiveData.value.shuffled().take(sizeOfTrainingUnit)
+                            trainingViewModel.onChangeTrainingData(preparedTrainingData)
+                            trainingViewModel.onChangeCurrentQuestion(preparedTrainingData[0])
                         } else {
+                            preparedTrainingData = questionsLiveData.value
                             trainingViewModel.onChangeTrainingData(questionsLiveData.value)
+                            trainingViewModel.onChangeCurrentQuestion(preparedTrainingData[0])
                         }
                         navController.navigate(Screen.DrawerScreen.Training.route)
                     }) {
@@ -105,6 +111,11 @@ class QuestionListComponent {
                 }
             }
             items(questionsLiveData.value) { question ->
+                val isFavourite: MutableState<Int> =
+                    rememberSaveable { mutableStateOf(question.favourite) }
+                val iconColor: State<Color> = animateColorAsState(
+                    if (isFavourite.value == 1 || currentFilter.value == CriteriaFilter.FAVOURITES) Color.Yellow else Color.Black
+                )
                 Card(
                     backgroundColor = Color.White,
                     modifier = Modifier
@@ -118,6 +129,26 @@ class QuestionListComponent {
                 ) {
                     Column {
                         Row {
+                            IconButton(onClick = {
+                                if (currentFilter.value == CriteriaFilter.FAVOURITES) {
+                                    question.favourite = 0
+                                    isFavourite.value = question.favourite
+                                    questionViewModel.updateQuestion(question)
+                                    questionViewModel.onChangeQuestionList(filterAbleQuestions.filter { it.favourite == 1 })
+                                } else
+                                    questionViewModel.setFavourite(
+                                        question,
+                                        isFavourite,
+                                        currentFilter.value!!
+                                    )
+                            }) {
+                                Icon(
+                                    if (currentFilter.value == CriteriaFilter.FAVOURITES) Icons.Filled.Delete else Icons.Filled.Star,
+                                    contentDescription = "Icon for learned questions",
+                                    modifier = Modifier.size(20.dp),
+                                    tint = if (currentFilter.value == CriteriaFilter.FAVOURITES) Color.Black else iconColor.value
+                                )
+                            }
                             Text(
                                 text = question.text,
                                 Modifier.padding(start = 3.dp)
@@ -294,7 +325,7 @@ class QuestionListComponent {
                             onClick = {
                                 //Take all not learned questions
                                 questionViewModel.onChangeFilter(CriteriaFilter.NOT_LEARNED)
-                                questionViewModel.onChangeQuestionList(filterAbleQuestions.filter { it.learnedOnce == 1 })
+                                questionViewModel.onChangeQuestionList(filterAbleQuestions.filter { it.learnedOnce == 1 && it.learnedTwice == 0 })
                                 onOpenDialog(false)
                             },
                             Modifier

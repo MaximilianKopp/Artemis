@@ -30,11 +30,6 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
     private val _closeTrainingScreen = MutableLiveData<Pair<Float, Boolean>>()
     val closeTrainingScreen: LiveData<Pair<Float, Boolean>> = _closeTrainingScreen
 
-    private val _showStartScreenInfo = MutableLiveData(true)
-    val showStartScreenInfo: LiveData<Boolean> = _showStartScreenInfo
-
-    private val _currentScreen = MutableLiveData<Screen.DrawerScreen>()
-
     private val _isVibrating = MutableLiveData<Int>()
     val isVibrating: LiveData<Int> = _isVibrating
 
@@ -91,12 +86,6 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
             configurationRepository.updateVibrationConfig(isVibrating.toString())
         }
 
-
-    private suspend fun onChangeCurrentScreenCoroutine(currentScreen: Screen.DrawerScreen) =
-        withContext(Dispatchers.IO) {
-            _currentScreen.postValue(currentScreen)
-        }
-
     fun onTopBarTitleChange(newTitle: String) {
         viewModelScope.launch {
             onTopBarTitleChangeCoroutine(newTitle)
@@ -150,16 +139,5 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
     private suspend fun onOpenTrainingDialogCoroutine(isOpen: Boolean) =
         withContext(Dispatchers.IO) {
             _openTrainingDialog.postValue(isOpen)
-        }
-
-    fun onShowStartScreenInfo(showStartInfo: Boolean) {
-        viewModelScope.launch {
-            onShowStartScreenInfoCoroutine(showStartInfo)
-        }
-    }
-
-    private suspend fun onShowStartScreenInfoCoroutine(showStartInfo: Boolean) =
-        withContext(Dispatchers.IO) {
-            _showStartScreenInfo.postValue(showStartInfo)
         }
 }

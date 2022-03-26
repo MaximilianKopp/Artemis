@@ -19,9 +19,6 @@ class TrainingViewModel : ViewModel() {
     private val _currentQuestion = MutableLiveData<Question>()
     val currentQuestion = _currentQuestion
 
-    private val _trainingQuestions = MutableLiveData<List<Question>>()
-    val trainingQuestions = _trainingQuestions
-
     private val _trainingData = MutableLiveData<List<Question>>()
     val trainingData: LiveData<List<Question>> = _trainingData
 
@@ -73,8 +70,19 @@ class TrainingViewModel : ViewModel() {
     private val _answerBtnText = MutableLiveData("Antworten")
     val answerBtnText: LiveData<String> = _answerBtnText
 
-    private val _isNavDialogOpen = MutableLiveData<Boolean>()
-    val isNavDialogOpen: LiveData<Boolean> = _isNavDialogOpen
+    private val _favouriteColor = MutableLiveData<Int>()
+    val favouriteColor: LiveData<Int> = _favouriteColor
+
+    fun onChangeFavouriteState(isFavourite: Int) {
+        viewModelScope.launch {
+            onChangeFavouriteStateCoroutine(isFavourite)
+        }
+    }
+
+    private suspend fun onChangeFavouriteStateCoroutine(isFavourite: Int) =
+        withContext(Dispatchers.IO) {
+            _favouriteColor.postValue(isFavourite)
+        }
 
     fun onChangeTrainingData(traningData: List<Question>) {
         viewModelScope.launch {
@@ -261,12 +269,14 @@ class TrainingViewModel : ViewModel() {
     private fun firstPage(questions: List<Question>) {
         onChangeIndex(0)
         onChangeCurrentQuestion(questions[0])
+        onChangeFavouriteState(questions[0].favourite)
     }
 
     private fun prevPage(index: Int, questions: List<Question>) {
         if (index > 0) {
             onChangeIndex(index - 1)
             onChangeCurrentQuestion(questions[index - 1])
+            onChangeFavouriteState(questions[index - 1].favourite)
         }
     }
 
@@ -274,21 +284,34 @@ class TrainingViewModel : ViewModel() {
         if (index < questions.size - 1) {
             onChangeIndex(index + 1)
             onChangeCurrentQuestion(questions[index + 1])
+            onChangeFavouriteState(questions[index + 1].favourite)
         }
     }
 
     private fun lastPage(questions: List<Question>) {
         onChangeIndex(questions.size - 1)
         onChangeCurrentQuestion(questions[questions.size - 1])
+        onChangeFavouriteState(questions[questions.size - 1].favourite)
     }
 
-    fun onOpenNavDialog(isOpen: Boolean) {
-        viewModelScope.launch {
-            onOpenNavDialogCoroutine(isOpen)
-        }
-    }
-
-    private suspend fun onOpenNavDialogCoroutine(isOpen: Boolean) = withContext(Dispatchers.IO) {
-        _isNavDialogOpen.postValue(isOpen)
-    }
+//    fun setFavourite(
+//        question: Question,
+//        isFavourite: MutableState<Int>,
+//        currentFilter: CriteriaFilter
+//    ) {
+//        if (question.favourite == 0) {
+//            question.favourite = 1
+//            isFavourite.value = question.favourite
+//        }
+//        else if (question.favourite == 1) {
+//            question.favourite = 0
+//            isFavourite.value = question.favourite
+//        }
+//
+//        if (question.favourite == 1 && currentFilter == CriteriaFilter.FAVOURITES) {
+//            question.favourite = 0
+//            isFavourite.value = question.favourite
+//        }
+//        updateQuestion(question)
+//    }
 }
