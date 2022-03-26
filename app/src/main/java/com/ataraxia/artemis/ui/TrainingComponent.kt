@@ -350,7 +350,6 @@ class TrainingComponent {
                                 }
                                 questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
                                 trainingViewModel.onChangeIndex(0)
-                                trainingViewModel.onOpenNavDialog(false)
                             }
                         }
                         //Loads next question
@@ -425,7 +424,6 @@ class TrainingComponent {
                                     navController.navigate(loadScreen.route)
                                     questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
                                     trainingViewModel.onChangeIndex(0)
-                                    trainingViewModel.onOpenNavDialog(false)
                                     onOpenTrainingDialog(false)
                                     generalViewModel.onCloseTrainingScreen(
                                         Pair(
@@ -434,7 +432,6 @@ class TrainingComponent {
                                         )
                                     )
                                     trainingViewModel.onChangeIndex(0)
-                                    trainingViewModel.onOpenNavDialog(false)
                                 }
                             },
                             Modifier

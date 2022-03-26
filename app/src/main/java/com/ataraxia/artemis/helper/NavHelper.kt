@@ -54,20 +54,14 @@ class NavHelper {
                                 statisticViewModel,
                                 navController
                             )
-                                .apply { generalViewModel.onShowStartScreenInfo(true) }
                             Questions.route -> questionComponent.TopicCatalogueScreen(
                                 questionViewModel, navController
-                            ).apply { generalViewModel.onShowStartScreenInfo(false) }
+                            )
                             Exam.route -> examComponent.ExamScreen()
-                                .apply {
-                                    generalViewModel.onShowStartScreenInfo(false)
-                                }
                             Statistics.route -> statisticComponent.StatisticScreen(
                                 questionViewModel, statisticViewModel, navController
                             )
-                                .apply { generalViewModel.onShowStartScreenInfo(false) }
                             Configuration.route -> configComponent.ConfigScreen()
-                                .apply { generalViewModel.onShowStartScreenInfo(false) }
                             Training.route -> trainingComponent.TrainingScreen(
                                 navController = navController,
                                 isTrainingDialogOpen = isFilterDialogOpen,
