@@ -1,6 +1,9 @@
 package com.ataraxia.artemis.viewModel
 
 import android.app.Application
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -29,6 +32,14 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
 
     private val _closeTrainingScreen = MutableLiveData<Pair<Float, Boolean>>()
     val closeTrainingScreen: LiveData<Pair<Float, Boolean>> = _closeTrainingScreen
+
+    private val _searchWidgetState: MutableState<Boolean> =
+        mutableStateOf(false)
+    val searchWidgetState: State<Boolean> = _searchWidgetState
+
+    private val _searchTextState: MutableState<String> =
+        mutableStateOf(value = "")
+    val searchTextState: State<String> = _searchTextState
 
     private val _isVibrating = MutableLiveData<Int>()
     val isVibrating: LiveData<Int> = _isVibrating
@@ -140,4 +151,12 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
         withContext(Dispatchers.IO) {
             _openTrainingDialog.postValue(isOpen)
         }
+
+    fun onChangeSearchWidgetState(newValue: Boolean) {
+        _searchWidgetState.value = newValue
+    }
+
+    fun onChangeSearchTextState(newValue: String) {
+        _searchTextState.value = newValue
+    }
 }

@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -86,28 +88,30 @@ class QuestionListComponent {
 
         LazyColumn {
             stickyHeader {
-                Button(
-                    enabled = questionsLiveData.value.isNotEmpty(),
-                    modifier = Modifier.padding(8.dp),
-                    colors = ButtonDefaults.buttonColors(Artemis_Blue),
-                    onClick = {
-                        val preparedTrainingData: List<Question>
-                        if (currentFilter.value == CriteriaFilter.ALL_QUESTIONS_SHUFFLED) {
-                            preparedTrainingData =
-                                questionsLiveData.value.shuffled().take(sizeOfTrainingUnit)
-                            trainingViewModel.onChangeTrainingData(preparedTrainingData)
-                            trainingViewModel.onChangeCurrentQuestion(preparedTrainingData[0])
-                        } else {
-                            preparedTrainingData = questionsLiveData.value
-                            trainingViewModel.onChangeTrainingData(questionsLiveData.value)
-                            trainingViewModel.onChangeCurrentQuestion(preparedTrainingData[0])
-                        }
-                        navController.navigate(Screen.DrawerScreen.Training.route)
-                    }) {
-                    Text(
-                        color = Color.White,
-                        text = "Training starten",
-                    )
+                Row {
+                    Button(
+                        enabled = questionsLiveData.value.isNotEmpty(),
+                        modifier = Modifier.padding(8.dp),
+                        colors = ButtonDefaults.buttonColors(Artemis_Blue),
+                        onClick = {
+                            val preparedTrainingData: List<Question>
+                            if (currentFilter.value == CriteriaFilter.ALL_QUESTIONS_SHUFFLED) {
+                                preparedTrainingData =
+                                    questionsLiveData.value.shuffled().take(sizeOfTrainingUnit)
+                                trainingViewModel.onChangeTrainingData(preparedTrainingData)
+                                trainingViewModel.onChangeCurrentQuestion(preparedTrainingData[0])
+                            } else {
+                                preparedTrainingData = questionsLiveData.value
+                                trainingViewModel.onChangeTrainingData(questionsLiveData.value)
+                                trainingViewModel.onChangeCurrentQuestion(preparedTrainingData[0])
+                            }
+                            navController.navigate(Screen.DrawerScreen.Training.route)
+                        }) {
+                        Text(
+                            color = Color.White,
+                            text = "Training starten",
+                        )
+                    }
                 }
             }
             items(questionsLiveData.value) { question ->
@@ -194,6 +198,7 @@ class QuestionListComponent {
                 backgroundColor = Artemis_Green,
                 onDismissRequest = { onOpenDialog(false) },
                 modifier = Modifier.verticalScroll(scrollState, true),
+                shape = RoundedCornerShape(CornerSize(25.dp)),
                 buttons = {
                     Column(
                         Modifier.padding(12.dp),

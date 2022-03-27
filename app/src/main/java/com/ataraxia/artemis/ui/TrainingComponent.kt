@@ -304,14 +304,16 @@ class TrainingComponent {
                                         currentQuestion.learnedTwice = 0
                                         currentQuestion.failed = 1
 
-                                        @Suppress("DEPRECATION") val vibration: Vibrator =
-                                            context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-                                        vibration.vibrate(
-                                            VibrationEffect.createOneShot(
-                                                200,
-                                                VibrationEffect.DEFAULT_AMPLITUDE
+                                        if (generalViewModel.isVibrating.value == 1) {
+                                            @Suppress("DEPRECATION") val vibration: Vibrator =
+                                                context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                                            vibration.vibrate(
+                                                VibrationEffect.createOneShot(
+                                                    200,
+                                                    VibrationEffect.DEFAULT_AMPLITUDE
+                                                )
                                             )
-                                        )
+                                        }
                                         Log.v("Failed", currentQuestion.failed.toString())
                                     }
                                     //Saves all changes into database
@@ -335,7 +337,10 @@ class TrainingComponent {
                                 }
                                 statisticViewModel.onChangeTotalStatisticsFromStartScreen()
                             }) {
-                            Text(text = answerBtnText)
+                            Text(
+                                text = answerBtnText,
+                                color = Color.White
+                            )
                         }
                     }
                     Row(
