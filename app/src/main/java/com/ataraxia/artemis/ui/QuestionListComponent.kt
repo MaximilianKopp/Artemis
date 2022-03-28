@@ -78,8 +78,14 @@ class QuestionListComponent {
         val questionsLiveData = questionViewModel.questions.observeAsState(filterAbleQuestions)
         val currentFilter = questionViewModel.filter.observeAsState()
         val isVibrating: Int by generalViewModel.isVibrating.observeAsState(1)
+        val searchBarText: String by generalViewModel.searchTextState
         val sizeOfTrainingUnit: Int by generalViewModel.sizeOfTrainingUnit.observeAsState(20)
+        Log.v("Current Searchtext", searchBarText)
 
+        if (currentFilter.value == CriteriaFilter.SEARCH) {
+            questionViewModel.onChangeQuestionList(
+                filterAbleQuestions.filter { it.text.contains(searchBarText) })
+        }
         if (currentFilter.value == CriteriaFilter.ALL_QUESTIONS_SHUFFLED) {
             questionViewModel.onChangeQuestionList(filterAbleQuestions)
         }
@@ -105,6 +111,14 @@ class QuestionListComponent {
                                 trainingViewModel.onChangeTrainingData(questionsLiveData.value)
                                 trainingViewModel.onChangeCurrentQuestion(preparedTrainingData[0])
                             }
+                            generalViewModel.onChangeSearchWidgetState(false)
+                            generalViewModel.onHideSearchWidget(
+                                Pair(
+                                    Constants.ALPHA_INVISIBLE,
+                                    Constants.DISABLED
+                                )
+                            )
+                            generalViewModel.onChangeSearchWidgetState(false)
                             navController.navigate(Screen.DrawerScreen.Training.route)
                         }) {
                         Text(
@@ -125,6 +139,13 @@ class QuestionListComponent {
                     modifier = Modifier
                         .padding(4.dp)
                         .clickable {
+                            generalViewModel.onChangeSearchWidgetState(false)
+                            generalViewModel.onHideSearchWidget(
+                                Pair(
+                                    Constants.ALPHA_INVISIBLE,
+                                    Constants.DISABLED
+                                )
+                            )
                             questionViewModel.onChangeFilter(CriteriaFilter.SINGLE_QUESTION)
                             trainingViewModel.onChangeTrainingData(listOf(question))
                             trainingViewModel.onChangeCurrentQuestion(question)
@@ -385,6 +406,13 @@ class QuestionListComponent {
             )
         }
         BackHandler(enabled = true) {
+            generalViewModel.onChangeSearchWidgetState(false)
+            generalViewModel.onHideSearchWidget(
+                Pair(
+                    Constants.ALPHA_INVISIBLE,
+                    Constants.DISABLED
+                )
+            )
             questionViewModel.onChangeQuestionList(filterAbleQuestions)
             navController.navigate(Screen.DrawerScreen.Questions.route)
         }

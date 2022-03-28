@@ -39,13 +39,17 @@ class AppBarComponent {
     fun GeneralTopAppBar(
         scope: CoroutineScope,
         state: ScaffoldState,
+        generalViewModel: GeneralViewModel,
+        questionViewModel: QuestionViewModel
     ) {
-        val generalViewModel: GeneralViewModel = viewModel()
         val title: String by generalViewModel.title.observeAsState("")
         val questionFilter: Pair<Float, Boolean> by generalViewModel.questionFilter.observeAsState(
             Pair(Constants.ALPHA_VISIBLE, Constants.ENABLED)
         )
         val closeTrainingScreen: Pair<Float, Boolean> by generalViewModel.closeTrainingScreen.observeAsState(
+            Pair(Constants.ALPHA_INVISIBLE, Constants.DISABLED)
+        )
+        val searchWidget: Pair<Float, Boolean> by generalViewModel.searchWidget.observeAsState(
             Pair(Constants.ALPHA_INVISIBLE, Constants.DISABLED)
         )
         val searchWidgetState by generalViewModel.searchWidgetState
@@ -55,8 +59,13 @@ class AppBarComponent {
             SearchAppBar(
                 text = searchTextState,
                 onTextChange = { generalViewModel.onChangeSearchTextState(it) },
-                onCloseClicked = { generalViewModel.onChangeSearchWidgetState(false) },
-                onSearchClicked = { Log.d("Searched Text", it) }
+                onCloseClicked = {
+                    generalViewModel.onChangeSearchWidgetState(false)
+                    questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
+                },
+                onSearchClicked = {
+                    Log.v("Clicked", "Auf search geklickt")
+                }
             )
         } else {
             DefaultAppBar(
@@ -65,7 +74,9 @@ class AppBarComponent {
                 state = state,
                 generalViewModel = generalViewModel,
                 questionFilter = questionFilter,
+                searchWidget = searchWidget,
                 onSearchTriggered = { generalViewModel.onChangeSearchWidgetState(true) },
+                questionViewModel = questionViewModel,
                 closeTrainingScreen = closeTrainingScreen
             )
         }
@@ -77,7 +88,9 @@ class AppBarComponent {
         scope: CoroutineScope,
         state: ScaffoldState,
         generalViewModel: GeneralViewModel,
+        questionViewModel: QuestionViewModel,
         questionFilter: Pair<Float, Boolean>,
+        searchWidget: Pair<Float, Boolean>,
         onSearchTriggered: () -> Unit,
         closeTrainingScreen: Pair<Float, Boolean>
     ) {
@@ -98,7 +111,13 @@ class AppBarComponent {
                     Icon(Icons.Default.FilterAlt, contentDescription = "Filter")
                 }
                 IconButton(
-                    onClick = { onSearchTriggered() }) {
+                    onClick = {
+                        onSearchTriggered()
+                        questionViewModel.onChangeFilter(CriteriaFilter.SEARCH)
+                    },
+                    Modifier.alpha(searchWidget.first),
+                    enabled = searchWidget.second,
+                ) {
                     Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
                 }
                 IconButton(

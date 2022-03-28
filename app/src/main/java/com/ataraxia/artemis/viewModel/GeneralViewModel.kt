@@ -33,6 +33,9 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
     private val _closeTrainingScreen = MutableLiveData<Pair<Float, Boolean>>()
     val closeTrainingScreen: LiveData<Pair<Float, Boolean>> = _closeTrainingScreen
 
+    private val _searchWidget = MutableLiveData<Pair<Float, Boolean>>()
+    val searchWidget: LiveData<Pair<Float, Boolean>> = _searchWidget
+
     private val _searchWidgetState: MutableState<Boolean> =
         mutableStateOf(false)
     val searchWidgetState: State<Boolean> = _searchWidgetState
@@ -117,6 +120,17 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
     private suspend fun onHideFilterCoroutine(visible: Pair<Float, Boolean>) =
         withContext(Dispatchers.IO) {
             _questionFilter.postValue(visible)
+        }
+
+    fun onHideSearchWidget(visibility: Pair<Float, Boolean>) {
+        CoroutineScope(Dispatchers.IO).launch {
+            onHideSearchWidgetCoroutine(visibility)
+        }
+    }
+
+    private suspend fun onHideSearchWidgetCoroutine(visibility: Pair<Float, Boolean>) =
+        withContext(Dispatchers.IO) {
+            _searchWidget.postValue(visibility)
         }
 
     fun onCloseTrainingScreen(visibility: Pair<Float, Boolean>) {

@@ -80,6 +80,8 @@ class StartMenuComponent {
                 appBarComposition.GeneralTopAppBar(
                     scope = scope,
                     state = state,
+                    generalViewModel = generalViewModel,
+                    questionViewModel = questionViewModel
                 )
             },
             drawerContent = {

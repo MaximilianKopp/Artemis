@@ -72,6 +72,12 @@ class NavHelper {
                                 statisticViewModel = statisticViewModel
                             )
                         }
+                        generalViewModel.onHideSearchWidget(
+                            Pair(
+                                Constants.ALPHA_INVISIBLE,
+                                Constants.DISABLED
+                            )
+                        )
                         generalViewModel.onHideFilter(
                             Pair(
                                 Constants.ALPHA_INVISIBLE,
@@ -94,6 +100,12 @@ class NavHelper {
                                         currentTopic = topicScreen.topic
                                     ).apply {
                                         questionViewModel.onChangeTopic(topicScreen.topic)
+                                        generalViewModel.onHideSearchWidget(
+                                            Pair(
+                                                Constants.ALPHA_VISIBLE,
+                                                Constants.ENABLED
+                                            )
+                                        )
                                         generalViewModel.onHideFilter(
                                             Pair(
                                                 Constants.ALPHA_VISIBLE,
@@ -111,6 +123,12 @@ class NavHelper {
                                         currentTopic = topicScreen.topic
                                     ).apply {
                                         questionViewModel.onChangeTopic(topicScreen.topic)
+                                        generalViewModel.onHideSearchWidget(
+                                            Pair(
+                                                Constants.ALPHA_VISIBLE,
+                                                Constants.ENABLED
+                                            )
+                                        )
                                         generalViewModel.onHideFilter(
                                             Pair(
                                                 Constants.ALPHA_VISIBLE,
@@ -128,6 +146,12 @@ class NavHelper {
                                         currentTopic = topicScreen.topic
                                     ).apply {
                                         questionViewModel.onChangeTopic(topicScreen.topic)
+                                        generalViewModel.onHideSearchWidget(
+                                            Pair(
+                                                Constants.ALPHA_VISIBLE,
+                                                Constants.ENABLED
+                                            )
+                                        )
                                         generalViewModel.onHideFilter(
                                             Pair(
                                                 Constants.ALPHA_VISIBLE,
@@ -145,6 +169,12 @@ class NavHelper {
                                         currentTopic = topicScreen.topic
                                     ).apply {
                                         questionViewModel.onChangeTopic(topicScreen.topic)
+                                        generalViewModel.onHideSearchWidget(
+                                            Pair(
+                                                Constants.ALPHA_VISIBLE,
+                                                Constants.ENABLED
+                                            )
+                                        )
                                         generalViewModel.onHideFilter(
                                             Pair(
                                                 Constants.ALPHA_VISIBLE,
@@ -162,6 +192,12 @@ class NavHelper {
                                         currentTopic = topicScreen.topic
                                     ).apply {
                                         questionViewModel.onChangeTopic(topicScreen.topic)
+                                        generalViewModel.onHideSearchWidget(
+                                            Pair(
+                                                Constants.ALPHA_VISIBLE,
+                                                Constants.ENABLED
+                                            )
+                                        )
                                         generalViewModel.onHideFilter(
                                             Pair(
                                                 Constants.ALPHA_VISIBLE,
@@ -178,6 +214,12 @@ class NavHelper {
                                         trainingViewModel = trainingViewModel,
                                         currentTopic = topicScreen.topic
                                     ).apply {
+                                        generalViewModel.onHideSearchWidget(
+                                            Pair(
+                                                Constants.ALPHA_VISIBLE,
+                                                Constants.ENABLED
+                                            )
+                                        )
                                         questionViewModel.onChangeTopic(topicScreen.topic)
                                         generalViewModel.onHideFilter(
                                             Pair(
@@ -210,6 +252,12 @@ class NavHelper {
                             statisticViewModel = statisticViewModel
                         )
                         generalViewModel.onTopBarTitleChange(Training.title)
+                        generalViewModel.onHideSearchWidget(
+                            Pair(
+                                Constants.ALPHA_INVISIBLE,
+                                Constants.DISABLED
+                            )
+                        )
                         generalViewModel.onHideFilter(
                             Pair(
                                 Constants.ALPHA_INVISIBLE,
