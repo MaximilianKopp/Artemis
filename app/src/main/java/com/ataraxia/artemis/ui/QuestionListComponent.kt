@@ -2,17 +2,27 @@ package com.ataraxia.artemis.ui
 
 import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.runtime.Composable
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.rounded.ChevronLeft
+import androidx.compose.material.icons.rounded.ChevronRight
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,12 +30,16 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.helper.CriteriaFilter
+import com.ataraxia.artemis.model.Question
 import com.ataraxia.artemis.model.Screen
-import com.ataraxia.artemis.ui.theme.Purple700
+import com.ataraxia.artemis.ui.theme.Artemis_Blue
+import com.ataraxia.artemis.ui.theme.Artemis_Green
+import com.ataraxia.artemis.ui.theme.Artemis_Yellow
 import com.ataraxia.artemis.viewModel.GeneralViewModel
 import com.ataraxia.artemis.viewModel.QuestionViewModel
 import com.ataraxia.artemis.viewModel.TrainingViewModel
 
+@ExperimentalFoundationApi
 class QuestionListComponent {
 
     @Composable
@@ -49,10 +63,9 @@ class QuestionListComponent {
         )
     }
 
-    @OptIn(ExperimentalFoundationApi::class)
     @Composable
     fun CurrentTopicContent(
-        isDialogOpen: Boolean,
+        isFilterDialogOpen: Boolean,
         onOpenDialog: (Boolean) -> Unit,
         navController: NavController,
         questionViewModel: QuestionViewModel,
@@ -61,43 +74,78 @@ class QuestionListComponent {
         currentTopic: Int
     ) {
         val filterAbleQuestions =
-            questionViewModel.selectTopic(currentTopic, CriteriaFilter.ALL_QUESTIONS)
+            questionViewModel.selectTopic(currentTopic, CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
         val questionsLiveData = questionViewModel.questions.observeAsState(filterAbleQuestions)
         val currentFilter = questionViewModel.filter.observeAsState()
+        val isVibrating: Int by generalViewModel.isVibrating.observeAsState(1)
+        val searchBarText: String by generalViewModel.searchTextState
+        val sizeOfTrainingUnit: Int by generalViewModel.sizeOfTrainingUnit.observeAsState(20)
+        Log.v("Current Searchtext", searchBarText)
+
+        if (currentFilter.value == CriteriaFilter.SEARCH) {
+            questionViewModel.onChangeQuestionList(
+                filterAbleQuestions.filter { it.text.contains(searchBarText) })
+        }
+        if (currentFilter.value == CriteriaFilter.ALL_QUESTIONS_SHUFFLED) {
+            questionViewModel.onChangeQuestionList(filterAbleQuestions)
+        }
 
         Log.v("Current Filter", currentFilter.toString())
 
         LazyColumn {
             stickyHeader {
-                Button(
-                    enabled = questionsLiveData.value.isNotEmpty(),
-                    modifier = Modifier.padding(8.dp),
-                    colors = ButtonDefaults.buttonColors(Purple700),
-                    onClick = {
-                        if (currentFilter.value == CriteriaFilter.ALL_QUESTIONS) {
-                            val preparedTrainingData = questionsLiveData.value.shuffled().take(
-                                Constants.TRAINING_SIZE
-                            )
-                            trainingViewModel.onChangeTrainingData(
-                                preparedTrainingData
-                            )
-                            if (preparedTrainingData.isNotEmpty()) {
+                Row {
+                    Button(
+                        enabled = questionsLiveData.value.isNotEmpty(),
+                        modifier = Modifier.padding(8.dp),
+                        colors = ButtonDefaults.buttonColors(Artemis_Blue),
+                        onClick = {
+                            val preparedTrainingData: List<Question>
+                            if (currentFilter.value == CriteriaFilter.ALL_QUESTIONS_SHUFFLED) {
+                                preparedTrainingData =
+                                    questionsLiveData.value.shuffled().take(sizeOfTrainingUnit)
+                                trainingViewModel.onChangeTrainingData(preparedTrainingData)
+                                trainingViewModel.onChangeCurrentQuestion(preparedTrainingData[0])
+                            } else {
+                                preparedTrainingData = questionsLiveData.value
+                                trainingViewModel.onChangeTrainingData(questionsLiveData.value)
                                 trainingViewModel.onChangeCurrentQuestion(preparedTrainingData[0])
                             }
-                        } else {
-                            trainingViewModel.onChangeTrainingData(questionsLiveData.value)
-                        }
-                        navController.navigate(Screen.DrawerScreen.Training.route)
-                    }) {
-                    Text(text = "Training starten")
+                            generalViewModel.onChangeSearchWidgetState(false)
+                            generalViewModel.onHideSearchWidget(
+                                Pair(
+                                    Constants.ALPHA_INVISIBLE,
+                                    Constants.DISABLED
+                                )
+                            )
+                            generalViewModel.onChangeSearchWidgetState(false)
+                            navController.navigate(Screen.DrawerScreen.Training.route)
+                        }) {
+                        Text(
+                            color = Color.White,
+                            text = "Training starten",
+                        )
+                    }
                 }
             }
             items(questionsLiveData.value) { question ->
+                val isFavourite: MutableState<Int> =
+                    rememberSaveable { mutableStateOf(question.favourite) }
+                val iconColor: State<Color> = animateColorAsState(
+                    if (isFavourite.value == 1 || currentFilter.value == CriteriaFilter.FAVOURITES) Color.Yellow else Color.Black
+                )
                 Card(
                     backgroundColor = Color.White,
                     modifier = Modifier
                         .padding(4.dp)
                         .clickable {
+                            generalViewModel.onChangeSearchWidgetState(false)
+                            generalViewModel.onHideSearchWidget(
+                                Pair(
+                                    Constants.ALPHA_INVISIBLE,
+                                    Constants.DISABLED
+                                )
+                            )
                             questionViewModel.onChangeFilter(CriteriaFilter.SINGLE_QUESTION)
                             trainingViewModel.onChangeTrainingData(listOf(question))
                             trainingViewModel.onChangeCurrentQuestion(question)
@@ -106,6 +154,26 @@ class QuestionListComponent {
                 ) {
                     Column {
                         Row {
+                            IconButton(onClick = {
+                                if (currentFilter.value == CriteriaFilter.FAVOURITES) {
+                                    question.favourite = 0
+                                    isFavourite.value = question.favourite
+                                    questionViewModel.updateQuestion(question)
+                                    questionViewModel.onChangeQuestionList(filterAbleQuestions.filter { it.favourite == 1 })
+                                } else
+                                    questionViewModel.setFavourite(
+                                        question,
+                                        isFavourite,
+                                        currentFilter.value!!
+                                    )
+                            }) {
+                                Icon(
+                                    if (currentFilter.value == CriteriaFilter.FAVOURITES) Icons.Filled.Delete else Icons.Filled.Star,
+                                    contentDescription = "Icon for learned questions",
+                                    modifier = Modifier.size(20.dp),
+                                    tint = if (currentFilter.value == CriteriaFilter.FAVOURITES) Color.Black else iconColor.value
+                                )
+                            }
                             Text(
                                 text = question.text,
                                 Modifier.padding(start = 3.dp)
@@ -121,14 +189,14 @@ class QuestionListComponent {
                                         //Icon for learned questions
                                         Icon(
                                             Icons.Filled.Check,
-                                            contentDescription = "",
+                                            contentDescription = "Icon for learned questions",
                                             modifier = Modifier.size(20.dp),
                                             tint = questionViewModel.setQuestionStateColor(question)
                                         )
                                         //Icon for failed questions
                                         Icon(
                                             Icons.Filled.Close,
-                                            contentDescription = "",
+                                            contentDescription = "Icon for failed questions",
                                             modifier = Modifier.size(20.dp),
                                             tint = if (question.failed == 1) {
                                                 Color.Red
@@ -144,23 +212,100 @@ class QuestionListComponent {
                 }
             }
         }
-        if (isDialogOpen) {
+        if (isFilterDialogOpen) {
+            val scrollState = rememberScrollState()
             AlertDialog(
+                contentColor = Color.White,
+                backgroundColor = Artemis_Green,
                 onDismissRequest = { onOpenDialog(false) },
-                text = {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "Filterauswahl",
-                            style = MaterialTheme.typography.h4
-                        )
-                        Divider(thickness = 2.dp)
-                        Text(
-                            text = "Der Filter legt fest, welche Fragen vorausgewählt werden:",
-                            style = MaterialTheme.typography.body1
-                        )
-                    }
-                },
+                modifier = Modifier.verticalScroll(scrollState, true),
+                shape = RoundedCornerShape(CornerSize(25.dp)),
                 buttons = {
+                    Column(
+                        Modifier.padding(12.dp),
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Filterauswahl",
+                                style = MaterialTheme.typography.h4
+                            )
+                            IconButton(onClick = {
+                                onOpenDialog(false)
+                            }) {
+                                Icon(
+                                    modifier = Modifier.size(20.dp),
+                                    imageVector = Icons.Filled.Close,
+                                    contentDescription = "Closes the filter dialog"
+                                )
+                            }
+                        }
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Vibrieren bei falscher Antwort",
+                                style = MaterialTheme.typography.body1
+                            )
+                            Switch(
+                                checked = isVibrating == 1,
+                                onCheckedChange = {
+                                    if (isVibrating == 1) generalViewModel.onChangeEnableVibration(
+                                        0
+                                    ) else generalViewModel.onChangeEnableVibration(1)
+                                },
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = Artemis_Yellow,
+                                    checkedTrackColor = Artemis_Yellow,
+                                    uncheckedThumbColor = Color.White,
+                                    uncheckedTrackColor = Artemis_Yellow
+                                )
+                            )
+                        }
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Trainingsumfang",
+                                style = MaterialTheme.typography.body1
+                            )
+                            Row(
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                IconButton(onClick = {
+                                    if (sizeOfTrainingUnit != Constants.SIZE_PER_TRANINIG_UNIT_MIN) {
+                                        generalViewModel.onChangeSizeOfTrainingUnit(
+                                            sizeOfTrainingUnit - 10
+                                        )
+                                    } // no else
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.ChevronLeft,
+                                        contentDescription = "Left arrow for determine size of training unit"
+                                    )
+                                }
+                                Text(text = "$sizeOfTrainingUnit")
+                                IconButton(onClick = {
+                                    if (sizeOfTrainingUnit < Constants.SIZE_PER_TRAINING_UNIT_MAX) {
+                                        generalViewModel.onChangeSizeOfTrainingUnit(
+                                            sizeOfTrainingUnit + 10
+                                        )
+                                    } // no else
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.ChevronRight,
+                                        contentDescription = "Right arrow for determine size of training unit"
+                                    )
+                                }
+                            }
+                        }
+                    }
                     Column(
                         Modifier.padding(12.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
@@ -168,16 +313,37 @@ class QuestionListComponent {
                         Button(
                             onClick = {
                                 //Take all questions
-                                questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS)
+                                questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
                                 questionViewModel.onChangeQuestionList(filterAbleQuestions)
                                 onOpenDialog(false)
                             },
                             Modifier
                                 .width(300.dp)
-                                .padding(4.dp)
+                                .padding(4.dp),
+                            colors = ButtonDefaults.buttonColors(Artemis_Yellow),
                         ) {
                             Text(
-                                text = "Alle Fragen",
+                                color = Color.Black,
+                                text = "Zufallswiedergabe ($sizeOfTrainingUnit Fragen)",
+                                style = MaterialTheme.typography.body1
+                            )
+                        }
+                        Button(
+                            onClick = {
+                                //Take all questions in chronological order
+                                questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_CHRONOLOGICAL)
+                                questionViewModel.onChangeQuestionList(filterAbleQuestions)
+                                onOpenDialog(false)
+                            },
+                            Modifier
+                                .width(300.dp)
+                                .padding(4.dp),
+                            colors = ButtonDefaults.buttonColors(Artemis_Yellow),
+
+                            ) {
+                            Text(
+                                color = Color.Black,
+                                text = "Alle Fragen (1- ${filterAbleQuestions.size})",
                                 style = MaterialTheme.typography.body1
                             )
                         }
@@ -185,14 +351,16 @@ class QuestionListComponent {
                             onClick = {
                                 //Take all not learned questions
                                 questionViewModel.onChangeFilter(CriteriaFilter.NOT_LEARNED)
-                                questionViewModel.onChangeQuestionList(filterAbleQuestions.filter { it.learnedOnce == 1 })
+                                questionViewModel.onChangeQuestionList(filterAbleQuestions.filter { it.learnedOnce == 1 && it.learnedTwice == 0 })
                                 onOpenDialog(false)
                             },
                             Modifier
                                 .width(300.dp)
-                                .padding(4.dp)
+                                .padding(4.dp),
+                            colors = ButtonDefaults.buttonColors(Artemis_Yellow),
                         ) {
                             Text(
+                                color = Color.Black,
                                 text = "Noch nicht gelernt",
                                 style = MaterialTheme.typography.body1
                             )
@@ -206,9 +374,11 @@ class QuestionListComponent {
                             },
                             Modifier
                                 .width(300.dp)
-                                .padding(4.dp)
+                                .padding(4.dp),
+                            colors = ButtonDefaults.buttonColors(Artemis_Yellow),
                         ) {
                             Text(
+                                color = Color.Black,
                                 text = "Falsch beantwortet",
                                 style = MaterialTheme.typography.body1
                             )
@@ -222,9 +392,11 @@ class QuestionListComponent {
                             },
                             Modifier
                                 .width(300.dp)
-                                .padding(4.dp)
+                                .padding(4.dp),
+                            colors = ButtonDefaults.buttonColors(Artemis_Yellow),
                         ) {
                             Text(
+                                color = Color.Black,
                                 text = "Favouriten",
                                 style = MaterialTheme.typography.body1
                             )
@@ -234,6 +406,13 @@ class QuestionListComponent {
             )
         }
         BackHandler(enabled = true) {
+            generalViewModel.onChangeSearchWidgetState(false)
+            generalViewModel.onHideSearchWidget(
+                Pair(
+                    Constants.ALPHA_INVISIBLE,
+                    Constants.DISABLED
+                )
+            )
             questionViewModel.onChangeQuestionList(filterAbleQuestions)
             navController.navigate(Screen.DrawerScreen.Questions.route)
         }

@@ -1,12 +1,13 @@
 package com.ataraxia.artemis.viewModel
 
 import android.app.Application
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.ataraxia.artemis.data.db.QuestionDatabase
+import com.ataraxia.artemis.data.db.ArtemisDatabase
 import com.ataraxia.artemis.data.questions.QuestionRepository
 import com.ataraxia.artemis.helper.CriteriaFilter
 import com.ataraxia.artemis.model.Question
@@ -38,12 +39,12 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
     var onceLearnedQuestions: Int = 0
     var learnedQuestions: Int = 0
     var failedQuestions: Int = 0
-    lateinit var progressInPercent: BigDecimal
+    var progressInPercent: BigDecimal = BigDecimal.ZERO
 
     init {
         CoroutineScope(Dispatchers.IO).launch {
             val questionDao =
-                QuestionDatabase.getDatabase(application.applicationContext).questionDao()
+                ArtemisDatabase.getDatabase(application.applicationContext).questionDao()
             questionRepository = QuestionRepository(questionDao)
             allQuestions = questionRepository.getAllQuestions()
             onceLearnedQuestions = allQuestions.filter { it.learnedTwice == 1 }.count()
@@ -139,16 +140,13 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
         return questions
     }
 
-    fun loadSingleQuestion(question: Question): List<Question> {
-        return listOf(question)
-    }
 
     private fun filterQuestions(
         criteriaFilter: CriteriaFilter,
         questions: List<Question>
     ): List<Question> {
         val filteredQuestions: List<Question> = when (criteriaFilter) {
-            CriteriaFilter.ALL_QUESTIONS -> questions
+            CriteriaFilter.ALL_QUESTIONS_SHUFFLED -> questions
             CriteriaFilter.NOT_LEARNED -> questions.filter { it.learnedOnce == 1 }
             CriteriaFilter.FAILED -> questions.filter { it.failed == 1 }
             CriteriaFilter.FAVOURITES -> questions.filter { it.favourite == 1 }
@@ -192,7 +190,7 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
         trainingDataWithoutFilter.addAll(remainingQuestions.take(trainingSize))
 
         when (criteriaFilter) {
-            CriteriaFilter.ALL_QUESTIONS -> _questions.postValue(trainingDataWithoutFilter)
+            CriteriaFilter.ALL_QUESTIONS_SHUFFLED -> _questions.postValue(trainingDataWithoutFilter)
             CriteriaFilter.NOT_LEARNED -> _questions.postValue(learnedOnceQuestions)
             CriteriaFilter.FAILED -> _questions.postValue(failedQuestions)
             CriteriaFilter.FAVOURITES -> _questions.postValue(favourites)
@@ -243,5 +241,25 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
             result = Color.Green
         }
         return result
+    }
+
+    fun setFavourite(
+        question: Question,
+        isFavourite: MutableState<Int>,
+        currentFilter: CriteriaFilter
+    ) {
+        if (question.favourite == 0) {
+            question.favourite = 1
+            isFavourite.value = question.favourite
+        } else if (question.favourite == 1) {
+            question.favourite = 0
+            isFavourite.value = question.favourite
+        }
+
+        if (question.favourite == 1 && currentFilter == CriteriaFilter.FAVOURITES) {
+            question.favourite = 0
+            isFavourite.value = question.favourite
+        }
+        updateQuestion(question)
     }
 }

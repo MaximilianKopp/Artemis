@@ -8,12 +8,11 @@ import android.view.Gravity
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronLeft
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.FirstPage
-import androidx.compose.material.icons.filled.LastPage
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -23,11 +22,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.helper.CriteriaFilter
 import com.ataraxia.artemis.helper.NavTrainingButton
 import com.ataraxia.artemis.model.Question
-import com.ataraxia.artemis.model.Screen
-import com.ataraxia.artemis.ui.theme.YELLOW_ARTEMIS
+import com.ataraxia.artemis.ui.theme.Artemis_Blue
+import com.ataraxia.artemis.ui.theme.Artemis_Green
+import com.ataraxia.artemis.ui.theme.Artemis_Yellow
 import com.ataraxia.artemis.viewModel.GeneralViewModel
 import com.ataraxia.artemis.viewModel.QuestionViewModel
 import com.ataraxia.artemis.viewModel.StatisticViewModel
@@ -103,7 +104,7 @@ class TrainingComponent {
         val isButtonEnabled: Boolean by trainingViewModel.isButtonEnabled.observeAsState(true)
         val answerBtnText: String by trainingViewModel.answerBtnText.observeAsState("ten")
 
-        val isNavDialogOpen: Boolean by trainingViewModel.isNavDialogOpen.observeAsState(false)
+        val favouriteState: Int by trainingViewModel.favouriteColor.observeAsState(currentQuestion.favourite)
 
         val optionA: Pair<Pair<Boolean, Color>, String> =
             Pair(Pair(checkedA, checkBoxColorA), selectA)
@@ -126,7 +127,7 @@ class TrainingComponent {
             currentTopic?.let {
                 questionViewModel.selectTopic(
                     it,
-                    CriteriaFilter.ALL_QUESTIONS
+                    CriteriaFilter.ALL_QUESTIONS_SHUFFLED
                 )
             }
 
@@ -136,19 +137,38 @@ class TrainingComponent {
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            val scrollState = rememberScrollState()
             Column(
                 Modifier
                     .wrapContentHeight()
                     .weight(1f, fill = true)
+                    .verticalScroll(scrollState, true)
             ) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text(
-                        modifier = Modifier.padding(6.dp),
-                        text = currentQuestion.text,
-                        style = MaterialTheme.typography.body1,
-                    )
+                    Row {
+                        IconButton(onClick = {
+                            if (currentQuestion.favourite == 1) {
+                                currentQuestion.favourite = 0
+                            } else {
+                                currentQuestion.favourite = 1
+                            }
+                            trainingViewModel.onChangeFavouriteState(currentQuestion.favourite)
+                            questionViewModel.updateQuestion(currentQuestion)
+                        }) {
+                            Icon(
+                                imageVector = Icons.Filled.Star,
+                                contentDescription = "Favourite Icon",
+                                tint = if (favouriteState == 1) Color.Yellow else Color.Black
+                            )
+                        }
+                        Text(
+                            modifier = Modifier.padding(6.dp),
+                            text = currentQuestion.text,
+                            style = MaterialTheme.typography.body1,
+                        )
+                    }
                 }
                 Card(
                     modifier = Modifier
@@ -218,7 +238,7 @@ class TrainingComponent {
                                 Icons.Filled.FirstPage,
                                 contentDescription = "First page button",
                                 modifier = Modifier.size(50.dp),
-                                tint = YELLOW_ARTEMIS
+                                tint = Artemis_Yellow
                             )
                         }
                         //Loads previous question
@@ -235,16 +255,16 @@ class TrainingComponent {
                                 Icons.Filled.ChevronLeft,
                                 contentDescription = "Prev question button",
                                 modifier = Modifier.size(50.dp),
-                                tint = YELLOW_ARTEMIS
+                                tint = Artemis_Yellow
                             )
                         }
                     }
                     Row(
                         modifier = Modifier.padding(start = 25.dp, end = 25.dp)
                     ) {
-//                        val context = LocalContext.current
                         Button(
                             enabled = checkedA || checkedB || checkedC || checkedD,
+                            colors = ButtonDefaults.buttonColors(Artemis_Blue),
                             //Contains whole logic for further answer processing
                             onClick = {
                                 if (answerBtnText == "Antworten") {
@@ -263,7 +283,7 @@ class TrainingComponent {
                                                 "LearnedOnce",
                                                 currentQuestion.learnedOnce.toString()
                                             )
-                                        } else if (currentQuestion.learnedTwice == 0) {
+                                        } else if (currentQuestion.learnedTwice == 0 && currentQuestion.learnedOnce == 1) {
                                             currentQuestion.learnedTwice = 1
                                             currentQuestion.learnedOnce = 0
                                             currentQuestion.failed = 0
@@ -284,14 +304,16 @@ class TrainingComponent {
                                         currentQuestion.learnedTwice = 0
                                         currentQuestion.failed = 1
 
-                                        @Suppress("DEPRECATION") val vibration: Vibrator =
-                                            context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-                                        vibration.vibrate(
-                                            VibrationEffect.createOneShot(
-                                                200,
-                                                VibrationEffect.DEFAULT_AMPLITUDE
+                                        if (generalViewModel.isVibrating.value == 1) {
+                                            @Suppress("DEPRECATION") val vibration: Vibrator =
+                                                context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                                            vibration.vibrate(
+                                                VibrationEffect.createOneShot(
+                                                    200,
+                                                    VibrationEffect.DEFAULT_AMPLITUDE
+                                                )
                                             )
-                                        )
+                                        }
                                         Log.v("Failed", currentQuestion.failed.toString())
                                     }
                                     //Saves all changes into database
@@ -309,13 +331,16 @@ class TrainingComponent {
                                         trainingData
                                     )
                                     if (index == trainingData.size - 1) {
-                                        trainingViewModel.onOpenNavDialog(true)
+                                        onOpenTrainingDialog(true)
                                     }
                                     trainingViewModel.onChangeAnswerButtonText("Antworten")
                                 }
                                 statisticViewModel.onChangeTotalStatisticsFromStartScreen()
                             }) {
-                            Text(text = answerBtnText)
+                            Text(
+                                text = answerBtnText,
+                                color = Color.White
+                            )
                         }
                     }
                     Row(
@@ -323,10 +348,13 @@ class TrainingComponent {
                     ) {
                         BackHandler(enabled = true) {
                             if (loadScreen != null && renewQuestions != null) {
-                                navController.navigate(loadScreen.route)
-                                questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS)
+                                navController.navigate(loadScreen.route) {
+                                    popUpTo(0) {
+                                        inclusive = true
+                                    }
+                                }
+                                questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
                                 trainingViewModel.onChangeIndex(0)
-                                trainingViewModel.onOpenNavDialog(false)
                             }
                         }
                         //Loads next question
@@ -343,7 +371,7 @@ class TrainingComponent {
                                 Icons.Filled.ChevronRight,
                                 contentDescription = "Next question button",
                                 modifier = Modifier.size(50.dp),
-                                tint = YELLOW_ARTEMIS
+                                tint = Artemis_Yellow
                             )
                         }
 
@@ -361,7 +389,7 @@ class TrainingComponent {
                                 Icons.Filled.LastPage,
                                 contentDescription = "Last page button",
                                 modifier = Modifier.size(50.dp),
-                                tint = YELLOW_ARTEMIS
+                                tint = Artemis_Yellow
                             )
                         }
                     }
@@ -379,11 +407,13 @@ class TrainingComponent {
         if (isTrainingDialogOpen) {
             AlertDialog(
                 onDismissRequest = { onOpenTrainingDialog(false) },
+                backgroundColor = Artemis_Green,
                 text = {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = "Möchtest du das Training abbrechen?",
-                            style = MaterialTheme.typography.body1
+                            text = "Zurück zum Hauptmenü?",
+                            style = MaterialTheme.typography.body1,
+                            color = Color.White
                         )
                     }
                 },
@@ -395,16 +425,24 @@ class TrainingComponent {
                         Button(
                             onClick = {
                                 if (loadScreen != null && renewQuestions != null) {
-                                    navController.navigate(Screen.DrawerScreen.Questions.route)
-                                    questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS)
-                                    onOpenTrainingDialog(false)
+
+                                    navController.navigate(loadScreen.route)
+                                    questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
                                     trainingViewModel.onChangeIndex(0)
-                                    trainingViewModel.onOpenNavDialog(false)
+                                    onOpenTrainingDialog(false)
+                                    generalViewModel.onCloseTrainingScreen(
+                                        Pair(
+                                            Constants.ALPHA_INVISIBLE,
+                                            Constants.DISABLED
+                                        )
+                                    )
+                                    trainingViewModel.onChangeIndex(0)
                                 }
                             },
                             Modifier
                                 .width(300.dp)
-                                .padding(4.dp)
+                                .padding(4.dp),
+                            colors = ButtonDefaults.buttonColors(Artemis_Yellow)
                         ) {
                             Text(
                                 text = "Ja",
@@ -417,7 +455,8 @@ class TrainingComponent {
                             },
                             Modifier
                                 .width(300.dp)
-                                .padding(4.dp)
+                                .padding(4.dp),
+                            colors = ButtonDefaults.buttonColors(Artemis_Yellow)
                         ) {
                             Text(
                                 text = "Nein",
@@ -428,31 +467,14 @@ class TrainingComponent {
                 }
             )
         }
-        if (isNavDialogOpen) {
-            AlertDialog(
-                onDismissRequest = {
-                    trainingViewModel.onOpenNavDialog(false)
-                },
-                buttons = {
-                    Button(onClick = {
-                        if (loadScreen != null && renewQuestions != null) {
-                            navController.navigate(loadScreen.route)
-                            questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS)
-                            trainingViewModel.onChangeIndex(0)
-                            trainingViewModel.onOpenNavDialog(false)
-                        }
-                    }) {
-                        Text(text = "Zurück zum Menü")
-                    }
-                }
-            )
+    }
+
+    private fun showMessage(context: Context, message: String) {
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).apply {
+            this.setGravity(Gravity.CENTER, 0, 0)
+            this.show()
         }
     }
 }
 
-fun showMessage(context: Context, message: String) {
-    Toast.makeText(context, message, Toast.LENGTH_SHORT).apply {
-        this.setGravity(Gravity.CENTER, 0, 0)
-        this.show()
-    }
-}
+

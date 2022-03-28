@@ -10,7 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.ataraxia.artemis.ui.theme.YELLOW_ARTEMIS
+import com.ataraxia.artemis.ui.theme.Artemis_Yellow
 
 abstract class TextButtonTemplate : Modifier {
     companion object {
@@ -23,7 +23,7 @@ abstract class TextButtonTemplate : Modifier {
 
         @Composable
         fun menuBackgroundColor() = textButtonColors(
-        backgroundColor = YELLOW_ARTEMIS
+            backgroundColor = Artemis_Yellow
         )
     }
 }

@@ -33,7 +33,7 @@ class Screen {
         )
 
         object Home : DrawerScreen(
-            R.drawable.ic_baseline_language_24,
+            R.drawable.ic_baseline_home_24,
             "Startmenü",
             "startmenu",
         )
