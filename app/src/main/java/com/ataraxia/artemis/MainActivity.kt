@@ -3,6 +3,7 @@ package com.ataraxia.artemis
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ataraxia.artemis.ui.StartMenuComponent
 import com.ataraxia.artemis.ui.theme.ArtemisTheme
@@ -11,6 +12,7 @@ import com.ataraxia.artemis.viewModel.QuestionViewModel
 import com.ataraxia.artemis.viewModel.StatisticViewModel
 import com.ataraxia.artemis.viewModel.TrainingViewModel
 
+@ExperimentalFoundationApi
 class MainActivity : ComponentActivity() {
     private val startMenuComposition = StartMenuComponent()
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,7 +29,7 @@ class MainActivity : ComponentActivity() {
                     generalViewModel,
                     questionViewModel,
                     trainingViewModel,
-                    statisticViewModel
+                    statisticViewModel,
                 )
             }
         }

@@ -1,7 +1,11 @@
 package com.ataraxia.artemis.ui
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -13,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.ataraxia.artemis.R
 import com.ataraxia.artemis.helper.Constants
@@ -20,22 +25,24 @@ import com.ataraxia.artemis.helper.NavHelper
 import com.ataraxia.artemis.model.Screen
 import com.ataraxia.artemis.templates.TextButtonTemplate
 import com.ataraxia.artemis.templates.TextTemplate
-import com.ataraxia.artemis.ui.theme.GREEN_ARTEMIS
-import com.ataraxia.artemis.ui.theme.YELLOW_ARTEMIS
+import com.ataraxia.artemis.ui.theme.Artemis_Green
+import com.ataraxia.artemis.ui.theme.Artemis_Yellow
 import com.ataraxia.artemis.viewModel.GeneralViewModel
 import com.ataraxia.artemis.viewModel.QuestionViewModel
 import com.ataraxia.artemis.viewModel.StatisticViewModel
 import com.ataraxia.artemis.viewModel.TrainingViewModel
+import java.math.BigDecimal
 
 class StartMenuComponent {
     private val appBarComposition = AppBarComponent()
 
+    @ExperimentalFoundationApi
     @Composable
     fun StartScreen(
         generalViewModel: GeneralViewModel,
         questionViewModel: QuestionViewModel,
         trainingViewModel: TrainingViewModel,
-        statisticViewModel: StatisticViewModel
+        statisticViewModel: StatisticViewModel,
     ) {
         StartContent(
             generalViewModel,
@@ -45,6 +52,7 @@ class StartMenuComponent {
         )
     }
 
+    @ExperimentalFoundationApi
     @Composable
     fun StartContent(
         generalViewModel: GeneralViewModel,
@@ -52,42 +60,40 @@ class StartMenuComponent {
         trainingViewModel: TrainingViewModel,
         statisticViewModel: StatisticViewModel
     ) {
-        val navController = rememberNavController()
+        val navController: NavHostController = rememberNavController()
         val state = rememberScaffoldState(drawerState = DrawerState(DrawerValue.Closed))
         val scope = rememberCoroutineScope()
         val isFilterDialogOpen: Boolean by generalViewModel.filterDialog.observeAsState(false)
         val isTrainingDialogClosed: Boolean by generalViewModel.closeTrainingDialog.observeAsState(
             false
         )
-        val showStartScreenInfo: Boolean by generalViewModel.showStartScreenInfo.observeAsState(
-            true
-        )
+        BackHandler {
+            navController.navigate(Screen.DrawerScreen.Home.route) {
+                navController.popBackStack()
+            }
+        }
+
         Scaffold(
             scaffoldState = state,
-            backgroundColor = GREEN_ARTEMIS,
+            backgroundColor = Artemis_Green,
             topBar = {
                 appBarComposition.GeneralTopAppBar(
                     scope = scope,
                     state = state,
+                    generalViewModel = generalViewModel,
+                    questionViewModel = questionViewModel
                 )
             },
             drawerContent = {
                 appBarComposition.DrawerContent(
-                    generalViewModel = generalViewModel,
                     questionViewModel = questionViewModel,
                     scope = scope,
                     state = state,
                     navController = navController
                 )
             },
-            drawerBackgroundColor = YELLOW_ARTEMIS
+            drawerBackgroundColor = Artemis_Yellow
         ) { it ->
-            if (showStartScreenInfo) {
-                ShowStartScreenInfo(
-                    questionViewModel,
-                    statisticViewModel
-                )
-            }
             NavHelper.LoadNavigationRoutes(
                 navController = navController,
                 paddingValues = it,
@@ -141,15 +147,22 @@ class StartMenuComponent {
 
     @Composable
     fun StartMenu(
+        statisticViewModel: StatisticViewModel,
         navController: NavController
     ) {
+        val scrollState = rememberScrollState()
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxSize()
-                .padding(bottom = 10.dp),
-            verticalArrangement = Arrangement.Bottom,
+                .padding(bottom = 10.dp)
+                .verticalScroll(scrollState, true),
+            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
+
         ) {
+            ShowStartScreenInfo(statisticViewModel)
+            Spacer(modifier = Modifier.padding(top = 50.dp))
             Row {
                 StartMenuButton(onClick = {
                     navController.navigate(Screen.DrawerScreen.Questions.route)
@@ -195,7 +208,6 @@ class StartMenuComponent {
 
     @Composable
     fun ShowStartScreenInfo(
-        questionViewModel: QuestionViewModel,
         statisticViewModel: StatisticViewModel
     ) {
         val allQuestions: Int by statisticViewModel.allQuestionsCount.observeAsState(0)
@@ -204,28 +216,32 @@ class StartMenuComponent {
         )
         val learnedQuestions: Int by statisticViewModel.allLearnedQuestionsCount.observeAsState(0)
         val failedQuestions: Int by statisticViewModel.allFailedQuestionCount.observeAsState(0)
-        val progressInPercent = questionViewModel.progressInPercent
+        val progressInPercent: BigDecimal by statisticViewModel.progressInPercent.observeAsState(
+            BigDecimal.ZERO
+        )
 
         Column {
             Row(
-                modifier = Modifier.padding(top = 5.dp)
+                modifier = Modifier.padding(top = 5.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = Constants.APP_NAME,
                     color = Color.White,
-                    style = MaterialTheme.typography.h6,
-                    modifier = Modifier.padding(start = 25.dp, top = 25.dp, bottom = 10.dp)
+                    style = MaterialTheme.typography.h5,
+                    modifier = Modifier
+                        .padding(start = 25.dp)
+                        .weight(0.75f)
                 )
-                Box(
-                    Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.CenterEnd
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_coat_of_arms_of_rhineland_palatinate),
-                        contentDescription = "Coat of arms of RLP",
-                        modifier = Modifier.padding(end = 10.dp)
-                    )
-                }
+                Image(
+                    painter = painterResource(id = R.drawable.ic_coat_of_arms_of_rhineland_palatinate),
+                    contentDescription = "Coat of arms of RLP",
+                    modifier = Modifier
+                        .padding(bottom = 5.dp, end = 10.dp)
+                        .weight(0.25f)
+                )
+
             }
             Divider(thickness = 2.dp, color = Color.White, startIndent = 25.dp)
             Text(
