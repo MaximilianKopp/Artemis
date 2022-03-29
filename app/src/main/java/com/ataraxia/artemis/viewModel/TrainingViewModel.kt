@@ -5,10 +5,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.helper.NavTrainingButton
 import com.ataraxia.artemis.model.Question
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -74,7 +74,7 @@ class TrainingViewModel : ViewModel() {
     val favouriteColor: LiveData<Int> = _favouriteColor
 
     fun onChangeFavouriteState(isFavourite: Int) {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             onChangeFavouriteStateCoroutine(isFavourite)
         }
     }
@@ -85,7 +85,7 @@ class TrainingViewModel : ViewModel() {
         }
 
     fun onChangeTrainingData(traningData: List<Question>) {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             onChangeTrainingDataCoroutine(traningData)
         }
     }
@@ -96,7 +96,7 @@ class TrainingViewModel : ViewModel() {
         }
 
     fun onChangeCurrentQuestion(newQuestion: Question) {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             onChangeCurrentQuestionCoroutine(newQuestion)
         }
     }
@@ -107,7 +107,7 @@ class TrainingViewModel : ViewModel() {
         }
 
     fun onChangeIndex(newIndex: Int) {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             onChangeIndexCoroutine(newIndex)
         }
         Log.v("Current index", (newIndex + 1).toString())
@@ -129,7 +129,7 @@ class TrainingViewModel : ViewModel() {
     }
 
     fun onChangeCheckedOption(selection: Boolean, checkedAnswer: String) {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             onChangeCheckedOptionCoroutine(selection, checkedAnswer)
         }
     }
@@ -151,7 +151,7 @@ class TrainingViewModel : ViewModel() {
         }
 
     fun onChangeSelection(selection: String) {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             onChangeSelectionCoroutine(selection)
         }
     }
@@ -167,7 +167,7 @@ class TrainingViewModel : ViewModel() {
         }
 
     fun onChangeAnswerButtonText(answerBtnText: String) {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             onChangeAnswerButtonTextCoroutine(answerBtnText)
         }
     }
@@ -234,7 +234,7 @@ class TrainingViewModel : ViewModel() {
     }
 
     fun onChangeEnableButtons(enabled: Boolean) {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             onChangeEnableButtonsCoroutine(enabled)
         }
     }

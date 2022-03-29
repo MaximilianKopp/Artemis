@@ -6,7 +6,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
 import com.ataraxia.artemis.data.db.ArtemisDatabase
 import com.ataraxia.artemis.data.questions.QuestionRepository
 import com.ataraxia.artemis.helper.CriteriaFilter
@@ -163,7 +162,7 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
         questions: List<Question>,
         trainingSize: Int
     ) {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             prepareQuestionDataCoroutine(criteriaFilter, questions, trainingSize)
         }
     }

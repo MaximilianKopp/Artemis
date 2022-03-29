@@ -4,7 +4,6 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
 import com.ataraxia.artemis.data.db.ArtemisDatabase
 import com.ataraxia.artemis.data.statistics.StatisticRepository
 import kotlinx.coroutines.CoroutineScope
@@ -50,7 +49,7 @@ class StatisticViewModel(application: Application) : AndroidViewModel(Applicatio
     }
 
     fun onChangeTotalStatisticsFromStartScreen() {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             onChangeTotalStatisticsFromStartScreenCoroutine()
         }
     }

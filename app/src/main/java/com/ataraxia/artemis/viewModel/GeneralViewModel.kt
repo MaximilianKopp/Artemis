@@ -7,7 +7,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
 import com.ataraxia.artemis.data.configuration.ConfigurationRepository
 import com.ataraxia.artemis.data.db.ArtemisDatabase
 import com.ataraxia.artemis.model.Screen
@@ -77,7 +76,7 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun onChangeSizeOfTrainingUnit(size: Int) {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             onChangeSizeOfTrainingUnitCoroutine(size)
         }
     }
@@ -89,7 +88,7 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
         }
 
     fun onChangeEnableVibration(isVibrating: Int) {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             onChangeEnableVibrationCoroutine(isVibrating)
         }
     }
@@ -101,7 +100,7 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
         }
 
     fun onTopBarTitleChange(newTitle: String) {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             onTopBarTitleChangeCoroutine(newTitle)
         }
     }
@@ -112,7 +111,7 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
         }
 
     fun onHideFilter(visibility: Pair<Float, Boolean>) {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             onHideFilterCoroutine(visibility)
         }
     }
@@ -134,7 +133,7 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
         }
 
     fun onCloseTrainingScreen(visibility: Pair<Float, Boolean>) {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             onCloseTrainingScreenCoroutine(visibility)
         }
     }
@@ -145,7 +144,7 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
         }
 
     fun onOpenFilterDialog(isOpen: Boolean) {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             onOpenFilterDialogCoroutine(isOpen)
         }
     }
@@ -156,7 +155,7 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
         }
 
     fun onOpenTrainingDialog(isOpen: Boolean) {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             onOpenTrainingDialogCoroutine(isOpen)
         }
     }
