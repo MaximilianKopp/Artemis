@@ -84,7 +84,12 @@ class QuestionListComponent {
 
         if (currentFilter.value == CriteriaFilter.SEARCH) {
             questionViewModel.onChangeQuestionList(
-                filterAbleQuestions.filter { it.text.contains(searchBarText) })
+                filterAbleQuestions.filter {
+                    it.text.contains(searchBarText)
+                    it.optionA.contains(searchBarText)
+                    it.optionB.contains(searchBarText)
+                    it.optionC.contains(searchBarText)
+                })
         }
         if (currentFilter.value == CriteriaFilter.ALL_QUESTIONS_SHUFFLED) {
             questionViewModel.onChangeQuestionList(filterAbleQuestions)
@@ -118,6 +123,7 @@ class QuestionListComponent {
                                     Constants.DISABLED
                                 )
                             )
+                            trainingViewModel.onChangeIndex(0)
                             generalViewModel.onChangeSearchWidgetState(false)
                             navController.navigate(Screen.DrawerScreen.Training.route)
                         }) {
@@ -176,7 +182,7 @@ class QuestionListComponent {
                             }
                             Text(
                                 text = question.text,
-                                Modifier.padding(start = 3.dp)
+                                Modifier.padding(start = 3.dp, top = 12.dp)
                             )
                         }
                         Row {

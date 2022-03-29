@@ -209,7 +209,11 @@ class TrainingComponent {
                                     modifier = Modifier.padding(start = 5.dp)
                                 )
                                 Text(
-                                    modifier = Modifier.padding(start = 4.dp, end = 2.dp),
+                                    modifier = Modifier.padding(
+                                        start = 3.dp,
+                                        top = 12.dp,
+                                        end = 2.dp
+                                    ),
                                     text = currentQuestionText,
                                     style = MaterialTheme.typography.caption
                                 )
