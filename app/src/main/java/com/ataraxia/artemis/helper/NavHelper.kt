@@ -36,7 +36,7 @@ class NavHelper {
 
             val startMenuComponent = StartMenuComponent()
             val questionComponent = TopicCatalogueComponent()
-            val examComponent = ExamComponent()
+            val examComponent = AssignmentComponent()
             val statisticComponent = StatisticComponent()
             val configComponent = ConfigComponent()
             val questionListComponent = QuestionListComponent()
@@ -57,7 +57,9 @@ class NavHelper {
                             Questions.route -> questionComponent.TopicCatalogueScreen(
                                 questionViewModel, navController
                             )
-                            Exam.route -> examComponent.ExamScreen()
+                            Exam.route -> examComponent.AssignmentScreen(
+                                questionViewModel
+                            )
                             Statistics.route -> statisticComponent.StatisticScreen(
                                 questionViewModel, statisticViewModel, navController
                             )

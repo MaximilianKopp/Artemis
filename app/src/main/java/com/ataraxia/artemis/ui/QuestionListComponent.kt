@@ -1,7 +1,6 @@
 package com.ataraxia.artemis.ui
 
 import android.util.Log
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
@@ -410,17 +409,6 @@ class QuestionListComponent {
                     }
                 }
             )
-        }
-        BackHandler(enabled = true) {
-            generalViewModel.onChangeSearchWidgetState(false)
-            generalViewModel.onHideSearchWidget(
-                Pair(
-                    Constants.ALPHA_INVISIBLE,
-                    Constants.DISABLED
-                )
-            )
-            questionViewModel.onChangeQuestionList(filterAbleQuestions)
-            navController.navigate(Screen.DrawerScreen.Questions.route)
         }
     }
 }

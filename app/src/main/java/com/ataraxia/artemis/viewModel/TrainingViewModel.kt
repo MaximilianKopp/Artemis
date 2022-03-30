@@ -186,6 +186,7 @@ class TrainingViewModel : ViewModel() {
         Log.v("Selected Options", checkedAnswers.toString())
     }
 
+    @Suppress("JavaCollectionsStaticMethodOnImmutableList")
     fun isSelectionCorrect(
         correctAnswers: Question,
         currentCheckedAnswers: List<String>,
@@ -233,18 +234,18 @@ class TrainingViewModel : ViewModel() {
         }
     }
 
-    fun onChangeEnableButtons(enabled: Boolean) {
+    fun onChangeEnableNavButtons(enabled: Boolean) {
         CoroutineScope(Dispatchers.IO).launch {
-            onChangeEnableButtonsCoroutine(enabled)
+            onChangeEnableNavButtonsCoroutine(enabled)
         }
     }
 
-    private suspend fun onChangeEnableButtonsCoroutine(enabled: Boolean) =
+    private suspend fun onChangeEnableNavButtonsCoroutine(enabled: Boolean) =
         withContext(Dispatchers.IO) {
             _isButtonEnabled.postValue(enabled)
         }
 
-    fun loadNextQuestion() {
+    fun resetSelections() {
         _checkedA.postValue(false)
         _checkedB.postValue(false)
         _checkedC.postValue(false)
@@ -264,6 +265,7 @@ class TrainingViewModel : ViewModel() {
             NavTrainingButton.NEXT_PAGE -> nextPage(index, questions)
             NavTrainingButton.LAST_PAGE -> lastPage(questions)
         }
+        resetSelections()
     }
 
     private fun firstPage(questions: List<Question>) {

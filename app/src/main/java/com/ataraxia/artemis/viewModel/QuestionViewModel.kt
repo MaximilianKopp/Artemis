@@ -34,7 +34,6 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
 
     lateinit var allQuestions: List<Question>
 
-
     var onceLearnedQuestions: Int = 0
     var learnedQuestions: Int = 0
     var failedQuestions: Int = 0
@@ -56,6 +55,39 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
             }
         }
 
+    }
+
+    fun prepareQuestionsForAssignment(): List<Question> {
+        //Algorithm: Take 20 Questions from each chapter by random
+        val chapter1 = allQuestions.filter { it.topic == 0 }.shuffled().take(20)
+        val chapter2 = allQuestions.filter { it.topic == 1 }.shuffled().take(20)
+        val chapter3 = allQuestions.filter { it.topic == 2 }.shuffled().take(20)
+        val chapter4 = allQuestions.filter { it.topic == 3 }.shuffled().take(20)
+        val chapter5 = allQuestions.filter { it.topic == 4 }.shuffled().take(20)
+        val chapter6 = allQuestions.filter { it.topic == 5 }.shuffled().take(20)
+
+        val assignmentQuestions: List<Question> =
+            (chapter1 + chapter2 + chapter3 + chapter4 + chapter5 + chapter6)
+
+        return removeIndexNumberFromQuestion(assignmentQuestions)
+    }
+
+    private fun removeIndexNumberFromQuestion(questions: List<Question>): List<Question> {
+        for (question in questions) {
+            val subString = question.text.substring(0, 4)
+            when (')') {
+                subString[1] -> {
+                    question.text = question.text.removeRange(0, 3)
+                }
+                subString[2] -> {
+                    question.text = question.text.removeRange(0, 4)
+                }
+                subString[3] -> {
+                    question.text = question.text.removeRange(0, 5)
+                }
+            }
+        }
+        return questions
     }
 
     private fun calculatePercentage(learnedQuestions: Int, allQuestions: Int): BigDecimal {

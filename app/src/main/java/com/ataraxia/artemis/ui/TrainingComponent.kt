@@ -26,6 +26,7 @@ import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.helper.CriteriaFilter
 import com.ataraxia.artemis.helper.NavTrainingButton
 import com.ataraxia.artemis.model.Question
+import com.ataraxia.artemis.model.Screen
 import com.ataraxia.artemis.ui.theme.Artemis_Blue
 import com.ataraxia.artemis.ui.theme.Artemis_Green
 import com.ataraxia.artemis.ui.theme.Artemis_Yellow
@@ -33,6 +34,10 @@ import com.ataraxia.artemis.viewModel.GeneralViewModel
 import com.ataraxia.artemis.viewModel.QuestionViewModel
 import com.ataraxia.artemis.viewModel.StatisticViewModel
 import com.ataraxia.artemis.viewModel.TrainingViewModel
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+import java.util.*
 
 class TrainingComponent {
 
@@ -147,27 +152,29 @@ class TrainingComponent {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Row {
-                        IconButton(onClick = {
-                            if (currentQuestion.favourite == 1) {
-                                currentQuestion.favourite = 0
-                            } else {
-                                currentQuestion.favourite = 1
+                    Column {
+                        Row {
+                            IconButton(onClick = {
+                                if (currentQuestion.favourite == 1) {
+                                    currentQuestion.favourite = 0
+                                } else {
+                                    currentQuestion.favourite = 1
+                                }
+                                trainingViewModel.onChangeFavouriteState(currentQuestion.favourite)
+                                questionViewModel.updateQuestion(currentQuestion)
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Star,
+                                    contentDescription = "Favourite Icon",
+                                    tint = if (favouriteState == 1) Color.Yellow else Color.Black
+                                )
                             }
-                            trainingViewModel.onChangeFavouriteState(currentQuestion.favourite)
-                            questionViewModel.updateQuestion(currentQuestion)
-                        }) {
-                            Icon(
-                                imageVector = Icons.Filled.Star,
-                                contentDescription = "Favourite Icon",
-                                tint = if (favouriteState == 1) Color.Yellow else Color.Black
+                            Text(
+                                modifier = Modifier.padding(6.dp),
+                                text = currentQuestion.text,
+                                style = MaterialTheme.typography.body1,
                             )
                         }
-                        Text(
-                            modifier = Modifier.padding(6.dp),
-                            text = currentQuestion.text,
-                            style = MaterialTheme.typography.body1,
-                        )
                     }
                 }
                 Card(
@@ -222,6 +229,18 @@ class TrainingComponent {
                     }
                 }
             }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 5.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = if (currentQuestion.lastViewed == Constants.LAST_SEEN_DEFAULT) Constants.EMPTY_STRING else "Zuletzt angesehen am ${currentQuestion.lastViewed}",
+                    style = MaterialTheme.typography.caption,
+                    color = Color.White
+                )
+            }
             //Navigation Buttons
             Column {
                 Row {
@@ -272,6 +291,16 @@ class TrainingComponent {
                             //Contains whole logic for further answer processing
                             onClick = {
                                 if (answerBtnText == "Antworten") {
+                                    //Change last viewed record by current timestamp
+                                    currentQuestion.lastViewed =
+                                        LocalDateTime.now().format(
+                                            DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
+                                                .withLocale(
+                                                    Locale("de")
+                                                )
+                                        )
+                                    questionViewModel.updateQuestion(currentQuestion)
+
                                     trainingViewModel.onChangeAnswerButtonText("Weiter")
                                     if (trainingViewModel.isSelectionCorrect(
                                             currentQuestion,
@@ -322,12 +351,11 @@ class TrainingComponent {
                                     }
                                     //Saves all changes into database
                                     questionViewModel.updateQuestion(currentQuestion)
-                                    trainingViewModel.onChangeEnableButtons(false)
-
+                                    trainingViewModel.onChangeEnableNavButtons(false)
                                 }
                                 if (answerBtnText == "Weiter") {
-                                    trainingViewModel.onChangeEnableButtons(true)
-                                    trainingViewModel.loadNextQuestion()
+                                    trainingViewModel.onChangeEnableNavButtons(true)
+                                    trainingViewModel.resetSelections()
                                     Log.v("Current Question", currentQuestion.correctAnswers)
                                     trainingViewModel.setNavTrainingButton(
                                         NavTrainingButton.NEXT_PAGE,
@@ -350,17 +378,6 @@ class TrainingComponent {
                     Row(
                         modifier = Modifier.padding(bottom = 30.dp)
                     ) {
-                        BackHandler(enabled = true) {
-                            if (loadScreen != null && renewQuestions != null) {
-                                navController.navigate(loadScreen.route) {
-                                    popUpTo(0) {
-                                        inclusive = true
-                                    }
-                                }
-                                questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
-                                trainingViewModel.onChangeIndex(0)
-                            }
-                        }
                         //Loads next question
                         IconButton(
                             enabled = isButtonEnabled,
@@ -409,68 +426,100 @@ class TrainingComponent {
             }
         }
         if (isTrainingDialogOpen) {
-            AlertDialog(
-                onDismissRequest = { onOpenTrainingDialog(false) },
-                backgroundColor = Artemis_Green,
-                text = {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            if (loadScreen != null) {
+                if (renewQuestions != null) {
+                    TrainerAlertDialog(
+                        onOpenTrainingDialog,
+                        loadScreen,
+                        navController,
+                        questionViewModel,
+                        generalViewModel,
+                        trainingViewModel,
+                    )
+                }
+            }
+        }
+        BackHandler(enabled = true) {
+            if (loadScreen != null) {
+                navController.navigate(loadScreen.route)
+            }
+            questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
+            trainingViewModel.onChangeIndex(0)
+            trainingViewModel.onChangeAnswerButtonText("Antworten")
+            trainingViewModel.resetSelections()
+        }
+    }
+
+    @Composable
+    fun TrainerAlertDialog(
+        onOpenTrainingDialog: (Boolean) -> Unit,
+        loadScreen: Screen.DrawerScreen,
+        navController: NavController,
+        questionViewModel: QuestionViewModel,
+        generalViewModel: GeneralViewModel,
+        trainingViewModel: TrainingViewModel,
+
+        ) {
+        AlertDialog(
+            onDismissRequest = { onOpenTrainingDialog(false) },
+            backgroundColor = Artemis_Green,
+            text = {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "Zurück zum Hauptmenü?",
+                        style = MaterialTheme.typography.body1,
+                        color = Color.White
+                    )
+                }
+            },
+            buttons = {
+                Column(
+                    Modifier.padding(12.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Button(
+                        onClick = {
+                            navController.navigate(loadScreen.route)
+                            questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
+                            trainingViewModel.onChangeIndex(0)
+                            onOpenTrainingDialog(false)
+                            generalViewModel.onCloseTrainingScreen(
+                                Pair(
+                                    Constants.ALPHA_INVISIBLE,
+                                    Constants.DISABLED
+                                )
+                            )
+                            trainingViewModel.onChangeIndex(0)
+                            trainingViewModel.onChangeAnswerButtonText("Antworten")
+                            trainingViewModel.resetSelections()
+                        },
+                        Modifier
+                            .width(300.dp)
+                            .padding(4.dp),
+                        colors = ButtonDefaults.buttonColors(Artemis_Yellow),
+                    ) {
                         Text(
-                            text = "Zurück zum Hauptmenü?",
-                            style = MaterialTheme.typography.body1,
-                            color = Color.White
+                            text = "Ja",
+                            style = MaterialTheme.typography.body1
                         )
                     }
-                },
-                buttons = {
-                    Column(
-                        Modifier.padding(12.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                    Button(
+                        onClick = {
+                            onOpenTrainingDialog(false)
+                        },
+                        Modifier
+                            .width(300.dp)
+                            .padding(4.dp),
+                        colors = ButtonDefaults.buttonColors(Artemis_Yellow)
                     ) {
-                        Button(
-                            onClick = {
-                                if (loadScreen != null && renewQuestions != null) {
-
-                                    navController.navigate(loadScreen.route)
-                                    questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
-                                    trainingViewModel.onChangeIndex(0)
-                                    onOpenTrainingDialog(false)
-                                    generalViewModel.onCloseTrainingScreen(
-                                        Pair(
-                                            Constants.ALPHA_INVISIBLE,
-                                            Constants.DISABLED
-                                        )
-                                    )
-                                    trainingViewModel.onChangeIndex(0)
-                                }
-                            },
-                            Modifier
-                                .width(300.dp)
-                                .padding(4.dp),
-                            colors = ButtonDefaults.buttonColors(Artemis_Yellow)
-                        ) {
-                            Text(
-                                text = "Ja",
-                                style = MaterialTheme.typography.body1
-                            )
-                        }
-                        Button(
-                            onClick = {
-                                onOpenTrainingDialog(false)
-                            },
-                            Modifier
-                                .width(300.dp)
-                                .padding(4.dp),
-                            colors = ButtonDefaults.buttonColors(Artemis_Yellow)
-                        ) {
-                            Text(
-                                text = "Nein",
-                                style = MaterialTheme.typography.body1
-                            )
-                        }
+                        Text(
+                            text = "Nein",
+                            style = MaterialTheme.typography.body1
+                        )
                     }
                 }
-            )
-        }
+            }
+        )
     }
 
     private fun showMessage(context: Context, message: String) {
@@ -480,5 +529,6 @@ class TrainingComponent {
         }
     }
 }
+
 
 

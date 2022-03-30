@@ -14,6 +14,9 @@ class Constants {
         const val ENABLED = true
         const val DISABLED = false
 
+        const val EMPTY_STRING = ""
+        const val LAST_SEEN_DEFAULT = "01.03.22, 00:00"
+
         const val TRAINING_SELECTION_A = "a"
         const val TRAINING_SELECTION_B = "b"
         const val TRAINING_SELECTION_C = "c"
