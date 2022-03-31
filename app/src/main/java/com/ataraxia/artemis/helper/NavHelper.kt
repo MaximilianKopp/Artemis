@@ -11,10 +11,7 @@ import androidx.navigation.compose.composable
 import com.ataraxia.artemis.model.Screen
 import com.ataraxia.artemis.model.Screen.DrawerScreen.*
 import com.ataraxia.artemis.ui.*
-import com.ataraxia.artemis.viewModel.GeneralViewModel
-import com.ataraxia.artemis.viewModel.QuestionViewModel
-import com.ataraxia.artemis.viewModel.StatisticViewModel
-import com.ataraxia.artemis.viewModel.TrainingViewModel
+import com.ataraxia.artemis.viewModel.*
 
 class NavHelper {
 
@@ -31,7 +28,8 @@ class NavHelper {
             generalViewModel: GeneralViewModel,
             questionViewModel: QuestionViewModel,
             trainingViewModel: TrainingViewModel,
-            statisticViewModel: StatisticViewModel
+            statisticViewModel: StatisticViewModel,
+            assignmentViewModel: AssignmentViewModel
         ) {
 
             val startMenuComponent = StartMenuComponent()
@@ -58,7 +56,8 @@ class NavHelper {
                                 questionViewModel, navController
                             )
                             Exam.route -> examComponent.AssignmentScreen(
-                                questionViewModel
+                                questionViewModel,
+                                assignmentViewModel
                             )
                             Statistics.route -> statisticComponent.StatisticScreen(
                                 questionViewModel, statisticViewModel, navController

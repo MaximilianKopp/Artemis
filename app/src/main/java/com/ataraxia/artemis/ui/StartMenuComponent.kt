@@ -27,10 +27,7 @@ import com.ataraxia.artemis.templates.TextButtonTemplate
 import com.ataraxia.artemis.templates.TextTemplate
 import com.ataraxia.artemis.ui.theme.Artemis_Green
 import com.ataraxia.artemis.ui.theme.Artemis_Yellow
-import com.ataraxia.artemis.viewModel.GeneralViewModel
-import com.ataraxia.artemis.viewModel.QuestionViewModel
-import com.ataraxia.artemis.viewModel.StatisticViewModel
-import com.ataraxia.artemis.viewModel.TrainingViewModel
+import com.ataraxia.artemis.viewModel.*
 import java.math.BigDecimal
 
 class StartMenuComponent {
@@ -43,12 +40,14 @@ class StartMenuComponent {
         questionViewModel: QuestionViewModel,
         trainingViewModel: TrainingViewModel,
         statisticViewModel: StatisticViewModel,
+        assignmentViewModel: AssignmentViewModel
     ) {
         StartContent(
             generalViewModel,
             questionViewModel,
             trainingViewModel,
-            statisticViewModel
+            statisticViewModel,
+            assignmentViewModel
         )
     }
 
@@ -58,7 +57,8 @@ class StartMenuComponent {
         generalViewModel: GeneralViewModel,
         questionViewModel: QuestionViewModel,
         trainingViewModel: TrainingViewModel,
-        statisticViewModel: StatisticViewModel
+        statisticViewModel: StatisticViewModel,
+        assignmentViewModel: AssignmentViewModel
     ) {
         val navController: NavHostController = rememberNavController()
         val state = rememberScaffoldState(drawerState = DrawerState(DrawerValue.Closed))
@@ -104,7 +104,8 @@ class StartMenuComponent {
                 generalViewModel = generalViewModel,
                 questionViewModel = questionViewModel,
                 trainingViewModel = trainingViewModel,
-                statisticViewModel = statisticViewModel
+                statisticViewModel = statisticViewModel,
+                assignmentViewModel = assignmentViewModel
             )
         }
     }

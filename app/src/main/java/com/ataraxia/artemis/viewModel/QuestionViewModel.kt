@@ -24,6 +24,9 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
     private val _questions = MutableLiveData<List<Question>>()
     val questions: LiveData<List<Question>> = _questions
 
+    private val _questionsForAssignment = MutableLiveData<List<Question>>()
+    val questionsForAssignment: LiveData<List<Question>> = _questionsForAssignment
+
     private val _currentTopic = MutableLiveData<Int>()
     val currentTopic: LiveData<Int> = _currentTopic
 
@@ -56,6 +59,17 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
         }
 
     }
+
+    fun onChangeQuestionsForAssignment(questions: List<Question>) {
+        CoroutineScope(Dispatchers.IO).launch {
+            onChangeQuestionsForAssignmentCoroutines(questions)
+        }
+    }
+
+    private suspend fun onChangeQuestionsForAssignmentCoroutines(questions: List<Question>) =
+        withContext(Dispatchers.IO) {
+            _questionsForAssignment.postValue(questions)
+        }
 
     fun prepareQuestionsForAssignment(): List<Question> {
         //Algorithm: Take 20 Questions from each chapter by random
