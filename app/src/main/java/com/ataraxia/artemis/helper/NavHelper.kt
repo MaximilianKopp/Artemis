@@ -56,8 +56,12 @@ class NavHelper {
                                 questionViewModel, navController
                             )
                             Exam.route -> examComponent.AssignmentScreen(
+                                navController,
                                 questionViewModel,
-                                assignmentViewModel
+                                trainingViewModel,
+                                generalViewModel,
+                                assignmentViewModel,
+                                statisticViewModel
                             )
                             Statistics.route -> statisticComponent.StatisticScreen(
                                 questionViewModel, statisticViewModel, navController
