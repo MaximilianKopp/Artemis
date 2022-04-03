@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.helper.CriteriaFilter
-import com.ataraxia.artemis.helper.NavTrainingButton
+import com.ataraxia.artemis.helper.NavigationButton
 import com.ataraxia.artemis.model.Question
 import com.ataraxia.artemis.model.Screen
 import com.ataraxia.artemis.ui.theme.Artemis_Blue
@@ -251,8 +251,8 @@ class TrainingComponent {
                         IconButton(
                             enabled = isButtonEnabled,
                             onClick = {
-                                trainingViewModel.setNavTrainingButton(
-                                    NavTrainingButton.FIRST_PAGE,
+                                trainingViewModel.setNavigationButton(
+                                    NavigationButton.FIRST_PAGE,
                                     index,
                                     trainingData
                                 )
@@ -268,8 +268,8 @@ class TrainingComponent {
                         IconButton(
                             enabled = isButtonEnabled,
                             onClick = {
-                                trainingViewModel.setNavTrainingButton(
-                                    NavTrainingButton.PREV_PAGE,
+                                trainingViewModel.setNavigationButton(
+                                    NavigationButton.PREV_PAGE,
                                     index,
                                     trainingData
                                 )
@@ -357,8 +357,8 @@ class TrainingComponent {
                                     trainingViewModel.onChangeEnableNavButtons(true)
                                     trainingViewModel.resetSelections()
                                     Log.v("Current Question", currentQuestion.correctAnswers)
-                                    trainingViewModel.setNavTrainingButton(
-                                        NavTrainingButton.NEXT_PAGE,
+                                    trainingViewModel.setNavigationButton(
+                                        NavigationButton.NEXT_PAGE,
                                         index,
                                         trainingData
                                     )
@@ -382,8 +382,8 @@ class TrainingComponent {
                         IconButton(
                             enabled = isButtonEnabled,
                             onClick = {
-                                trainingViewModel.setNavTrainingButton(
-                                    NavTrainingButton.NEXT_PAGE,
+                                trainingViewModel.setNavigationButton(
+                                    NavigationButton.NEXT_PAGE,
                                     index,
                                     trainingData
                                 )
@@ -400,8 +400,8 @@ class TrainingComponent {
                         IconButton(
                             enabled = isButtonEnabled,
                             onClick = {
-                                trainingViewModel.setNavTrainingButton(
-                                    NavTrainingButton.LAST_PAGE,
+                                trainingViewModel.setNavigationButton(
+                                    NavigationButton.LAST_PAGE,
                                     index,
                                     trainingData
                                 )

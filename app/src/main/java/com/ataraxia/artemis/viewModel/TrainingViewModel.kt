@@ -6,7 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.ataraxia.artemis.helper.Constants
-import com.ataraxia.artemis.helper.NavTrainingButton
+import com.ataraxia.artemis.helper.NavigationButton
 import com.ataraxia.artemis.model.Question
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -84,9 +84,9 @@ class TrainingViewModel : ViewModel() {
             _favouriteColor.postValue(isFavourite)
         }
 
-    fun onChangeTrainingData(traningData: List<Question>) {
+    fun onChangeTrainingData(trainingData: List<Question>) {
         CoroutineScope(Dispatchers.IO).launch {
-            onChangeTrainingDataCoroutine(traningData)
+            onChangeTrainingDataCoroutine(trainingData)
         }
     }
 
@@ -258,12 +258,12 @@ class TrainingViewModel : ViewModel() {
     }
 
     //Navigation bar with buttons
-    fun setNavTrainingButton(direction: NavTrainingButton, index: Int, questions: List<Question>) {
+    fun setNavigationButton(direction: NavigationButton, index: Int, questions: List<Question>) {
         when (direction) {
-            NavTrainingButton.FIRST_PAGE -> firstPage(questions)
-            NavTrainingButton.PREV_PAGE -> prevPage(index, questions)
-            NavTrainingButton.NEXT_PAGE -> nextPage(index, questions)
-            NavTrainingButton.LAST_PAGE -> lastPage(questions)
+            NavigationButton.FIRST_PAGE -> firstPage(questions)
+            NavigationButton.PREV_PAGE -> prevPage(index, questions)
+            NavigationButton.NEXT_PAGE -> nextPage(index, questions)
+            NavigationButton.LAST_PAGE -> lastPage(questions)
         }
         resetSelections()
     }

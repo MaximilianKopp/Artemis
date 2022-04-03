@@ -45,10 +45,10 @@ class Screen {
             "questioncatalogue"
         )
 
-        object Exam : DrawerScreen(
+        object Assignment : DrawerScreen(
             R.drawable.ic_baseline_assignment_24,
             "Prüfung",
-            "exam"
+            "assignment"
         )
 
         object Statistics : DrawerScreen(
@@ -59,7 +59,7 @@ class Screen {
 
         object Configuration : DrawerScreen(
             R.drawable.ic_baseline_build_circle_24,
-            "Konfiguration",
+            "Einstellungen",
             "configuration"
         )
 
@@ -103,13 +103,23 @@ class Screen {
             "Training",
             "training"
         )
+
+        object Imprint : DrawerScreen(
+            "Impressum",
+            "imprint"
+        )
+
+        object Policy : DrawerScreen(
+            "Datenschutzerklärung",
+            "policy"
+        )
     }
 
     companion object {
         val GENERAL_SCREENS = listOf(
             DrawerScreen.Home,
             DrawerScreen.Questions,
-            DrawerScreen.Exam,
+            DrawerScreen.Assignment,
             DrawerScreen.Statistics,
             DrawerScreen.Configuration,
         )
@@ -120,8 +130,7 @@ class Screen {
             DrawerScreen.TopicWeaponsLawAndTechnology,
             DrawerScreen.TopicWildLifeTreatment,
             DrawerScreen.TopicHuntingLaw,
-            DrawerScreen.TopicPreservationOfWildLifeAndNature,
-            DrawerScreen.Training,
+            DrawerScreen.TopicPreservationOfWildLifeAndNature
         )
     }
 }

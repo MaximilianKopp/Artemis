@@ -25,6 +25,8 @@ class NavHelper {
             onOpenFilterDialog: (Boolean) -> Unit,
             isTrainingDialogClosed: Boolean,
             onOpenTrainingDialog: (Boolean) -> Unit,
+            isAssignmentDialogClosed: Boolean,
+            onOpenAssignmentDialog: (Boolean) -> Unit,
             generalViewModel: GeneralViewModel,
             questionViewModel: QuestionViewModel,
             trainingViewModel: TrainingViewModel,
@@ -49,33 +51,19 @@ class NavHelper {
                     composable(generalScreen.route) {
                         when (generalScreen.route) {
                             Home.route -> startMenuComponent.StartMenu(
+                                generalViewModel,
+                                questionViewModel,
+                                assignmentViewModel,
                                 statisticViewModel,
                                 navController
                             )
                             Questions.route -> questionComponent.TopicCatalogueScreen(
                                 questionViewModel, navController
                             )
-                            Exam.route -> examComponent.AssignmentScreen(
-                                navController,
-                                questionViewModel,
-                                trainingViewModel,
-                                generalViewModel,
-                                assignmentViewModel,
-                                statisticViewModel
-                            )
                             Statistics.route -> statisticComponent.StatisticScreen(
                                 questionViewModel, statisticViewModel, navController
                             )
                             Configuration.route -> configComponent.ConfigScreen()
-                            Training.route -> trainingComponent.TrainingScreen(
-                                navController = navController,
-                                isTrainingDialogOpen = isFilterDialogOpen,
-                                onOpenTrainingDialog = onOpenTrainingDialog,
-                                questionViewModel = questionViewModel,
-                                trainingViewModel = trainingViewModel,
-                                generalViewModel = generalViewModel,
-                                statisticViewModel = statisticViewModel
-                            )
                         }
                         generalViewModel.onHideSearchWidget(
                             Pair(
@@ -84,6 +72,18 @@ class NavHelper {
                             )
                         )
                         generalViewModel.onHideFilter(
+                            Pair(
+                                Constants.ALPHA_INVISIBLE,
+                                Constants.DISABLED
+                            )
+                        )
+                        generalViewModel.onCloseTrainingScreen(
+                            Pair(
+                                Constants.ALPHA_INVISIBLE,
+                                Constants.DISABLED
+                            )
+                        )
+                        generalViewModel.onCloseAssignmentScreen(
                             Pair(
                                 Constants.ALPHA_INVISIBLE,
                                 Constants.DISABLED
@@ -246,6 +246,36 @@ class NavHelper {
                             generalViewModel.onTopBarTitleChange(topicScreen.title)
                         }
                     }
+                    composable(Assignment.route) {
+                        examComponent.AssignmentScreen(
+                            navController,
+                            isAssignmentDialogClosed,
+                            onOpenAssignmentDialog,
+                            questionViewModel,
+                            generalViewModel,
+                            assignmentViewModel,
+                            statisticViewModel
+                        )
+                        generalViewModel.onTopBarTitleChange(Assignment.title)
+                        generalViewModel.onHideSearchWidget(
+                            Pair(
+                                Constants.ALPHA_INVISIBLE,
+                                Constants.DISABLED
+                            )
+                        )
+                        generalViewModel.onHideFilter(
+                            Pair(
+                                Constants.ALPHA_INVISIBLE,
+                                Constants.DISABLED
+                            )
+                        )
+                        generalViewModel.onCloseAssignmentScreen(
+                            Pair(
+                                Constants.ALPHA_VISIBLE,
+                                Constants.ENABLED
+                            )
+                        )
+                    }
                     composable(Training.route) {
                         trainingComponent.TrainingScreen(
                             navController = navController,
@@ -267,6 +297,12 @@ class NavHelper {
                             Pair(
                                 Constants.ALPHA_INVISIBLE,
                                 Constants.DISABLED
+                            )
+                        )
+                        generalViewModel.onCloseTrainingScreen(
+                            Pair(
+                                Constants.ALPHA_VISIBLE,
+                                Constants.ENABLED
                             )
                         )
                         generalViewModel.onCloseTrainingScreen(

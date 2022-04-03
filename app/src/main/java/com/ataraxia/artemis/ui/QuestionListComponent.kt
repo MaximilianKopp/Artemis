@@ -124,6 +124,7 @@ class QuestionListComponent {
                             )
                             trainingViewModel.onChangeIndex(0)
                             generalViewModel.onChangeSearchWidgetState(false)
+                            generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Training)
                             navController.navigate(Screen.DrawerScreen.Training.route)
                         }) {
                         Text(
@@ -151,6 +152,7 @@ class QuestionListComponent {
                                     Constants.DISABLED
                                 )
                             )
+                            generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Training)
                             questionViewModel.onChangeFilter(CriteriaFilter.SINGLE_QUESTION)
                             trainingViewModel.onChangeTrainingData(listOf(question))
                             trainingViewModel.onChangeCurrentQuestion(question)

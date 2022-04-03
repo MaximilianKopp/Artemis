@@ -9,10 +9,7 @@ import androidx.lifecycle.MutableLiveData
 import com.ataraxia.artemis.data.db.ArtemisDatabase
 import com.ataraxia.artemis.data.questions.QuestionRepository
 import com.ataraxia.artemis.helper.CriteriaFilter
-import com.ataraxia.artemis.model.Question
-import com.ataraxia.artemis.model.Screen
-import com.ataraxia.artemis.model.StatisticProjection
-import com.ataraxia.artemis.model.Topic
+import com.ataraxia.artemis.model.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -24,8 +21,8 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
     private val _questions = MutableLiveData<List<Question>>()
     val questions: LiveData<List<Question>> = _questions
 
-    private val _questionsForAssignment = MutableLiveData<List<Question>>()
-    val questionsForAssignment: LiveData<List<Question>> = _questionsForAssignment
+    private val _questionsForAssignment = MutableLiveData<List<QuestionProjection>>()
+    val questionsForAssignment: LiveData<List<QuestionProjection>> = _questionsForAssignment
 
     private val _currentTopic = MutableLiveData<Int>()
     val currentTopic: LiveData<Int> = _currentTopic
@@ -60,13 +57,13 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
 
     }
 
-    fun onChangeQuestionsForAssignment(questions: List<Question>) {
+    fun onChangeQuestionsForAssignment(questions: List<QuestionProjection>) {
         CoroutineScope(Dispatchers.IO).launch {
             onChangeQuestionsForAssignmentCoroutines(questions)
         }
     }
 
-    private suspend fun onChangeQuestionsForAssignmentCoroutines(questions: List<Question>) =
+    private suspend fun onChangeQuestionsForAssignmentCoroutines(questions: List<QuestionProjection>) =
         withContext(Dispatchers.IO) {
             _questionsForAssignment.postValue(questions)
         }

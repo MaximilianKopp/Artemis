@@ -22,11 +22,11 @@ import androidx.navigation.compose.rememberNavController
 import com.ataraxia.artemis.R
 import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.helper.NavHelper
+import com.ataraxia.artemis.model.QuestionProjection
 import com.ataraxia.artemis.model.Screen
 import com.ataraxia.artemis.templates.TextButtonTemplate
 import com.ataraxia.artemis.templates.TextTemplate
 import com.ataraxia.artemis.ui.theme.Artemis_Green
-import com.ataraxia.artemis.ui.theme.Artemis_Yellow
 import com.ataraxia.artemis.viewModel.*
 import java.math.BigDecimal
 
@@ -63,8 +63,14 @@ class StartMenuComponent {
         val navController: NavHostController = rememberNavController()
         val state = rememberScaffoldState(drawerState = DrawerState(DrawerValue.Closed))
         val scope = rememberCoroutineScope()
+        val currentScreen: Screen.DrawerScreen by generalViewModel.currentScreen.observeAsState(
+            Screen.DrawerScreen.Home
+        )
         val isFilterDialogOpen: Boolean by generalViewModel.filterDialog.observeAsState(false)
-        val isTrainingDialogClosed: Boolean by generalViewModel.closeTrainingDialog.observeAsState(
+        val isTrainingDialogClosed: Boolean by generalViewModel.openTrainingDialog.observeAsState(
+            false
+        )
+        val isAssignmentDialogClosed: Boolean by generalViewModel.openAssignmentDialog.observeAsState(
             false
         )
         BackHandler {
@@ -72,12 +78,12 @@ class StartMenuComponent {
                 navController.popBackStack()
             }
         }
-
         Scaffold(
             scaffoldState = state,
             backgroundColor = Artemis_Green,
             topBar = {
                 appBarComposition.GeneralTopAppBar(
+                    currentScreen = currentScreen,
                     scope = scope,
                     state = state,
                     generalViewModel = generalViewModel,
@@ -92,7 +98,7 @@ class StartMenuComponent {
                     navController = navController
                 )
             },
-            drawerBackgroundColor = Artemis_Yellow
+            drawerBackgroundColor = Artemis_Green
         ) { it ->
             NavHelper.LoadNavigationRoutes(
                 navController = navController,
@@ -101,6 +107,8 @@ class StartMenuComponent {
                 onOpenFilterDialog = { generalViewModel.onOpenFilterDialog(it) },
                 isTrainingDialogClosed = isTrainingDialogClosed,
                 onOpenTrainingDialog = { generalViewModel.onOpenTrainingDialog(it) },
+                isAssignmentDialogClosed = isAssignmentDialogClosed,
+                onOpenAssignmentDialog = { generalViewModel.onOpenAssignmentDialog(it) },
                 generalViewModel = generalViewModel,
                 questionViewModel = questionViewModel,
                 trainingViewModel = trainingViewModel,
@@ -148,6 +156,9 @@ class StartMenuComponent {
 
     @Composable
     fun StartMenu(
+        generalViewModel: GeneralViewModel,
+        questionViewModel: QuestionViewModel,
+        assignmentViewModel: AssignmentViewModel,
         statisticViewModel: StatisticViewModel,
         navController: NavController
     ) {
@@ -175,7 +186,14 @@ class StartMenuComponent {
                     )
                 }
                 StartMenuButton(onClick = {
-                    navController.navigate(Screen.DrawerScreen.Exam.route)
+                    val assignmentQuestions =
+                        questionViewModel.prepareQuestionsForAssignment().map {
+                            QuestionProjection.entityToModel(it)
+                        }.toList().shuffled()
+                    questionViewModel.onChangeQuestionsForAssignment(assignmentQuestions)
+                    assignmentViewModel.onChangeCurrentQuestion(assignmentQuestions[0])
+                    generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Assignment)
+                    navController.navigate(Screen.DrawerScreen.Assignment.route)
                 }) {
                     StartMenuContent(
                         drawable = R.drawable.ic_baseline_assignment_24,
