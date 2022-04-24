@@ -77,10 +77,7 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
         val chapter5 = allQuestions.filter { it.topic == 4 }.shuffled().take(20)
         val chapter6 = allQuestions.filter { it.topic == 5 }.shuffled().take(20)
 
-        val assignmentQuestions: List<Question> =
-            (chapter1 + chapter2 + chapter3 + chapter4 + chapter5 + chapter6)
-
-        return removeIndexNumberFromQuestion(assignmentQuestions)
+        return (chapter1 + chapter2 + chapter3 + chapter4 + chapter5 + chapter6)
     }
 
     private fun removeIndexNumberFromQuestion(questions: List<Question>): List<Question> {
@@ -178,6 +175,10 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
             Topic.TOPIC_6.ordinal -> questions = filterQuestions(
                 criteriaFilter,
                 allQuestions.filter { it.topic == Topic.TOPIC_6.ordinal })
+            Topic.TOPIC_7.ordinal -> questions = filterQuestions(
+                criteriaFilter,
+                allQuestions
+            )
         }
         return questions
     }

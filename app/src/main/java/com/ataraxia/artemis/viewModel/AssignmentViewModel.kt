@@ -138,7 +138,7 @@ class AssignmentViewModel : ViewModel() {
             }
         }
 
-    fun onChangeIndex(newIndex: Int) {
+    private fun onChangeIndex(newIndex: Int) {
         CoroutineScope(Dispatchers.IO).launch {
             onChangeIndexCoroutine(newIndex)
         }
