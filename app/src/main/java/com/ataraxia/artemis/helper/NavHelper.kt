@@ -41,6 +41,8 @@ class NavHelper {
             val configComponent = ConfigComponent()
             val questionListComponent = QuestionListComponent()
             val trainingComponent = TrainingComponent()
+            val imprintComponent = ImprintComponent()
+            val privacyComponent = PrivacyComponent()
 
             NavHost(
                 navController,
@@ -64,6 +66,8 @@ class NavHelper {
                                 questionViewModel, statisticViewModel, navController
                             )
                             Configuration.route -> configComponent.ConfigScreen()
+                            Imprint.route -> imprintComponent.ImprintScreen()
+                            Privacy.route -> privacyComponent.PrivacyScreen()
                         }
                         generalViewModel.onHideSearchWidget(
                             Pair(
@@ -233,7 +237,29 @@ class NavHelper {
                                             )
                                         )
                                     }
-
+                                    AllQuestions.route -> questionListComponent.CurrentTopicScreen(
+                                        navController = navController,
+                                        isFilterDialogOpen = isFilterDialogOpen,
+                                        onOpenFilterDialog = onOpenFilterDialog,
+                                        questionViewModel = questionViewModel,
+                                        generalViewModel = generalViewModel,
+                                        trainingViewModel = trainingViewModel,
+                                        currentTopic = topicScreen.topic
+                                    ).apply {
+                                        generalViewModel.onHideSearchWidget(
+                                            Pair(
+                                                Constants.ALPHA_VISIBLE,
+                                                Constants.ENABLED
+                                            )
+                                        )
+                                        questionViewModel.onChangeTopic(topicScreen.topic)
+                                        generalViewModel.onHideFilter(
+                                            Pair(
+                                                Constants.ALPHA_VISIBLE,
+                                                Constants.ENABLED
+                                            )
+                                        )
+                                    }
                                 }
                                 generalViewModel.onCloseTrainingScreen(
                                     Pair(

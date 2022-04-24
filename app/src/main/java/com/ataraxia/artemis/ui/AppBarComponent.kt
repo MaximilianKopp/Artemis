@@ -4,8 +4,10 @@ import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -243,49 +245,80 @@ class AppBarComponent {
         state: ScaffoldState,
         navController: NavHostController
     ) {
-        Card(
-            backgroundColor = Artemis_Yellow,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(100.dp)
-                .clickable {
+        val scrollState = rememberScrollState()
+        Column(
+            Modifier.verticalScroll(state = scrollState, true)
+        ) {
+            Card(
+                backgroundColor = Artemis_Yellow,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(80.dp)
+                    .clickable {
+                        scope.launch {
+                            state.drawerState.close()
+                            navController.navigate(Screen.DrawerScreen.Home.route)
+                        }
+                    },
+                shape = RectangleShape
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        modifier = Modifier
+                            .weight(0.75f)
+                            .padding(start = 15.dp),
+                        text = "Artemis - Prüfungstrainer",
+                        color = Color.Black,
+                        style = MaterialTheme.typography.h6
+                    )
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_coat_of_arms_of_rhineland_palatinate),
+                        contentDescription = "Coat of arms of RLP",
+                        modifier = Modifier
+                            .padding(bottom = 5.dp, end = 10.dp)
+                            .weight(0.25f)
+                    )
+                }
+            }
+            //Display Topic Screens
+            for (topic in Screen.TOPIC_SCREENS) {
+                TextButton(onClick = {
                     scope.launch {
                         state.drawerState.close()
-                        navController.navigate(Screen.DrawerScreen.Home.route)
+                        navController.navigate(topic.route)
+                        questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
                     }
-                },
-            shape = RectangleShape
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    modifier = Modifier
-                        .weight(0.75f)
-                        .padding(start = 15.dp),
-                    text = "Artemis - Prüfungstrainer",
-                    color = Color.Black,
-                    style = MaterialTheme.typography.h5
-                )
-                Image(
-                    painter = painterResource(id = R.drawable.ic_coat_of_arms_of_rhineland_palatinate),
-                    contentDescription = "Coat of arms of RLP",
-                    modifier = Modifier
-                        .padding(bottom = 5.dp, end = 10.dp)
-                        .weight(0.25f)
-                )
-            }
-        }
-        //Display Topic Screens
-        for (topic in Screen.TOPIC_SCREENS) {
-            TextButton(onClick = {
-                scope.launch {
-                    state.drawerState.close()
-                    navController.navigate(topic.route)
-                    questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
-                }
 
+                }) {
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_baseline_keyboard_arrow_right_24),
+                            contentDescription = "Topics"
+                        )
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = topic.title,
+                            style = MaterialTheme.typography.subtitle2,
+                            color = Color.White
+                        )
+                    }
+                }
+            }
+            Divider(
+                color = Color.Gray, thickness = 2.dp
+            )
+            TextButton(onClick = {
+                scope.launch { state.drawerState.close() }
+                    .also {
+                        navController.navigate(Screen.DrawerScreen.Questions.route)
+                        questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
+                    }
             }) {
                 Row(
                     horizontalArrangement = Arrangement.Center,
@@ -293,110 +326,84 @@ class AppBarComponent {
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.ic_baseline_keyboard_arrow_right_24),
-                        contentDescription = "Topics"
+                        contentDescription = "Sachgebiete"
                     )
                     Text(
                         modifier = Modifier.fillMaxWidth(),
-                        text = topic.title,
-                        style = MaterialTheme.typography.h6,
+                        text = Screen.DrawerScreen.Questions.title,
+                        style = MaterialTheme.typography.subtitle2,
                         color = Color.White
                     )
                 }
             }
-        }
-        Divider(
-            color = Color.Gray, thickness = 2.dp
-        )
-        TextButton(onClick = {
-            scope.launch { state.drawerState.close() }
-                .also {
-                    navController.navigate(Screen.DrawerScreen.Statistics.route)
+            TextButton(onClick = {
+                scope.launch { state.drawerState.close() }
+                    .also {
+                        navController.navigate(Screen.DrawerScreen.Statistics.route)
+                        questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
+                    }
+            }) {
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_baseline_keyboard_arrow_right_24),
+                        contentDescription = "Statistik"
+                    )
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = Screen.DrawerScreen.Statistics.title,
+                        style = MaterialTheme.typography.subtitle2,
+                        color = Color.White
+                    )
+                }
+            }
+            TextButton(onClick = {
+                scope.launch {
+                    state.drawerState.close()
+                    navController.navigate(Screen.DrawerScreen.Imprint.route)
                     questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
                 }
-        }) {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_baseline_keyboard_arrow_right_24),
-                    contentDescription = "Statistik"
-                )
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = Screen.DrawerScreen.Statistics.title,
-                    style = MaterialTheme.typography.h6,
-                    color = Color.White
-                )
+            }) {
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_baseline_keyboard_arrow_right_24),
+                        contentDescription = "Privacy"
+                    )
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = Screen.DrawerScreen.Imprint.title,
+                        style = MaterialTheme.typography.subtitle2,
+                        color = Color.White
+                    )
+                }
             }
-        }
-        TextButton(onClick = {
-            scope.launch {
-                state.drawerState.close()
-                navController.navigate(Screen.DrawerScreen.Configuration.route)
-                questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
-            }
-        }) {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_baseline_keyboard_arrow_right_24),
-                    contentDescription = "Einstellungen"
-                )
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = Screen.DrawerScreen.Configuration.title,
-                    style = MaterialTheme.typography.h6,
-                    color = Color.White
-                )
-            }
-        }
-        TextButton(onClick = {
-            scope.launch {
-                state.drawerState.close()
-                navController.navigate(Screen.DrawerScreen.Imprint.route)
-                questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
-            }
-        }) {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_baseline_keyboard_arrow_right_24),
-                    contentDescription = "Impressum"
-                )
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = Screen.DrawerScreen.Imprint.title,
-                    style = MaterialTheme.typography.h6,
-                    color = Color.White
-                )
-            }
-        }
-        TextButton(onClick = {
-            scope.launch {
-                state.drawerState.close()
-                navController.navigate(Screen.DrawerScreen.Policy.route)
-                questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
-            }
-        }) {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_baseline_keyboard_arrow_right_24),
-                    contentDescription = "Datenschutz"
-                )
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = Screen.DrawerScreen.Policy.title,
-                    style = MaterialTheme.typography.h6,
-                    color = Color.White
-                )
+            TextButton(onClick = {
+                scope.launch {
+                    state.drawerState.close()
+                    navController.navigate(Screen.DrawerScreen.Privacy.route)
+                    questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
+                }
+            }) {
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_baseline_keyboard_arrow_right_24),
+                        contentDescription = "Privacy"
+                    )
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = Screen.DrawerScreen.Privacy.title,
+                        style = MaterialTheme.typography.subtitle2,
+                        color = Color.White
+                    )
+                }
             }
         }
     }

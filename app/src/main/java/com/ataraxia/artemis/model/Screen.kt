@@ -63,6 +63,17 @@ class Screen {
             "configuration"
         )
 
+        object Imprint : DrawerScreen(
+            R.drawable.ic_baseline_info_24,
+            "Impressum",
+            "imprint"
+        )
+
+        object Privacy : DrawerScreen(
+            "Datenschutz",
+            "policy"
+        )
+
         object TopicWildLife : DrawerScreen(
             "Wildbiologie & Wildhege",
             "topicWildlife",
@@ -99,19 +110,15 @@ class Screen {
             Topic.TOPIC_6.ordinal
         )
 
+        object AllQuestions : DrawerScreen(
+            "Alle Fragen",
+            "allQuestions",
+            Topic.TOPIC_7.ordinal
+        )
+
         object Training : DrawerScreen(
             "Training",
             "training"
-        )
-
-        object Imprint : DrawerScreen(
-            "Impressum",
-            "imprint"
-        )
-
-        object Policy : DrawerScreen(
-            "Datenschutzerklärung",
-            "policy"
         )
     }
 
@@ -122,6 +129,8 @@ class Screen {
             DrawerScreen.Assignment,
             DrawerScreen.Statistics,
             DrawerScreen.Configuration,
+            DrawerScreen.Imprint,
+            DrawerScreen.Privacy
         )
 
         val TOPIC_SCREENS = listOf(
@@ -130,7 +139,8 @@ class Screen {
             DrawerScreen.TopicWeaponsLawAndTechnology,
             DrawerScreen.TopicWildLifeTreatment,
             DrawerScreen.TopicHuntingLaw,
-            DrawerScreen.TopicPreservationOfWildLifeAndNature
+            DrawerScreen.TopicPreservationOfWildLifeAndNature,
+            DrawerScreen.AllQuestions
         )
     }
 }

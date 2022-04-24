@@ -1,11 +1,9 @@
 package com.ataraxia.artemis.ui
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -15,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -27,6 +26,7 @@ import com.ataraxia.artemis.model.Screen
 import com.ataraxia.artemis.templates.TextButtonTemplate
 import com.ataraxia.artemis.templates.TextTemplate
 import com.ataraxia.artemis.ui.theme.Artemis_Green
+import com.ataraxia.artemis.ui.theme.Artemis_Yellow
 import com.ataraxia.artemis.viewModel.*
 import java.math.BigDecimal
 
@@ -167,14 +167,14 @@ class StartMenuComponent {
             modifier =
             Modifier
                 .fillMaxSize()
-                .padding(bottom = 10.dp)
+                .padding(bottom = 5.dp)
                 .verticalScroll(scrollState, true),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
 
         ) {
             ShowStartScreenInfo(statisticViewModel)
-            Spacer(modifier = Modifier.padding(top = 50.dp))
+            Spacer(modifier = Modifier.padding(top = 5.dp))
             Row {
                 StartMenuButton(onClick = {
                     navController.navigate(Screen.DrawerScreen.Questions.route)
@@ -182,7 +182,7 @@ class StartMenuComponent {
                     StartMenuContent(
                         drawable = R.drawable.ic_baseline_menu_book_24,
                         contentDescription = "Questions",
-                        text = "Sachgebiete"
+                        text = Screen.DrawerScreen.Questions.title
                     )
                 }
                 StartMenuButton(onClick = {
@@ -198,7 +198,7 @@ class StartMenuComponent {
                     StartMenuContent(
                         drawable = R.drawable.ic_baseline_assignment_24,
                         contentDescription = "Examination",
-                        text = "Prüfung"
+                        text = Screen.DrawerScreen.Assignment.title
                     )
                 }
             }
@@ -209,17 +209,44 @@ class StartMenuComponent {
                     StartMenuContent(
                         drawable = R.drawable.ic_baseline_insert_chart_24,
                         contentDescription = "Statistics",
-                        text = "Statistik"
+                        text = Screen.DrawerScreen.Statistics.title
                     )
                 }
                 StartMenuButton(onClick = {
-                    navController.navigate(Screen.DrawerScreen.Configuration.route)
+                    navController.navigate(Screen.DrawerScreen.Imprint.route)
                 }) {
                     StartMenuContent(
-                        drawable = R.drawable.ic_baseline_build_circle_24,
-                        contentDescription = "Configuration",
-                        text = "Einstellungen"
+                        drawable = R.drawable.ic_baseline_info_24,
+                        contentDescription = "Imprint",
+                        text = Screen.DrawerScreen.Imprint.title
                     )
+                }
+            }
+            Row {
+                Card(
+                    shape = RoundedCornerShape(15.dp),
+                    modifier =
+                    Modifier
+                        .padding(15.dp)
+                        .size(200.dp, 35.dp)
+                        .border(BorderStroke(2.dp, Color.White), RoundedCornerShape(15.dp))
+                        .clickable {
+                            navController.navigate(Screen.DrawerScreen.Privacy.route)
+                        }
+                ) {
+                    Row(
+                        modifier = Modifier.background(Artemis_Yellow),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            modifier = Modifier.weight(1.4f),
+                            text = Screen.DrawerScreen.Privacy.title,
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.body2,
+                            color = Color.Black,
+                        )
+                    }
                 }
             }
         }
