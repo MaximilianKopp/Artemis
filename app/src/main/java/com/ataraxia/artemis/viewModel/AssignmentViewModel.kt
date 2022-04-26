@@ -1,12 +1,13 @@
 package com.ataraxia.artemis.viewModel
 
 import android.util.Log
-import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.MutableState
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.helper.NavigationButton
+import com.ataraxia.artemis.model.QuestionCheckbox
 import com.ataraxia.artemis.model.QuestionProjection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -16,73 +17,19 @@ import kotlinx.coroutines.withContext
 class AssignmentViewModel : ViewModel() {
 
     private val _currentQuestion = MutableLiveData<QuestionProjection>()
-    val currentQuestion = _currentQuestion
-
-    private val _checkedAnswers = mutableListOf<String>()
-    val checkedAnswers: List<String> = _checkedAnswers
+    val currentQuestion: LiveData<QuestionProjection> = _currentQuestion
 
     private val _index = MutableLiveData<Int>()
     val index: LiveData<Int> = _index
 
-    private val _checkBoxColorA = MutableLiveData<Color>()
-    val checkBoxColorA: LiveData<Color> = _checkBoxColorA
-
-    private val _checkBoxColorB = MutableLiveData<Color>()
-    val checkBoxColorB: LiveData<Color> = _checkBoxColorB
-
-    private val _checkBoxColorC = MutableLiveData<Color>()
-    val checkBoxColorC: LiveData<Color> = _checkBoxColorC
-
-    private val _checkBoxColorD = MutableLiveData<Color>()
-    val checkBoxColorD: LiveData<Color> = _checkBoxColorD
-
-    private val _selectA = MutableLiveData<String>()
-    val selectA: LiveData<String> = _selectA
-
-    private val _selectB = MutableLiveData<String>()
-    val selectB: LiveData<String> = _selectB
-
-    private val _selectC = MutableLiveData<String>()
-    val selectC: LiveData<String> = _selectC
-
-    private val _selectD = MutableLiveData<String>()
-    val selectD: LiveData<String> = _selectD
-
-    private val _checkedA = MutableLiveData<Boolean>()
-    val checkedA: LiveData<Boolean> = _checkedA
-
-    private val _checkedB = MutableLiveData<Boolean>()
-    val checkedB: LiveData<Boolean> = _checkedB
-
-    private val _checkedC = MutableLiveData<Boolean>()
-    val checkedC: LiveData<Boolean> = _checkedC
-
-    private val _checkedD = MutableLiveData<Boolean>()
-    val checkedD: LiveData<Boolean> = _checkedD
-
-    private val _isButtonEnabled = MutableLiveData<Boolean>()
-    val isButtonEnabled: LiveData<Boolean> = _isButtonEnabled
-
-    private val _answerBtnText = MutableLiveData("Antworten")
-    val answerBtnText: LiveData<String> = _answerBtnText
-
     private val _favouriteColor = MutableLiveData<Int>()
     val favouriteColor: LiveData<Int> = _favouriteColor
 
-    private fun resetSelections() {
-        _checkedA.postValue(false)
-        _checkedB.postValue(false)
-        _checkedC.postValue(false)
-        _checkedD.postValue(false)
-        _checkBoxColorA.postValue(Color.Black)
-        _checkBoxColorB.postValue(Color.Black)
-        _checkBoxColorC.postValue(Color.Black)
-        _checkBoxColorD.postValue(Color.Black)
-        _checkedAnswers.clear()
-    }
+    private val _checkedAnswers = mutableSetOf<String>()
+    private val checkedAnswers: Set<String> = _checkedAnswers as HashSet<String>
 
-    fun setCurrentQuestionText(question: QuestionProjection, checkedAnswer: String): String {
-        when (checkedAnswer) {
+    fun setCurrentQuestionText(question: QuestionProjection, checkbox: QuestionCheckbox): String {
+        when (checkbox.option) {
             Constants.TRAINING_SELECTION_A -> return question.optionA
             Constants.TRAINING_SELECTION_B -> return question.optionB
             Constants.TRAINING_SELECTION_C -> return question.optionC
@@ -91,52 +38,63 @@ class AssignmentViewModel : ViewModel() {
         return ""
     }
 
-    fun onChangeCheckedOption(selection: Boolean, checkedAnswer: String) {
-        CoroutineScope(Dispatchers.IO).launch {
-            onChangeCheckedOptionCoroutine(selection, checkedAnswer)
-        }
-    }
-
-    fun onChangeSelection(selection: String) {
-        CoroutineScope(Dispatchers.IO).launch {
-            onChangeSelectionCoroutine(selection)
-        }
-    }
-
-    private suspend fun onChangeSelectionCoroutine(selection: String) =
-        withContext(Dispatchers.IO) {
-            when (selection) {
-                Constants.TRAINING_SELECTION_A -> _selectA.postValue(selection)
-                Constants.TRAINING_SELECTION_B -> _selectB.postValue(selection)
-                Constants.TRAINING_SELECTION_C -> _selectC.postValue(selection)
-                Constants.TRAINING_SELECTION_D -> _selectD.postValue(selection)
-            }
-        }
-
-    fun currentSelection(isChecked: Boolean, option: String) {
+    @Suppress("JavaCollectionsStaticMethodOnImmutableList")
+    fun currentSelection(isChecked: Boolean, option: String, currentQuestion: QuestionProjection) {
         if (!isChecked) {
             _checkedAnswers.add(option)
         } else {
             _checkedAnswers.remove(option)
         }
         Log.v("Selected Options", checkedAnswers.toString())
+        currentQuestion.currentSelection = checkedAnswers.toSortedSet().toString()
     }
 
-    private suspend fun onChangeCheckedOptionCoroutine(selection: Boolean, checkedAnswer: String) =
-        withContext(Dispatchers.IO) {
-            var newSelectionValue = false
-            if (selection) {
-                newSelectionValue = false
-            } else if (!selection) {
-                newSelectionValue = true
-            }
-            when (checkedAnswer) {
-                Constants.TRAINING_SELECTION_A -> _checkedA.postValue(newSelectionValue)
-                Constants.TRAINING_SELECTION_B -> _checkedB.postValue(newSelectionValue)
-                Constants.TRAINING_SELECTION_C -> _checkedC.postValue(newSelectionValue)
-                Constants.TRAINING_SELECTION_D -> _checkedD.postValue(newSelectionValue)
+    fun checkedStates(
+        currentQuestion: QuestionProjection,
+        checkbox: QuestionCheckbox,
+        checkedState: MutableState<Boolean>
+    ): Boolean {
+        for (cb in currentQuestion.checkboxList) {
+            if (cb.option == checkbox.option) {
+                checkedState.value = cb.checked
             }
         }
+        return checkedState.value
+    }
+
+    fun onChangeCheckboxes(
+        checkbox: QuestionCheckbox,
+        currentQuestion: QuestionProjection,
+        checkedState: MutableState<Boolean>
+    ) {
+        CoroutineScope(Dispatchers.IO).launch {
+            onChangeCheckboxesCoroutine(checkbox, currentQuestion, checkedState)
+        }
+    }
+
+    private suspend fun onChangeCheckboxesCoroutine(
+        checkbox: QuestionCheckbox,
+        currentQuestion: QuestionProjection,
+        checkedState: MutableState<Boolean>
+    ) = withContext(Dispatchers.IO) {
+        checkbox.checked = !checkbox.checked
+        when (checkbox.option) {
+            Constants.TRAINING_SELECTION_A -> currentQuestion.checkboxA = checkbox.apply {
+                checkedState.value = checkbox.checked
+            }
+            Constants.TRAINING_SELECTION_B -> currentQuestion.checkboxB = checkbox.apply {
+                checkedState.value = checkbox.checked
+            }
+            Constants.TRAINING_SELECTION_C -> currentQuestion.checkboxC = checkbox.apply {
+                checkedState.value = checkbox.checked
+            }
+            Constants.TRAINING_SELECTION_D -> currentQuestion.checkboxD = checkbox.apply {
+                checkedState.value = checkbox.checked
+            }
+        }
+        _currentQuestion.postValue(currentQuestion)
+        onChangeCurrentQuestion(currentQuestion)
+    }
 
     private fun onChangeIndex(newIndex: Int) {
         CoroutineScope(Dispatchers.IO).launch {
@@ -158,6 +116,7 @@ class AssignmentViewModel : ViewModel() {
 
     private suspend fun onChangeCurrentQuestionCoroutine(newQuestion: QuestionProjection) =
         withContext(Dispatchers.IO) {
+            restoreSelection(newQuestion)
             _currentQuestion.postValue(newQuestion)
         }
 
@@ -176,7 +135,7 @@ class AssignmentViewModel : ViewModel() {
     fun setNavigationButton(
         direction: NavigationButton,
         index: Int,
-        questions: List<QuestionProjection>
+        questions: List<QuestionProjection>,
     ) {
         when (direction) {
             NavigationButton.FIRST_PAGE -> firstPage(questions)
@@ -185,7 +144,18 @@ class AssignmentViewModel : ViewModel() {
             NavigationButton.LAST_PAGE -> lastPage(questions)
             NavigationButton.SKIPPED_INDEX -> skippedIndex(questions, index)
         }
-        resetSelections()
+    }
+
+    @Suppress("JavaCollectionsStaticMethodOnImmutableList")
+    private fun restoreSelection(currentQuestion: QuestionProjection) {
+        _checkedAnswers.clear()
+        for (cb in currentQuestion.checkboxList) {
+            if (cb.checked) {
+                _checkedAnswers.add(cb.option)
+            }
+        }
+        checkedAnswers.toSortedSet().toString()
+        currentQuestion.currentSelection = _checkedAnswers.toString()
     }
 
     private fun firstPage(questions: List<QuestionProjection>) {

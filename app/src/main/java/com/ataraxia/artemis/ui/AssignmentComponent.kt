@@ -9,7 +9,6 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -74,47 +73,16 @@ class AssignmentComponent {
     ) {
 
         val navIndex: Int by assignmentViewModel.index.observeAsState(0)
-        val checkedAnswers: List<String> = assignmentViewModel.checkedAnswers
-
         val currentFilter = questionViewModel.filter.observeAsState()
-
         val currentQuestion: QuestionProjection by assignmentViewModel.currentQuestion.observeAsState(
             assignmentQuestions[0]
         )
-
         Log.v("Current Filter", currentFilter.value.toString())
-
-        val checkedA: Boolean by assignmentViewModel.checkedA.observeAsState(false)
-        val checkedB: Boolean by assignmentViewModel.checkedB.observeAsState(false)
-        val checkedC: Boolean by assignmentViewModel.checkedC.observeAsState(false)
-        val checkedD: Boolean by assignmentViewModel.checkedD.observeAsState(false)
-
-        val selectA: String by assignmentViewModel.selectA.observeAsState("a")
-        val selectB: String by assignmentViewModel.selectB.observeAsState("b")
-        val selectC: String by assignmentViewModel.selectC.observeAsState("c")
-        val selectD: String by assignmentViewModel.selectD.observeAsState("d")
-
-        val checkBoxColorA: Color by assignmentViewModel.checkBoxColorA.observeAsState(Color.Black)
-        val checkBoxColorB: Color by assignmentViewModel.checkBoxColorB.observeAsState(Color.Black)
-        val checkBoxColorC: Color by assignmentViewModel.checkBoxColorC.observeAsState(Color.Black)
-        val checkBoxColorD: Color by assignmentViewModel.checkBoxColorD.observeAsState(Color.Black)
 
         val favouriteState: Int by assignmentViewModel.favouriteColor.observeAsState(currentQuestion.favourite)
 
-        val optionA: Pair<Pair<Boolean, Color>, String> =
-            Pair(Pair(checkedA, checkBoxColorA), selectA)
-        val optionB: Pair<Pair<Boolean, Color>, String> =
-            Pair(Pair(checkedB, checkBoxColorB), selectB)
-        val optionC: Pair<Pair<Boolean, Color>, String> =
-            Pair(Pair(checkedC, checkBoxColorC), selectC)
-        val optionD: Pair<Pair<Boolean, Color>, String> =
-            Pair(Pair(checkedD, checkBoxColorD), selectD)
-
-        //Used in order to create checkboxes
-        val selections: List<Pair<Pair<Boolean, Color>, String>> =
-            listOf(optionA, optionB, optionC, optionD)
-
-
+        val resultListOfAnsweredQuestions: MutableList<QuestionProjection> =
+            assignmentQuestions.toMutableList()
 
         Column(
             modifier = Modifier
@@ -168,48 +136,61 @@ class AssignmentComponent {
                 ) {
                     Column {
                         //Creating checkboxes
-                        for (selection in selections) {
-                            val checkBoxCheckedState: MutableState<Boolean> =
-                                rememberSaveable { mutableStateOf(selection.first.first) }
-                            val checkBoxSelection: MutableState<String> =
-                                rememberSaveable { mutableStateOf(selection.second) }
-
-                            val currentQuestionText: String =
-                                assignmentViewModel.setCurrentQuestionText(
-                                    currentQuestion,
-                                    selection.second
-                                )
-                            Row {
-                                Checkbox(
-                                    /*
-                                   * selection.first = <Pair<Boolean, Color> => checkbox state & color
-                                   * selection.second = String => selection e.g: [a,b,c,d]
-                                   */
-                                    checked = selection.first.first,
-                                    colors = CheckboxDefaults.colors(selection.first.second),
-                                    onCheckedChange = {
-                                        assignmentViewModel.onChangeCheckedOption(
-                                            checkBoxCheckedState.value,
-                                            checkBoxSelection.value
-                                        )
-                                        assignmentViewModel.onChangeSelection(checkBoxSelection.value)
-                                        assignmentViewModel.currentSelection(
-                                            checkBoxCheckedState.value,
-                                            checkBoxSelection.value
-                                        )
-                                    },
-                                    modifier = Modifier.padding(start = 5.dp)
-                                )
-                                Text(
-                                    modifier = Modifier.padding(
-                                        start = 3.dp,
-                                        top = 12.dp,
-                                        end = 2.dp
-                                    ),
-                                    text = currentQuestionText,
-                                    style = MaterialTheme.typography.caption
+                        if (currentQuestion.checkboxList.isNotEmpty()) {
+                            for (checkbox in currentQuestion.checkboxList) {
+                                val checkedState =
+                                    rememberSaveable { mutableStateOf(checkbox.checked) }
+                                val currentQuestionText: String =
+                                    assignmentViewModel.setCurrentQuestionText(
+                                        currentQuestion, checkbox
+                                    )
+                                Row {
+                                    Checkbox(
+                                        checked = assignmentViewModel.checkedStates(
+                                            currentQuestion,
+                                            checkbox,
+                                            checkedState
+                                        ),
+                                        colors = CheckboxDefaults.colors(checkbox.color),
+                                        onCheckedChange = {
+                                            assignmentViewModel.onChangeCheckboxes(
+                                                checkbox,
+                                                currentQuestion,
+                                                checkedState
+                                            )
+                                            assignmentViewModel.currentSelection(
+                                                checkbox.checked,
+                                                checkbox.option,
+                                                currentQuestion
+                                            )
+                                            resultListOfAnsweredQuestions[navIndex] =
+                                                currentQuestion
+                                        },
+                                        modifier = Modifier.padding(start = 5.dp)
+                                    )
+                                    Text(
+                                        modifier = Modifier.padding(
+                                            start = 3.dp,
+                                            top = 12.dp,
+                                            end = 2.dp
+                                        ),
+                                        text = currentQuestionText,
+                                        style = MaterialTheme.typography.caption
+                                    )
+                                }
+                            }
+                            Log.v("Current Question", currentQuestion.text)
+                            currentQuestion.checkboxList.forEach {
+                                Log.v(
+                                    "Current option and check state",
+                                    "${it.option} ${it.checked}"
                                 )
                             }
+                            Log.v("Current Question Selection", currentQuestion.currentSelection)
+                            Log.v(
+                                "Current Question Correct Answers",
+                                currentQuestion.correctAnswers
+                            )
                         }
                     }
                 }
@@ -297,22 +278,18 @@ class AssignmentComponent {
                         }
                     }
                     Row(
-                        modifier = Modifier.padding(start = 25.dp, end = 25.dp)
+                        modifier = Modifier.padding(start = 20.dp, end = 20.dp)
                     ) {
                         Button(
                             colors = ButtonDefaults.buttonColors(Artemis_Blue),
                             //Contains whole logic for further answer processing
                             onClick = {
-                                assignmentViewModel.setNavigationButton(
-                                    NavigationButton.NEXT_PAGE,
-                                    navIndex,
-                                    assignmentQuestions
-                                )
+
                             })
                         {
                             Text(
                                 color = Color.White,
-                                text = "Nächste Frage"
+                                text = "Auswertung"
                             )
                         }
                     }
