@@ -7,4 +7,5 @@ enum class Topic {
     TOPIC_4,
     TOPIC_5,
     TOPIC_6,
+    TOPIC_7,
 }

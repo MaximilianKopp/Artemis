@@ -14,7 +14,7 @@ class StatisticRepository(private val statisticDao: StatisticDao) {
         statisticDao.getLearnedQuestionsByTopic(topic)
 
     fun getFailedQuestionsCountByTopic(topic: String): Int =
-        statisticDao.getLearnedQuestionsByTopic(topic)
+        statisticDao.getFailedQuestionsByTopic(topic)
 
     suspend fun updateAllQuestionsCount(name: String) = statisticDao.updateAllQuestionsCount(name)
 }

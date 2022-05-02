@@ -1,6 +1,5 @@
 package com.ataraxia.artemis.ui
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -47,16 +46,10 @@ class TopicCatalogueComponent {
         questionViewModel: QuestionViewModel,
         navController: NavController
     ) {
-        BackHandler(enabled = true) {
-            navController.navigate(Screen.DrawerScreen.Home.route) {
-                popUpTo(0)
-            }
-        }
         val topicScreens = Screen.TOPIC_SCREENS
         var countFailedQuestions: Int
         var countLearnedQuestions: Int
         var countAllQuestionsByTopic: Int
-
 
         val scrollState = rememberScrollState()
         Column(

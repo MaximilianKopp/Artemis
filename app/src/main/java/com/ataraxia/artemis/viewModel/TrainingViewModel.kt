@@ -5,10 +5,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.ataraxia.artemis.helper.Constants
-import com.ataraxia.artemis.helper.NavTrainingButton
+import com.ataraxia.artemis.helper.NavigationButton
 import com.ataraxia.artemis.model.Question
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -74,7 +74,7 @@ class TrainingViewModel : ViewModel() {
     val favouriteColor: LiveData<Int> = _favouriteColor
 
     fun onChangeFavouriteState(isFavourite: Int) {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             onChangeFavouriteStateCoroutine(isFavourite)
         }
     }
@@ -84,9 +84,9 @@ class TrainingViewModel : ViewModel() {
             _favouriteColor.postValue(isFavourite)
         }
 
-    fun onChangeTrainingData(traningData: List<Question>) {
-        viewModelScope.launch {
-            onChangeTrainingDataCoroutine(traningData)
+    fun onChangeTrainingData(trainingData: List<Question>) {
+        CoroutineScope(Dispatchers.IO).launch {
+            onChangeTrainingDataCoroutine(trainingData)
         }
     }
 
@@ -96,7 +96,7 @@ class TrainingViewModel : ViewModel() {
         }
 
     fun onChangeCurrentQuestion(newQuestion: Question) {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             onChangeCurrentQuestionCoroutine(newQuestion)
         }
     }
@@ -107,7 +107,7 @@ class TrainingViewModel : ViewModel() {
         }
 
     fun onChangeIndex(newIndex: Int) {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             onChangeIndexCoroutine(newIndex)
         }
         Log.v("Current index", (newIndex + 1).toString())
@@ -129,7 +129,7 @@ class TrainingViewModel : ViewModel() {
     }
 
     fun onChangeCheckedOption(selection: Boolean, checkedAnswer: String) {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             onChangeCheckedOptionCoroutine(selection, checkedAnswer)
         }
     }
@@ -151,7 +151,7 @@ class TrainingViewModel : ViewModel() {
         }
 
     fun onChangeSelection(selection: String) {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             onChangeSelectionCoroutine(selection)
         }
     }
@@ -167,7 +167,7 @@ class TrainingViewModel : ViewModel() {
         }
 
     fun onChangeAnswerButtonText(answerBtnText: String) {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             onChangeAnswerButtonTextCoroutine(answerBtnText)
         }
     }
@@ -186,6 +186,7 @@ class TrainingViewModel : ViewModel() {
         Log.v("Selected Options", checkedAnswers.toString())
     }
 
+    @Suppress("JavaCollectionsStaticMethodOnImmutableList")
     fun isSelectionCorrect(
         correctAnswers: Question,
         currentCheckedAnswers: List<String>,
@@ -233,18 +234,18 @@ class TrainingViewModel : ViewModel() {
         }
     }
 
-    fun onChangeEnableButtons(enabled: Boolean) {
-        viewModelScope.launch {
-            onChangeEnableButtonsCoroutine(enabled)
+    fun onChangeEnableNavButtons(enabled: Boolean) {
+        CoroutineScope(Dispatchers.IO).launch {
+            onChangeEnableNavButtonsCoroutine(enabled)
         }
     }
 
-    private suspend fun onChangeEnableButtonsCoroutine(enabled: Boolean) =
+    private suspend fun onChangeEnableNavButtonsCoroutine(enabled: Boolean) =
         withContext(Dispatchers.IO) {
             _isButtonEnabled.postValue(enabled)
         }
 
-    fun loadNextQuestion() {
+    fun resetSelections() {
         _checkedA.postValue(false)
         _checkedB.postValue(false)
         _checkedC.postValue(false)
@@ -257,13 +258,14 @@ class TrainingViewModel : ViewModel() {
     }
 
     //Navigation bar with buttons
-    fun setNavTrainingButton(direction: NavTrainingButton, index: Int, questions: List<Question>) {
+    fun setNavigationButton(direction: NavigationButton, index: Int, questions: List<Question>) {
         when (direction) {
-            NavTrainingButton.FIRST_PAGE -> firstPage(questions)
-            NavTrainingButton.PREV_PAGE -> prevPage(index, questions)
-            NavTrainingButton.NEXT_PAGE -> nextPage(index, questions)
-            NavTrainingButton.LAST_PAGE -> lastPage(questions)
+            NavigationButton.FIRST_PAGE -> firstPage(questions)
+            NavigationButton.PREV_PAGE -> prevPage(index, questions)
+            NavigationButton.NEXT_PAGE -> nextPage(index, questions)
+            NavigationButton.LAST_PAGE -> lastPage(questions)
         }
+        resetSelections()
     }
 
     private fun firstPage(questions: List<Question>) {

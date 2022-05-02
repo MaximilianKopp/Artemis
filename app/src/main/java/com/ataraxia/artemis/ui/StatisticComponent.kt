@@ -1,6 +1,5 @@
 package com.ataraxia.artemis.ui
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
@@ -25,7 +24,6 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.ataraxia.artemis.helper.RowScopeExtension.Companion.TableCell
-import com.ataraxia.artemis.model.Screen
 import com.ataraxia.artemis.ui.theme.Artemis_Green
 import com.ataraxia.artemis.ui.theme.Artemis_Red
 import com.ataraxia.artemis.ui.theme.Artemis_Yellow
@@ -63,12 +61,6 @@ class StatisticComponent {
         val progressInPercent: BigDecimal by statisticViewModel.progressInPercent.observeAsState(
             BigDecimal.ZERO
         )
-
-        BackHandler {
-            navController.navigate(Screen.DrawerScreen.Home.route) {
-                popUpTo(0)
-            }
-        }
         val scrollableState = rememberScrollState()
         Column(
             modifier = Modifier.verticalScroll(
