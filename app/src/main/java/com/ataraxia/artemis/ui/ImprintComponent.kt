@@ -75,8 +75,7 @@ class ImprintComponent {
                 color = Color.White
             )
             Text(
-                text = "Der Artemis-Prüfungstrainer ist geistiges Eigentum von Maximilian Kopp. \nEs wird hierbei zwischen der Applikation und den zugrunde liegenden Daten unterschieden. \nDer Quellcode sowie alle damit verbundenen Komponenten unterliegen dem Urheberrecht und anderen Gesetzen zum Schutz geistigen Eigentum" +
-                        ". \n" +
+                text = "Der Artemis-Prüfungstrainer ist geistiges Eigentum von Maximilian Kopp. \nDer Quellcode und alle funktionalen Komponenten unterliegen dem Urheberrecht und anderen Gesetzen zum Schutz geistigen Eigentums. \n" +
                         "Sie dürfen nicht dekompiliert sowie ohne Kenntnis des Eigentümers weder für Handelszwecke oder zur Weitergabe kopiert, noch verändert und in anderen Produkten weiterverwendet werden.",
                 style = MaterialTheme.typography.body1,
                 color = Color.White
