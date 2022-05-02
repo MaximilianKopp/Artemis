@@ -9,10 +9,10 @@ interface StatisticDao {
     @Query("SELECT COUNT(*) FROM questions")
     fun getAllQuestionsCount(): Int
 
-    @Query("SELECT COUNT(*) FROM questions WHERE learnedOnce = 1")
+    @Query("SELECT COUNT(*) FROM questions WHERE learnedOnce = 1 AND learnedTwice == 0")
     fun getAllLearnedOnceQuestionsCount(): Int
 
-    @Query("SELECT COUNT(*) FROM questions WHERE learnedTwice = 1")
+    @Query("SELECT COUNT(*) FROM questions WHERE learnedOnce = 0 AND learnedTwice = 1")
     fun getAllLearnedQuestionsCount(): Int
 
     @Query("SELECT COUNT(*) FROM questions WHERE failed = 1")
@@ -21,10 +21,10 @@ interface StatisticDao {
     @Query("SELECT COUNT(*) FROM questions WHERE topic =:topic")
     fun getAllQuestionsByTopic(topic: String): Int
 
-    @Query("SELECT COUNT(*) FROM questions WHERE topic =:topic AND learnedOnce = 1")
+    @Query("SELECT COUNT(*) FROM questions WHERE topic =:topic AND learnedOnce = 1 AND learnedTwice == 0")
     fun getLearnedOnceQuestionsByTopic(topic: String): Int
 
-    @Query("SELECT COUNT(*) FROM questions WHERE topic =:topic AND learnedTwice = 1")
+    @Query("SELECT COUNT(*) FROM questions WHERE topic =:topic AND learnedOnce = 0 AND learnedTwice == 1")
     fun getLearnedQuestionsByTopic(topic: String): Int
 
     @Query("SELECT COUNT(*) FROM questions WHERE topic =:topic AND failed = 1")
