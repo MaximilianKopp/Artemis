@@ -309,14 +309,14 @@ class TrainingComponent {
                                         )
                                     ) {
                                         showMessage(context, "Korrekt")
-                                        if (currentQuestion.learnedOnce == 0) {
+                                        if (currentQuestion.learnedOnce == 0 && currentQuestion.learnedTwice != 1) {
                                             currentQuestion.learnedOnce = 1
                                             currentQuestion.failed = 0
                                             Log.v(
                                                 "LearnedOnce",
                                                 currentQuestion.learnedOnce.toString()
                                             )
-                                        } else if (currentQuestion.learnedTwice == 0 && currentQuestion.learnedOnce == 1) {
+                                        } else if (currentQuestion.learnedOnce == 1 && currentQuestion.learnedTwice != 1) {
                                             currentQuestion.learnedTwice = 1
                                             currentQuestion.learnedOnce = 0
                                             currentQuestion.failed = 0

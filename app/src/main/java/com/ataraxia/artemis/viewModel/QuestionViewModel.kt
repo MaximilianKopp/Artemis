@@ -257,8 +257,10 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
             var filteredQuestions = allQuestions
             filteredQuestions = filteredQuestions.filter { it.topic == item.second.ordinal }
             val allQuestions: Int = filteredQuestions.size
-            val onceLearnedQuestions: Int = filteredQuestions.filter { it.learnedOnce == 1 }.count()
-            val learnedQuestions: Int = filteredQuestions.filter { it.learnedTwice == 1 }.count()
+            val onceLearnedQuestions: Int =
+                filteredQuestions.filter { it.learnedOnce == 1 && it.learnedTwice == 0 }.count()
+            val learnedQuestions: Int =
+                filteredQuestions.filter { it.learnedOnce == 0 && it.learnedTwice == 1 }.count()
             val failedQuestions: Int = filteredQuestions.filter { it.failed == 1 }.count()
 
             statistics.add(

@@ -84,10 +84,11 @@ class QuestionListComponent {
         if (currentFilter.value == CriteriaFilter.SEARCH) {
             questionViewModel.onChangeQuestionList(
                 filterAbleQuestions.filter {
-                    it.text.contains(searchBarText)
-                    it.optionA.contains(searchBarText)
-                    it.optionB.contains(searchBarText)
-                    it.optionC.contains(searchBarText)
+                    it.text.contains(searchBarText, true)
+                        .or(it.optionA.contains(searchBarText, true))
+                        .or(it.optionB.contains(searchBarText, true))
+                        .or(it.optionC.contains(searchBarText, true))
+                        .or(it.optionD.contains(searchBarText, true))
                 })
         }
         if (currentFilter.value == CriteriaFilter.ALL_QUESTIONS_SHUFFLED) {
@@ -129,7 +130,9 @@ class QuestionListComponent {
                         }) {
                         Text(
                             color = Color.White,
-                            text = "Training starten",
+                            text = "Training starten (${
+                                if (currentFilter.value == CriteriaFilter.ALL_QUESTIONS_SHUFFLED) sizeOfTrainingUnit else questionsLiveData.value.count()
+                            } Fragen)"
                         )
                     }
                 }
@@ -358,6 +361,24 @@ class QuestionListComponent {
                             onClick = {
                                 //Take all not learned questions
                                 questionViewModel.onChangeFilter(CriteriaFilter.NOT_LEARNED)
+                                questionViewModel.onChangeQuestionList(filterAbleQuestions.filter { it.learnedOnce == 0 && it.learnedTwice == 0 })
+                                onOpenDialog(false)
+                            },
+                            Modifier
+                                .width(300.dp)
+                                .padding(4.dp),
+                            colors = ButtonDefaults.buttonColors(Artemis_Yellow),
+                        ) {
+                            Text(
+                                color = Color.Black,
+                                text = "Noch nicht gelernt (${filterAbleQuestions.count { it.learnedOnce == 0 && it.learnedTwice == 0 }})",
+                                style = MaterialTheme.typography.body1
+                            )
+                        }
+                        Button(
+                            onClick = {
+                                //Take all once learned questions
+                                questionViewModel.onChangeFilter(CriteriaFilter.ONCE_LEARNED)
                                 questionViewModel.onChangeQuestionList(filterAbleQuestions.filter { it.learnedOnce == 1 && it.learnedTwice == 0 })
                                 onOpenDialog(false)
                             },
@@ -368,7 +389,7 @@ class QuestionListComponent {
                         ) {
                             Text(
                                 color = Color.Black,
-                                text = "Noch nicht gelernt",
+                                text = "Mind. 1x richtig beantwortet (${filterAbleQuestions.count { it.learnedOnce == 1 && it.learnedTwice == 0 }})",
                                 style = MaterialTheme.typography.body1
                             )
                         }
@@ -386,7 +407,7 @@ class QuestionListComponent {
                         ) {
                             Text(
                                 color = Color.Black,
-                                text = "Falsch beantwortet",
+                                text = "Falsch beantwortet (${filterAbleQuestions.count { it.failed == 1 }})",
                                 style = MaterialTheme.typography.body1
                             )
                         }
@@ -404,7 +425,7 @@ class QuestionListComponent {
                         ) {
                             Text(
                                 color = Color.Black,
-                                text = "Favouriten",
+                                text = "Favouriten (${filterAbleQuestions.count { it.favourite == 1 }})",
                                 style = MaterialTheme.typography.body1
                             )
                         }
