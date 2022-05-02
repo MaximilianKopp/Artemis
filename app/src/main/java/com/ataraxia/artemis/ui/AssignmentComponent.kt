@@ -1,6 +1,7 @@
 package com.ataraxia.artemis.ui
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -8,14 +9,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.ataraxia.artemis.helper.Constants
@@ -77,12 +77,15 @@ class AssignmentComponent {
         val currentQuestion: QuestionProjection by assignmentViewModel.currentQuestion.observeAsState(
             assignmentQuestions[0]
         )
+        val context = LocalContext.current
         Log.v("Current Filter", currentFilter.value.toString())
 
         val favouriteState: Int by assignmentViewModel.favouriteColor.observeAsState(currentQuestion.favourite)
 
         val resultListOfAnsweredQuestions: MutableList<QuestionProjection> =
             assignmentQuestions.toMutableList()
+
+        val isEvaluationDialogOpen: MutableState<Boolean> = remember { mutableStateOf(false) }
 
         Column(
             modifier = Modifier
@@ -284,12 +287,20 @@ class AssignmentComponent {
                             colors = ButtonDefaults.buttonColors(Artemis_Blue),
                             //Contains whole logic for further answer processing
                             onClick = {
-
+                                val text: String =
+                                    if (currentQuestion.correctAnswers == currentQuestion.currentSelection) {
+                                        "Korrekt"
+                                    } else {
+                                        "Falsch"
+                                    }
+                                Toast.makeText(context, text, Toast.LENGTH_SHORT)
+                                    .show()
+                                isEvaluationDialogOpen.value = true
                             })
                         {
                             Text(
                                 color = Color.White,
-                                text = "Auswertung"
+                                text = "Auswerten"
                             )
                         }
                     }
@@ -341,6 +352,9 @@ class AssignmentComponent {
                 )
             }
         }
+        if (isEvaluationDialogOpen.value) {
+            EvaluationAlertDialog(isEvaluationDialogOpen)
+        }
         if (isAssignmentDialogOpen) {
             AssignmentAlertDialog(
                 onOpenAssignmentDialog,
@@ -350,6 +364,39 @@ class AssignmentComponent {
             )
         }
     }
+
+    @Composable
+    fun EvaluationAlertDialog(isEvaluationDialogOpen: MutableState<Boolean>) {
+        AlertDialog(
+            onDismissRequest = { isEvaluationDialogOpen.value = false },
+            backgroundColor = Artemis_Green,
+            text = {
+                Text(text = "Test")
+            },
+            buttons = {
+                Column(
+                    Modifier.padding(12.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Button(
+                        onClick = {
+                            isEvaluationDialogOpen.value = false
+                        },
+                        Modifier
+                            .width(300.dp)
+                            .padding(4.dp),
+                        colors = ButtonDefaults.buttonColors(Artemis_Yellow),
+                    ) {
+                        Text(
+                            text = "Zurück",
+                            style = MaterialTheme.typography.body1
+                        )
+                    }
+                }
+            }
+        )
+    }
+
 
     @Composable
     fun AssignmentAlertDialog(
