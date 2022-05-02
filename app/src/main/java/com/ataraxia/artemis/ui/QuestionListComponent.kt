@@ -1,7 +1,6 @@
 package com.ataraxia.artemis.ui
 
 import android.util.Log
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
@@ -84,7 +83,13 @@ class QuestionListComponent {
 
         if (currentFilter.value == CriteriaFilter.SEARCH) {
             questionViewModel.onChangeQuestionList(
-                filterAbleQuestions.filter { it.text.contains(searchBarText) })
+                filterAbleQuestions.filter {
+                    it.text.contains(searchBarText, true)
+                        .or(it.optionA.contains(searchBarText, true))
+                        .or(it.optionB.contains(searchBarText, true))
+                        .or(it.optionC.contains(searchBarText, true))
+                        .or(it.optionD.contains(searchBarText, true))
+                })
         }
         if (currentFilter.value == CriteriaFilter.ALL_QUESTIONS_SHUFFLED) {
             questionViewModel.onChangeQuestionList(filterAbleQuestions)
@@ -118,12 +123,16 @@ class QuestionListComponent {
                                     Constants.DISABLED
                                 )
                             )
+                            trainingViewModel.onChangeIndex(0)
                             generalViewModel.onChangeSearchWidgetState(false)
+                            generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Training)
                             navController.navigate(Screen.DrawerScreen.Training.route)
                         }) {
                         Text(
                             color = Color.White,
-                            text = "Training starten",
+                            text = "Training starten (${
+                                if (currentFilter.value == CriteriaFilter.ALL_QUESTIONS_SHUFFLED) sizeOfTrainingUnit else questionsLiveData.value.count()
+                            } Fragen)"
                         )
                     }
                 }
@@ -146,6 +155,7 @@ class QuestionListComponent {
                                     Constants.DISABLED
                                 )
                             )
+                            generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Training)
                             questionViewModel.onChangeFilter(CriteriaFilter.SINGLE_QUESTION)
                             trainingViewModel.onChangeTrainingData(listOf(question))
                             trainingViewModel.onChangeCurrentQuestion(question)
@@ -176,7 +186,7 @@ class QuestionListComponent {
                             }
                             Text(
                                 text = question.text,
-                                Modifier.padding(start = 3.dp)
+                                Modifier.padding(start = 3.dp, top = 12.dp)
                             )
                         }
                         Row {
@@ -351,6 +361,24 @@ class QuestionListComponent {
                             onClick = {
                                 //Take all not learned questions
                                 questionViewModel.onChangeFilter(CriteriaFilter.NOT_LEARNED)
+                                questionViewModel.onChangeQuestionList(filterAbleQuestions.filter { it.learnedOnce == 0 && it.learnedTwice == 0 })
+                                onOpenDialog(false)
+                            },
+                            Modifier
+                                .width(300.dp)
+                                .padding(4.dp),
+                            colors = ButtonDefaults.buttonColors(Artemis_Yellow),
+                        ) {
+                            Text(
+                                color = Color.Black,
+                                text = "Noch nicht gelernt (${filterAbleQuestions.count { it.learnedOnce == 0 && it.learnedTwice == 0 }})",
+                                style = MaterialTheme.typography.body1
+                            )
+                        }
+                        Button(
+                            onClick = {
+                                //Take all once learned questions
+                                questionViewModel.onChangeFilter(CriteriaFilter.ONCE_LEARNED)
                                 questionViewModel.onChangeQuestionList(filterAbleQuestions.filter { it.learnedOnce == 1 && it.learnedTwice == 0 })
                                 onOpenDialog(false)
                             },
@@ -361,7 +389,7 @@ class QuestionListComponent {
                         ) {
                             Text(
                                 color = Color.Black,
-                                text = "Noch nicht gelernt",
+                                text = "Mind. 1x richtig beantwortet (${filterAbleQuestions.count { it.learnedOnce == 1 && it.learnedTwice == 0 }})",
                                 style = MaterialTheme.typography.body1
                             )
                         }
@@ -379,7 +407,7 @@ class QuestionListComponent {
                         ) {
                             Text(
                                 color = Color.Black,
-                                text = "Falsch beantwortet",
+                                text = "Falsch beantwortet (${filterAbleQuestions.count { it.failed == 1 }})",
                                 style = MaterialTheme.typography.body1
                             )
                         }
@@ -397,24 +425,13 @@ class QuestionListComponent {
                         ) {
                             Text(
                                 color = Color.Black,
-                                text = "Favouriten",
+                                text = "Favouriten (${filterAbleQuestions.count { it.favourite == 1 }})",
                                 style = MaterialTheme.typography.body1
                             )
                         }
                     }
                 }
             )
-        }
-        BackHandler(enabled = true) {
-            generalViewModel.onChangeSearchWidgetState(false)
-            generalViewModel.onHideSearchWidget(
-                Pair(
-                    Constants.ALPHA_INVISIBLE,
-                    Constants.DISABLED
-                )
-            )
-            questionViewModel.onChangeQuestionList(filterAbleQuestions)
-            navController.navigate(Screen.DrawerScreen.Questions.route)
         }
     }
 }

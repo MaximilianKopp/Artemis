@@ -6,14 +6,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
 import com.ataraxia.artemis.data.db.ArtemisDatabase
 import com.ataraxia.artemis.data.questions.QuestionRepository
 import com.ataraxia.artemis.helper.CriteriaFilter
-import com.ataraxia.artemis.model.Question
-import com.ataraxia.artemis.model.Screen
-import com.ataraxia.artemis.model.StatisticProjection
-import com.ataraxia.artemis.model.Topic
+import com.ataraxia.artemis.model.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -25,6 +21,9 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
     private val _questions = MutableLiveData<List<Question>>()
     val questions: LiveData<List<Question>> = _questions
 
+    private val _questionsForAssignment = MutableLiveData<List<QuestionProjection>>()
+    val questionsForAssignment: LiveData<List<QuestionProjection>> = _questionsForAssignment
+
     private val _currentTopic = MutableLiveData<Int>()
     val currentTopic: LiveData<Int> = _currentTopic
 
@@ -34,7 +33,6 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
     private lateinit var questionRepository: QuestionRepository
 
     lateinit var allQuestions: List<Question>
-
 
     var onceLearnedQuestions: Int = 0
     var learnedQuestions: Int = 0
@@ -57,6 +55,47 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
             }
         }
 
+    }
+
+    fun onChangeQuestionsForAssignment(questions: List<QuestionProjection>) {
+        CoroutineScope(Dispatchers.IO).launch {
+            onChangeQuestionsForAssignmentCoroutines(questions)
+        }
+    }
+
+    private suspend fun onChangeQuestionsForAssignmentCoroutines(questions: List<QuestionProjection>) =
+        withContext(Dispatchers.IO) {
+            _questionsForAssignment.postValue(questions)
+        }
+
+    fun prepareQuestionsForAssignment(): List<Question> {
+        //Algorithm: Take 20 Questions from each chapter by random
+        val chapter1 = allQuestions.filter { it.topic == 0 }.shuffled().take(20)
+        val chapter2 = allQuestions.filter { it.topic == 1 }.shuffled().take(20)
+        val chapter3 = allQuestions.filter { it.topic == 2 }.shuffled().take(20)
+        val chapter4 = allQuestions.filter { it.topic == 3 }.shuffled().take(20)
+        val chapter5 = allQuestions.filter { it.topic == 4 }.shuffled().take(20)
+        val chapter6 = allQuestions.filter { it.topic == 5 }.shuffled().take(20)
+
+        return (chapter1 + chapter2 + chapter3 + chapter4 + chapter5 + chapter6)
+    }
+
+    private fun removeIndexNumberFromQuestion(questions: List<Question>): List<Question> {
+        for (question in questions) {
+            val subString = question.text.substring(0, 4)
+            when (')') {
+                subString[1] -> {
+                    question.text = question.text.removeRange(0, 3)
+                }
+                subString[2] -> {
+                    question.text = question.text.removeRange(0, 4)
+                }
+                subString[3] -> {
+                    question.text = question.text.removeRange(0, 5)
+                }
+            }
+        }
+        return questions
     }
 
     private fun calculatePercentage(learnedQuestions: Int, allQuestions: Int): BigDecimal {
@@ -136,6 +175,10 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
             Topic.TOPIC_6.ordinal -> questions = filterQuestions(
                 criteriaFilter,
                 allQuestions.filter { it.topic == Topic.TOPIC_6.ordinal })
+            Topic.TOPIC_7.ordinal -> questions = filterQuestions(
+                criteriaFilter,
+                allQuestions
+            )
         }
         return questions
     }
@@ -163,7 +206,7 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
         questions: List<Question>,
         trainingSize: Int
     ) {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             prepareQuestionDataCoroutine(criteriaFilter, questions, trainingSize)
         }
     }
@@ -214,8 +257,10 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
             var filteredQuestions = allQuestions
             filteredQuestions = filteredQuestions.filter { it.topic == item.second.ordinal }
             val allQuestions: Int = filteredQuestions.size
-            val onceLearnedQuestions: Int = filteredQuestions.filter { it.learnedOnce == 1 }.count()
-            val learnedQuestions: Int = filteredQuestions.filter { it.learnedTwice == 1 }.count()
+            val onceLearnedQuestions: Int =
+                filteredQuestions.filter { it.learnedOnce == 1 && it.learnedTwice == 0 }.count()
+            val learnedQuestions: Int =
+                filteredQuestions.filter { it.learnedOnce == 0 && it.learnedTwice == 1 }.count()
             val failedQuestions: Int = filteredQuestions.filter { it.failed == 1 }.count()
 
             statistics.add(

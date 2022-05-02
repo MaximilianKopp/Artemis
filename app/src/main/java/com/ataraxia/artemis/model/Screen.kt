@@ -45,10 +45,10 @@ class Screen {
             "questioncatalogue"
         )
 
-        object Exam : DrawerScreen(
+        object Assignment : DrawerScreen(
             R.drawable.ic_baseline_assignment_24,
             "Prüfung",
-            "exam"
+            "assignment"
         )
 
         object Statistics : DrawerScreen(
@@ -59,8 +59,19 @@ class Screen {
 
         object Configuration : DrawerScreen(
             R.drawable.ic_baseline_build_circle_24,
-            "Konfiguration",
+            "Einstellungen",
             "configuration"
+        )
+
+        object Imprint : DrawerScreen(
+            R.drawable.ic_baseline_info_24,
+            "Impressum",
+            "imprint"
+        )
+
+        object Privacy : DrawerScreen(
+            "Datenschutz",
+            "policy"
         )
 
         object TopicWildLife : DrawerScreen(
@@ -99,6 +110,12 @@ class Screen {
             Topic.TOPIC_6.ordinal
         )
 
+        object AllQuestions : DrawerScreen(
+            "Alle Fragen",
+            "allQuestions",
+            Topic.TOPIC_7.ordinal
+        )
+
         object Training : DrawerScreen(
             "Training",
             "training"
@@ -109,9 +126,11 @@ class Screen {
         val GENERAL_SCREENS = listOf(
             DrawerScreen.Home,
             DrawerScreen.Questions,
-            DrawerScreen.Exam,
+            DrawerScreen.Assignment,
             DrawerScreen.Statistics,
             DrawerScreen.Configuration,
+            DrawerScreen.Imprint,
+            DrawerScreen.Privacy
         )
 
         val TOPIC_SCREENS = listOf(
@@ -121,7 +140,7 @@ class Screen {
             DrawerScreen.TopicWildLifeTreatment,
             DrawerScreen.TopicHuntingLaw,
             DrawerScreen.TopicPreservationOfWildLifeAndNature,
-            DrawerScreen.Training,
+            DrawerScreen.AllQuestions
         )
     }
 }

@@ -11,10 +11,7 @@ import androidx.navigation.compose.composable
 import com.ataraxia.artemis.model.Screen
 import com.ataraxia.artemis.model.Screen.DrawerScreen.*
 import com.ataraxia.artemis.ui.*
-import com.ataraxia.artemis.viewModel.GeneralViewModel
-import com.ataraxia.artemis.viewModel.QuestionViewModel
-import com.ataraxia.artemis.viewModel.StatisticViewModel
-import com.ataraxia.artemis.viewModel.TrainingViewModel
+import com.ataraxia.artemis.viewModel.*
 
 class NavHelper {
 
@@ -28,19 +25,24 @@ class NavHelper {
             onOpenFilterDialog: (Boolean) -> Unit,
             isTrainingDialogClosed: Boolean,
             onOpenTrainingDialog: (Boolean) -> Unit,
+            isAssignmentDialogClosed: Boolean,
+            onOpenAssignmentDialog: (Boolean) -> Unit,
             generalViewModel: GeneralViewModel,
             questionViewModel: QuestionViewModel,
             trainingViewModel: TrainingViewModel,
-            statisticViewModel: StatisticViewModel
+            statisticViewModel: StatisticViewModel,
+            assignmentViewModel: AssignmentViewModel
         ) {
 
             val startMenuComponent = StartMenuComponent()
             val questionComponent = TopicCatalogueComponent()
-            val examComponent = ExamComponent()
+            val examComponent = AssignmentComponent()
             val statisticComponent = StatisticComponent()
             val configComponent = ConfigComponent()
             val questionListComponent = QuestionListComponent()
             val trainingComponent = TrainingComponent()
+            val imprintComponent = ImprintComponent()
+            val privacyComponent = PrivacyComponent()
 
             NavHost(
                 navController,
@@ -51,26 +53,21 @@ class NavHelper {
                     composable(generalScreen.route) {
                         when (generalScreen.route) {
                             Home.route -> startMenuComponent.StartMenu(
+                                generalViewModel,
+                                questionViewModel,
+                                assignmentViewModel,
                                 statisticViewModel,
                                 navController
                             )
                             Questions.route -> questionComponent.TopicCatalogueScreen(
                                 questionViewModel, navController
                             )
-                            Exam.route -> examComponent.ExamScreen()
                             Statistics.route -> statisticComponent.StatisticScreen(
                                 questionViewModel, statisticViewModel, navController
                             )
                             Configuration.route -> configComponent.ConfigScreen()
-                            Training.route -> trainingComponent.TrainingScreen(
-                                navController = navController,
-                                isTrainingDialogOpen = isFilterDialogOpen,
-                                onOpenTrainingDialog = onOpenTrainingDialog,
-                                questionViewModel = questionViewModel,
-                                trainingViewModel = trainingViewModel,
-                                generalViewModel = generalViewModel,
-                                statisticViewModel = statisticViewModel
-                            )
+                            Imprint.route -> imprintComponent.ImprintScreen()
+                            Privacy.route -> privacyComponent.PrivacyScreen()
                         }
                         generalViewModel.onHideSearchWidget(
                             Pair(
@@ -79,6 +76,18 @@ class NavHelper {
                             )
                         )
                         generalViewModel.onHideFilter(
+                            Pair(
+                                Constants.ALPHA_INVISIBLE,
+                                Constants.DISABLED
+                            )
+                        )
+                        generalViewModel.onCloseTrainingScreen(
+                            Pair(
+                                Constants.ALPHA_INVISIBLE,
+                                Constants.DISABLED
+                            )
+                        )
+                        generalViewModel.onCloseAssignmentScreen(
                             Pair(
                                 Constants.ALPHA_INVISIBLE,
                                 Constants.DISABLED
@@ -228,7 +237,29 @@ class NavHelper {
                                             )
                                         )
                                     }
-
+                                    AllQuestions.route -> questionListComponent.CurrentTopicScreen(
+                                        navController = navController,
+                                        isFilterDialogOpen = isFilterDialogOpen,
+                                        onOpenFilterDialog = onOpenFilterDialog,
+                                        questionViewModel = questionViewModel,
+                                        generalViewModel = generalViewModel,
+                                        trainingViewModel = trainingViewModel,
+                                        currentTopic = topicScreen.topic
+                                    ).apply {
+                                        generalViewModel.onHideSearchWidget(
+                                            Pair(
+                                                Constants.ALPHA_VISIBLE,
+                                                Constants.ENABLED
+                                            )
+                                        )
+                                        questionViewModel.onChangeTopic(topicScreen.topic)
+                                        generalViewModel.onHideFilter(
+                                            Pair(
+                                                Constants.ALPHA_VISIBLE,
+                                                Constants.ENABLED
+                                            )
+                                        )
+                                    }
                                 }
                                 generalViewModel.onCloseTrainingScreen(
                                     Pair(
@@ -240,6 +271,36 @@ class NavHelper {
                             }
                             generalViewModel.onTopBarTitleChange(topicScreen.title)
                         }
+                    }
+                    composable(Assignment.route) {
+                        examComponent.AssignmentScreen(
+                            navController,
+                            isAssignmentDialogClosed,
+                            onOpenAssignmentDialog,
+                            questionViewModel,
+                            generalViewModel,
+                            assignmentViewModel,
+                            statisticViewModel
+                        )
+                        generalViewModel.onTopBarTitleChange(Assignment.title)
+                        generalViewModel.onHideSearchWidget(
+                            Pair(
+                                Constants.ALPHA_INVISIBLE,
+                                Constants.DISABLED
+                            )
+                        )
+                        generalViewModel.onHideFilter(
+                            Pair(
+                                Constants.ALPHA_INVISIBLE,
+                                Constants.DISABLED
+                            )
+                        )
+                        generalViewModel.onCloseAssignmentScreen(
+                            Pair(
+                                Constants.ALPHA_VISIBLE,
+                                Constants.ENABLED
+                            )
+                        )
                     }
                     composable(Training.route) {
                         trainingComponent.TrainingScreen(
@@ -262,6 +323,12 @@ class NavHelper {
                             Pair(
                                 Constants.ALPHA_INVISIBLE,
                                 Constants.DISABLED
+                            )
+                        )
+                        generalViewModel.onCloseTrainingScreen(
+                            Pair(
+                                Constants.ALPHA_VISIBLE,
+                                Constants.ENABLED
                             )
                         )
                         generalViewModel.onCloseTrainingScreen(

@@ -7,7 +7,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
 import com.ataraxia.artemis.data.configuration.ConfigurationRepository
 import com.ataraxia.artemis.data.db.ArtemisDatabase
 import com.ataraxia.artemis.model.Screen
@@ -18,6 +17,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class GeneralViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val _currentScreen = MutableLiveData<Screen.DrawerScreen>()
+    val currentScreen: LiveData<Screen.DrawerScreen> = _currentScreen
+
     private val _title = MutableLiveData("")
     val title: LiveData<String> = _title
 
@@ -28,10 +31,16 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
     val filterDialog: LiveData<Boolean> = _filterDialog
 
     private val _openTrainingDialog = MutableLiveData(false)
-    val closeTrainingDialog: LiveData<Boolean> = _openTrainingDialog
+    val openTrainingDialog: LiveData<Boolean> = _openTrainingDialog
 
     private val _closeTrainingScreen = MutableLiveData<Pair<Float, Boolean>>()
     val closeTrainingScreen: LiveData<Pair<Float, Boolean>> = _closeTrainingScreen
+
+    private val _openAssignmentDialog = MutableLiveData(false)
+    val openAssignmentDialog: LiveData<Boolean> = _openAssignmentDialog
+
+    private val _closeAssignmentScreen = MutableLiveData<Pair<Float, Boolean>>()
+    val closeAssignmentScreen: LiveData<Pair<Float, Boolean>> = _closeAssignmentScreen
 
     private val _searchWidget = MutableLiveData<Pair<Float, Boolean>>()
     val searchWidget: LiveData<Pair<Float, Boolean>> = _searchWidget
@@ -76,8 +85,19 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
         return currentScreen
     }
 
+    fun onChangeCurrentScreen(screen: Screen.DrawerScreen) {
+        CoroutineScope(Dispatchers.IO).launch {
+            onChangeCurrentScreenCoroutine(screen)
+        }
+    }
+
+    private suspend fun onChangeCurrentScreenCoroutine(screen: Screen.DrawerScreen) =
+        withContext(Dispatchers.IO) {
+            _currentScreen.postValue(screen)
+        }
+
     fun onChangeSizeOfTrainingUnit(size: Int) {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             onChangeSizeOfTrainingUnitCoroutine(size)
         }
     }
@@ -89,7 +109,7 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
         }
 
     fun onChangeEnableVibration(isVibrating: Int) {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             onChangeEnableVibrationCoroutine(isVibrating)
         }
     }
@@ -101,7 +121,7 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
         }
 
     fun onTopBarTitleChange(newTitle: String) {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             onTopBarTitleChangeCoroutine(newTitle)
         }
     }
@@ -112,7 +132,7 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
         }
 
     fun onHideFilter(visibility: Pair<Float, Boolean>) {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             onHideFilterCoroutine(visibility)
         }
     }
@@ -133,8 +153,19 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
             _searchWidget.postValue(visibility)
         }
 
+    fun onCloseAssignmentScreen(visibility: Pair<Float, Boolean>) {
+        CoroutineScope(Dispatchers.IO).launch {
+            onCloseAssignmentScreenCoroutine(visibility)
+        }
+    }
+
+    private suspend fun onCloseAssignmentScreenCoroutine(visibility: Pair<Float, Boolean>) =
+        withContext(Dispatchers.IO) {
+            _closeAssignmentScreen.postValue(visibility)
+        }
+
     fun onCloseTrainingScreen(visibility: Pair<Float, Boolean>) {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             onCloseTrainingScreenCoroutine(visibility)
         }
     }
@@ -145,7 +176,7 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
         }
 
     fun onOpenFilterDialog(isOpen: Boolean) {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             onOpenFilterDialogCoroutine(isOpen)
         }
     }
@@ -156,7 +187,7 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
         }
 
     fun onOpenTrainingDialog(isOpen: Boolean) {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             onOpenTrainingDialogCoroutine(isOpen)
         }
     }
@@ -164,6 +195,17 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
     private suspend fun onOpenTrainingDialogCoroutine(isOpen: Boolean) =
         withContext(Dispatchers.IO) {
             _openTrainingDialog.postValue(isOpen)
+        }
+
+    fun onOpenAssignmentDialog(isOpen: Boolean) {
+        CoroutineScope(Dispatchers.IO).launch {
+            onOpenAssignmentDialogCoroutine(isOpen)
+        }
+    }
+
+    private suspend fun onOpenAssignmentDialogCoroutine(isOpen: Boolean) =
+        withContext(Dispatchers.IO) {
+            _openAssignmentDialog.postValue(isOpen)
         }
 
     fun onChangeSearchWidgetState(newValue: Boolean) {
