@@ -32,8 +32,10 @@ abstract class ArtemisDatabase : RoomDatabase() {
                 return tempInstance
             synchronized(this) {
                 val instance = Room.databaseBuilder(
-                    context.applicationContext, ArtemisDatabase::class.java, "artemisRlp.db"
-                ).createFromAsset("database/artemisRlp.db")
+                    context.applicationContext,
+                    ArtemisDatabase::class.java,
+                    "artemisRlp_2022_05_01.db"
+                ).createFromAsset("database/artemisRlp_2022_05_01.db")
                     .build()
                 INSTANCE = instance
                 return instance
