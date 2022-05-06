@@ -18,8 +18,8 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 class QuestionViewModel(application: Application) : AndroidViewModel(application) {
-    private val _questions = MutableLiveData<List<Question>>()
-    val questions: LiveData<List<Question>> = _questions
+    private val _questions = MutableLiveData<List<QuestionProjection>>()
+    val questions: LiveData<List<QuestionProjection>> = _questions
 
     private val _questionsForAssignment = MutableLiveData<List<QuestionProjection>>()
     val questionsForAssignment: LiveData<List<QuestionProjection>> = _questionsForAssignment
@@ -32,7 +32,7 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
 
     private lateinit var questionRepository: QuestionRepository
 
-    lateinit var allQuestions: List<Question>
+    lateinit var allQuestions: List<QuestionProjection>
 
     var onceLearnedQuestions: Int = 0
     var learnedQuestions: Int = 0
@@ -44,7 +44,8 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
             val questionDao =
                 ArtemisDatabase.getDatabase(application.applicationContext).questionDao()
             questionRepository = QuestionRepository(questionDao)
-            allQuestions = questionRepository.getAllQuestions()
+            allQuestions =
+                questionRepository.getAllQuestions().map { QuestionProjection.entityToModel(it) }
             onceLearnedQuestions = allQuestions.filter { it.learnedTwice == 1 }.count()
             learnedQuestions = allQuestions.filter { it.learnedTwice == 1 }.count()
             failedQuestions = allQuestions.filter { it.failed == 1 }.count()
@@ -68,7 +69,7 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
             _questionsForAssignment.postValue(questions)
         }
 
-    fun prepareQuestionsForAssignment(): List<Question> {
+    fun prepareQuestionsForAssignment(): List<QuestionProjection> {
         //Algorithm: Take 20 Questions from each chapter by random
         val chapter1 = allQuestions.filter { it.topic == 0 }.shuffled().take(20)
         val chapter2 = allQuestions.filter { it.topic == 1 }.shuffled().take(20)
@@ -137,13 +138,13 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
             _filter.postValue(newCriteriaFilter)
         }
 
-    fun onChangeQuestionList(newValue: List<Question>) {
+    fun onChangeQuestionList(newValue: List<QuestionProjection>) {
         CoroutineScope(Dispatchers.IO).launch {
             onChangeQuestionListCoroutine(newValue)
         }
     }
 
-    private suspend fun onChangeQuestionListCoroutine(newValue: List<Question>) =
+    private suspend fun onChangeQuestionListCoroutine(newValue: List<QuestionProjection>) =
         withContext(Dispatchers.IO) {
             _questions.postValue(newValue)
         }
@@ -154,8 +155,8 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun selectTopic(topic: Int, criteriaFilter: CriteriaFilter): List<Question> {
-        var questions = listOf<Question>()
+    fun selectTopic(topic: Int, criteriaFilter: CriteriaFilter): List<QuestionProjection> {
+        var questions = listOf<QuestionProjection>()
         when (topic) {
             Topic.TOPIC_1.ordinal -> questions = filterQuestions(
                 criteriaFilter,
@@ -186,9 +187,9 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
 
     private fun filterQuestions(
         criteriaFilter: CriteriaFilter,
-        questions: List<Question>
-    ): List<Question> {
-        val filteredQuestions: List<Question> = when (criteriaFilter) {
+        questions: List<QuestionProjection>
+    ): List<QuestionProjection> {
+        val filteredQuestions: List<QuestionProjection> = when (criteriaFilter) {
             CriteriaFilter.ALL_QUESTIONS_SHUFFLED -> questions
             CriteriaFilter.NOT_LEARNED -> questions.filter { it.learnedOnce == 1 }
             CriteriaFilter.FAILED -> questions.filter { it.failed == 1 }
@@ -203,7 +204,7 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
 
     fun prepareQuestionData(
         criteriaFilter: CriteriaFilter,
-        questions: List<Question>,
+        questions: List<QuestionProjection>,
         trainingSize: Int
     ) {
         CoroutineScope(Dispatchers.IO).launch {
@@ -213,7 +214,7 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
 
     private suspend fun prepareQuestionDataCoroutine(
         criteriaFilter: CriteriaFilter,
-        questions: List<Question>,
+        questions: List<QuestionProjection>,
         trainingSize: Int
     ) = withContext(Dispatchers.IO) {
         val learnedOnceQuestions = questions.filter { it.learnedOnce == 1 }
@@ -226,7 +227,7 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
             it.removeAll(learnedTwiceQuestions)
             it.removeAll(failedQuestions)
         }
-        val trainingDataWithoutFilter = mutableListOf<Question>()
+        val trainingDataWithoutFilter = mutableListOf<QuestionProjection>()
         trainingDataWithoutFilter.addAll(failedQuestions.take(8))
         trainingDataWithoutFilter.addAll(learnedOnceQuestions.take(5))
         trainingDataWithoutFilter.addAll(learnedTwiceQuestions.take(2))
@@ -277,7 +278,7 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
         return statistics
     }
 
-    fun setQuestionStateColor(question: Question): Color {
+    fun setQuestionStateColor(question: QuestionProjection): Color {
         var result = Color.Black
         if (question.learnedOnce == 1 && question.failed == 0) {
             result = Color.Yellow

@@ -1,13 +1,15 @@
 package com.ataraxia.artemis.viewModel
 
 import android.util.Log
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.helper.NavigationButton
-import com.ataraxia.artemis.model.Question
+import com.ataraxia.artemis.model.QuestionCheckbox
+import com.ataraxia.artemis.model.QuestionProjection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -16,11 +18,11 @@ import java.util.*
 
 class TrainingViewModel : ViewModel() {
 
-    private val _currentQuestion = MutableLiveData<Question>()
-    val currentQuestion = _currentQuestion
+    private val _currentQuestion = MutableLiveData<QuestionProjection>()
+    val currentQuestion: LiveData<QuestionProjection> = _currentQuestion
 
-    private val _trainingData = MutableLiveData<List<Question>>()
-    val trainingData: LiveData<List<Question>> = _trainingData
+    private val _trainingData = MutableLiveData<List<QuestionProjection>>()
+    val trainingData: LiveData<List<QuestionProjection>> = _trainingData
 
     private val _checkedAnswers = mutableListOf<String>()
     val checkedAnswers: List<String> = _checkedAnswers
@@ -84,24 +86,24 @@ class TrainingViewModel : ViewModel() {
             _favouriteColor.postValue(isFavourite)
         }
 
-    fun onChangeTrainingData(trainingData: List<Question>) {
+    fun onChangeTrainingData(trainingData: List<QuestionProjection>) {
         CoroutineScope(Dispatchers.IO).launch {
             onChangeTrainingDataCoroutine(trainingData)
         }
     }
 
-    private suspend fun onChangeTrainingDataCoroutine(newTrainingData: List<Question>) =
+    private suspend fun onChangeTrainingDataCoroutine(newTrainingData: List<QuestionProjection>) =
         withContext(Dispatchers.IO) {
             _trainingData.postValue(newTrainingData)
         }
 
-    fun onChangeCurrentQuestion(newQuestion: Question) {
+    fun onChangeCurrentQuestion(newQuestion: QuestionProjection) {
         CoroutineScope(Dispatchers.IO).launch {
             onChangeCurrentQuestionCoroutine(newQuestion)
         }
     }
 
-    private suspend fun onChangeCurrentQuestionCoroutine(newQuestion: Question) =
+    private suspend fun onChangeCurrentQuestionCoroutine(newQuestion: QuestionProjection) =
         withContext(Dispatchers.IO) {
             _currentQuestion.postValue(newQuestion)
         }
@@ -118,7 +120,7 @@ class TrainingViewModel : ViewModel() {
             _index.postValue(newIndex)
         }
 
-    fun setCurrentQuestionText(question: Question, checkedAnswer: String): String {
+    fun setCurrentQuestionText(question: QuestionProjection, checkedAnswer: String): String {
         when (checkedAnswer) {
             Constants.TRAINING_SELECTION_A -> return question.optionA
             Constants.TRAINING_SELECTION_B -> return question.optionB
@@ -149,6 +151,19 @@ class TrainingViewModel : ViewModel() {
                 Constants.TRAINING_SELECTION_D -> _checkedD.postValue(newSelectionValue)
             }
         }
+
+    fun checkStates(
+        currentQuestion: QuestionProjection,
+        checkbox: QuestionCheckbox,
+        checkedState: MutableState<Boolean>
+    ): Boolean {
+        for (cb in currentQuestion.checkboxList) {
+            if (cb.option == checkbox.option) {
+                checkedState.value = cb.checked
+            }
+        }
+        return checkedState.value
+    }
 
     fun onChangeSelection(selection: String) {
         CoroutineScope(Dispatchers.IO).launch {
@@ -188,9 +203,9 @@ class TrainingViewModel : ViewModel() {
 
     @Suppress("JavaCollectionsStaticMethodOnImmutableList")
     fun isSelectionCorrect(
-        correctAnswers: Question,
+        correctAnswers: QuestionProjection,
         currentCheckedAnswers: List<String>,
-        selections: List<Pair<Pair<Boolean, Color>, String>>
+        checkBoxes: List<QuestionCheckbox>
     ): Boolean {
         var result = false
         Collections.sort(currentCheckedAnswers)
@@ -198,7 +213,7 @@ class TrainingViewModel : ViewModel() {
         if (correctAnswers.correctAnswers == currentCheckedAnswers.toString()) {
             result = true
         }
-        changeCheckboxColors(correctAnswers.correctAnswers, selections)
+        changeCheckboxColors(correctAnswers.correctAnswers, checkBoxes)
         Log.v("Correct Answers", correctAnswers.correctAnswers)
         Log.v("Current Answers", currentCheckedAnswers.toString())
         Log.v("Question answered", result.toString())
@@ -208,22 +223,22 @@ class TrainingViewModel : ViewModel() {
     //A selection is made of nested Pairs and contains all related checkbox values like isSelect, Value and Checkbox color
     private fun changeCheckboxColors(
         correctAnswers: String,
-        selections: List<Pair<Pair<Boolean, Color>, String>>
+        checkBoxes: List<QuestionCheckbox>
     ) {
-        selections.forEach { selection ->
-            if (correctAnswers.contains(selection.second)) {
-                when (selection.second) {
-                    Constants.TRAINING_SELECTION_A -> _checkBoxColorA.postValue(Color.Green)
-                    Constants.TRAINING_SELECTION_B -> _checkBoxColorB.postValue(Color.Green)
-                    Constants.TRAINING_SELECTION_C -> _checkBoxColorC.postValue(Color.Green)
-                    Constants.TRAINING_SELECTION_D -> _checkBoxColorD.postValue(Color.Green)
+        checkBoxes.forEach { checkbox ->
+            if (correctAnswers.contains(checkbox.option)) {
+                when (checkbox.option) {
+                    Constants.TRAINING_SELECTION_A -> checkbox.color = Color.Green
+                    Constants.TRAINING_SELECTION_B -> checkbox.color = Color.Green
+                    Constants.TRAINING_SELECTION_C -> checkbox.color = Color.Green
+                    Constants.TRAINING_SELECTION_D -> checkbox.color = Color.Green
                 }
             } else {
-                when (selection.second) {
-                    Constants.TRAINING_SELECTION_A -> _checkBoxColorA.postValue(Color.Red)
-                    Constants.TRAINING_SELECTION_B -> _checkBoxColorB.postValue(Color.Red)
-                    Constants.TRAINING_SELECTION_C -> _checkBoxColorC.postValue(Color.Red)
-                    Constants.TRAINING_SELECTION_D -> _checkBoxColorD.postValue(Color.Red)
+                when (checkbox.option) {
+                    Constants.TRAINING_SELECTION_A -> checkbox.color = Color.Red
+                    Constants.TRAINING_SELECTION_B -> checkbox.color = Color.Red
+                    Constants.TRAINING_SELECTION_C -> checkbox.color = Color.Red
+                    Constants.TRAINING_SELECTION_D -> checkbox.color = Color.Red
                 }
             }
             //Check all Checkboxes in order to show correct and wrong selections
@@ -258,7 +273,11 @@ class TrainingViewModel : ViewModel() {
     }
 
     //Navigation bar with buttons
-    fun setNavigationButton(direction: NavigationButton, index: Int, questions: List<Question>) {
+    fun setNavigationButton(
+        direction: NavigationButton,
+        index: Int,
+        questions: List<QuestionProjection>
+    ) {
         when (direction) {
             NavigationButton.FIRST_PAGE -> firstPage(questions)
             NavigationButton.PREV_PAGE -> prevPage(index, questions)
@@ -268,13 +287,13 @@ class TrainingViewModel : ViewModel() {
         resetSelections()
     }
 
-    private fun firstPage(questions: List<Question>) {
+    private fun firstPage(questions: List<QuestionProjection>) {
         onChangeIndex(0)
         onChangeCurrentQuestion(questions[0])
         onChangeFavouriteState(questions[0].favourite)
     }
 
-    private fun prevPage(index: Int, questions: List<Question>) {
+    private fun prevPage(index: Int, questions: List<QuestionProjection>) {
         if (index > 0) {
             onChangeIndex(index - 1)
             onChangeCurrentQuestion(questions[index - 1])
@@ -282,7 +301,7 @@ class TrainingViewModel : ViewModel() {
         }
     }
 
-    private fun nextPage(index: Int, questions: List<Question>) {
+    private fun nextPage(index: Int, questions: List<QuestionProjection>) {
         if (index < questions.size - 1) {
             onChangeIndex(index + 1)
             onChangeCurrentQuestion(questions[index + 1])
@@ -290,7 +309,7 @@ class TrainingViewModel : ViewModel() {
         }
     }
 
-    private fun lastPage(questions: List<Question>) {
+    private fun lastPage(questions: List<QuestionProjection>) {
         onChangeIndex(questions.size - 1)
         onChangeCurrentQuestion(questions[questions.size - 1])
         onChangeFavouriteState(questions[questions.size - 1].favourite)
