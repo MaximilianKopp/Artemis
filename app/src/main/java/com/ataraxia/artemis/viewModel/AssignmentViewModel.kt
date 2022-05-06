@@ -2,6 +2,7 @@ package com.ataraxia.artemis.viewModel
 
 import android.util.Log
 import androidx.compose.runtime.MutableState
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -9,10 +10,14 @@ import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.helper.NavigationButton
 import com.ataraxia.artemis.model.QuestionCheckbox
 import com.ataraxia.artemis.model.QuestionProjection
+import com.ataraxia.artemis.model.Screen
+import com.ataraxia.artemis.ui.theme.Artemis_Yellow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 class AssignmentViewModel : ViewModel() {
 
@@ -24,6 +29,9 @@ class AssignmentViewModel : ViewModel() {
 
     private val _favouriteColor = MutableLiveData<Int>()
     val favouriteColor: LiveData<Int> = _favouriteColor
+
+    private val _skippedBoxColor = MutableLiveData<Color>()
+    val skippedBoxColor: LiveData<Color> = _skippedBoxColor
 
     private val _checkedAnswers = mutableSetOf<String>()
     private val checkedAnswers: Set<String> = _checkedAnswers as HashSet<String>
@@ -49,7 +57,7 @@ class AssignmentViewModel : ViewModel() {
         currentQuestion.currentSelection = checkedAnswers.toSortedSet().toString()
     }
 
-    fun checkedStates(
+    fun checkStates(
         currentQuestion: QuestionProjection,
         checkbox: QuestionCheckbox,
         checkedState: MutableState<Boolean>
@@ -144,6 +152,119 @@ class AssignmentViewModel : ViewModel() {
             NavigationButton.LAST_PAGE -> lastPage(questions)
             NavigationButton.SKIPPED_INDEX -> skippedIndex(questions, index)
         }
+    }
+
+    fun changeColorByResult(question: QuestionProjection, checkbox: QuestionCheckbox): Color {
+        var result = Color.Red
+        if (question.correctAnswers.contains(checkbox.option)) {
+            result = Color.Green
+        }
+        return result
+    }
+
+    fun filterCorrectAnswersInTotal(resultList: List<QuestionProjection>): Int {
+        return resultList.filter { (it.currentSelection == it.correctAnswers) }
+            .count()
+    }
+
+    fun filterWrongAnswersInTotal(correctAnswers: Int): Int {
+        return Constants.SIZE_OF_ASSIGNMENT_TOTAL - correctAnswers
+    }
+
+    fun filterCorrectAnswersOfEachTopic(resultList: List<QuestionProjection>, topic: Int): Int {
+        return resultList.filter { (it.currentSelection == it.correctAnswers).and(it.topic == topic) }
+            .count()
+    }
+
+    fun filterWrongAnswersOfEachTopic(correctAnswersByTopic: Int): Int {
+        return Constants.SIZE_OF_EACH_ASSIGNMENT_TOPIC - correctAnswersByTopic
+    }
+
+    fun calculateMarksByTopic(resultList: List<QuestionProjection>): Map<String, Int> {
+        var resultOfCorrectAnswers = 0
+        val mapResult = HashMap<String, Int>()
+        for (topic in Screen.TOPIC_SCREENS.filter { it.title != "Alle Fragen" }) {
+            resultOfCorrectAnswers =
+                resultList.count { (it.correctAnswers == it.currentSelection).and(it.topic == Screen.DrawerScreen.TopicWildLife.topic) }
+            mapResult[topic.title] = calculateMark(resultOfCorrectAnswers)
+        }
+        return mapResult
+    }
+
+    fun calculateFinalMark(marksByTopics: Map<String, Int>): BigDecimal {
+        return (marksByTopics.entries.sumOf { it.value } / marksByTopics.size).toBigDecimal()
+            .setScale(2, RoundingMode.HALF_UP)
+    }
+
+    fun evaluate(marksByTopics: Map<String, Int>, finalMark: BigDecimal): Boolean {
+        var result = true
+        val failedTopics = getFailedTopics(marksByTopics)
+
+        if (failedTopics > 1) {
+            result = false
+        }
+        if (finalMark > BigDecimal.valueOf(4.55)) {
+            result = false
+        }
+        return result
+    }
+
+    fun getFailedTopics(marksByTopics: Map<String, Int>): Int {
+        var counter = 0
+        for ((_, value) in marksByTopics) {
+            if (value > 4) {
+                counter++
+            }
+        }
+        return counter
+    }
+
+    //If a decade of questions has been
+    fun changeSkippedBoxColor(
+        assignmentQuestions: List<QuestionProjection>,
+        skippedIndex: Int
+    ): Color {
+        val result: Color
+        val indexStart = if (skippedIndex != 0) skippedIndex - 10 else 0
+        val indexEnd = if (skippedIndex == 0) 10 else skippedIndex
+        val sublist = assignmentQuestions.subList(indexStart, indexEnd)
+        var amountOfSelections = 0
+
+        for (question in sublist) {
+            if (question.currentSelection.isNotBlank() && question.currentSelection != "[]") {
+                amountOfSelections++
+            }
+        }
+        return if (amountOfSelections > 1) {
+            Artemis_Yellow
+        } else {
+            Color.White
+        }
+    }
+
+    fun calculateMark(resultOfCorrectAnswers: Int): Int {
+        var mark = 6
+        when (resultOfCorrectAnswers) {
+            in 19..20 -> {
+                mark = 1
+            }
+            in 16..18 -> {
+                mark = 2
+            }
+            in 13..15 -> {
+                mark = 3
+            }
+            in 10..12 -> {
+                mark = 4
+            }
+            in 7..9 -> {
+                mark = 5
+            }
+            in 4..6 -> {
+                mark = 6
+            }
+        }
+        return mark
     }
 
     @Suppress("JavaCollectionsStaticMethodOnImmutableList")

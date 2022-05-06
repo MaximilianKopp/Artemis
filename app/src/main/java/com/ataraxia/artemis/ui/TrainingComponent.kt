@@ -9,6 +9,8 @@ import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -142,12 +144,12 @@ class TrainingComponent {
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            val scrollState = rememberScrollState()
+            val verticalScrollState = rememberScrollState()
             Column(
                 Modifier
                     .wrapContentHeight()
                     .weight(1f, fill = true)
-                    .verticalScroll(scrollState, true)
+                    .verticalScroll(verticalScrollState, true)
             ) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -462,6 +464,7 @@ class TrainingComponent {
         ) {
         AlertDialog(
             onDismissRequest = { onOpenTrainingDialog(false) },
+            shape = RoundedCornerShape(CornerSize(25.dp)),
             backgroundColor = Artemis_Green,
             text = {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
