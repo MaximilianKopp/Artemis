@@ -21,7 +21,6 @@ import androidx.navigation.compose.rememberNavController
 import com.ataraxia.artemis.R
 import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.helper.NavHelper
-import com.ataraxia.artemis.model.QuestionProjection
 import com.ataraxia.artemis.model.Screen
 import com.ataraxia.artemis.templates.TextButtonTemplate
 import com.ataraxia.artemis.templates.TextTemplate
@@ -187,9 +186,7 @@ class StartMenuComponent {
                 }
                 StartMenuButton(onClick = {
                     val assignmentQuestions =
-                        questionViewModel.prepareQuestionsForAssignment().map {
-                            QuestionProjection.entityToModel(it)
-                        }.toList().shuffled()
+                        questionViewModel.prepareQuestionsForAssignment().toList().shuffled()
                     questionViewModel.onChangeQuestionsForAssignment(assignmentQuestions)
                     assignmentViewModel.onChangeCurrentQuestion(assignmentQuestions[0])
                     generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Assignment)

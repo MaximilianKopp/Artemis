@@ -59,6 +59,9 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
     private val _sizeOfTrainingUnit = MutableLiveData<Int>()
     val sizeOfTrainingUnit: LiveData<Int> = _sizeOfTrainingUnit
 
+    private val _showAppBar = MutableLiveData<Boolean>()
+    val showAppBar: LiveData<Boolean> = _showAppBar
+
     private val configurationRepository: ConfigurationRepository
 
     init {
@@ -69,6 +72,17 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
             _sizeOfTrainingUnit.postValue(configurationRepository.getSizePerTrainingUnit().toInt())
         }
     }
+
+    fun onChangeAppBarAppearance(showAppBar: Boolean) {
+        CoroutineScope(Dispatchers.IO).launch {
+            onChangeAppBarAppearanceCoroutine(showAppBar)
+        }
+    }
+
+    private suspend fun onChangeAppBarAppearanceCoroutine(showAppBar: Boolean) =
+        withContext(Dispatchers.IO) {
+            _showAppBar.postValue(showAppBar)
+        }
 
     fun loadScreenByTopic(topic: Int): Screen.DrawerScreen {
         var currentScreen: Screen.DrawerScreen = Screen.DrawerScreen.TopicWildLife
