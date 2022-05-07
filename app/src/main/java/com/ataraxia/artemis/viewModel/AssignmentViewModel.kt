@@ -43,7 +43,7 @@ class AssignmentViewModel : ViewModel() {
             Constants.TRAINING_SELECTION_C -> return question.optionC
             Constants.TRAINING_SELECTION_D -> return question.optionD
         }
-        return ""
+        return "Error"
     }
 
     @Suppress("JavaCollectionsStaticMethodOnImmutableList")
@@ -181,7 +181,7 @@ class AssignmentViewModel : ViewModel() {
     }
 
     fun calculateMarksByTopic(resultList: List<QuestionProjection>): Map<String, Int> {
-        var resultOfCorrectAnswers = 0
+        var resultOfCorrectAnswers: Int
         val mapResult = HashMap<String, Int>()
         for (topic in Screen.TOPIC_SCREENS.filter { it.title != "Alle Fragen" }) {
             resultOfCorrectAnswers =
@@ -224,7 +224,6 @@ class AssignmentViewModel : ViewModel() {
         assignmentQuestions: List<QuestionProjection>,
         skippedIndex: Int
     ): Color {
-        val result: Color
         val indexStart = if (skippedIndex != 0) skippedIndex - 10 else 0
         val indexEnd = if (skippedIndex == 0) 10 else skippedIndex
         val sublist = assignmentQuestions.subList(indexStart, indexEnd)

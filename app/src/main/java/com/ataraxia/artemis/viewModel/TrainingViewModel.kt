@@ -14,7 +14,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.*
 
 class TrainingViewModel : ViewModel() {
 
@@ -24,47 +23,11 @@ class TrainingViewModel : ViewModel() {
     private val _trainingData = MutableLiveData<List<QuestionProjection>>()
     val trainingData: LiveData<List<QuestionProjection>> = _trainingData
 
-    private val _checkedAnswers = mutableListOf<String>()
-    val checkedAnswers: List<String> = _checkedAnswers
+    private val _checkedAnswers = mutableSetOf<String>()
+    val checkedAnswers: Set<String> = _checkedAnswers as HashSet<String>
 
     private val _index = MutableLiveData<Int>()
     val index: LiveData<Int> = _index
-
-    private val _checkBoxColorA = MutableLiveData<Color>()
-    val checkBoxColorA: LiveData<Color> = _checkBoxColorA
-
-    private val _checkBoxColorB = MutableLiveData<Color>()
-    val checkBoxColorB: LiveData<Color> = _checkBoxColorB
-
-    private val _checkBoxColorC = MutableLiveData<Color>()
-    val checkBoxColorC: LiveData<Color> = _checkBoxColorC
-
-    private val _checkBoxColorD = MutableLiveData<Color>()
-    val checkBoxColorD: LiveData<Color> = _checkBoxColorD
-
-    private val _selectA = MutableLiveData<String>()
-    val selectA: LiveData<String> = _selectA
-
-    private val _selectB = MutableLiveData<String>()
-    val selectB: LiveData<String> = _selectB
-
-    private val _selectC = MutableLiveData<String>()
-    val selectC: LiveData<String> = _selectC
-
-    private val _selectD = MutableLiveData<String>()
-    val selectD: LiveData<String> = _selectD
-
-    private val _checkedA = MutableLiveData<Boolean>()
-    val checkedA: LiveData<Boolean> = _checkedA
-
-    private val _checkedB = MutableLiveData<Boolean>()
-    val checkedB: LiveData<Boolean> = _checkedB
-
-    private val _checkedC = MutableLiveData<Boolean>()
-    val checkedC: LiveData<Boolean> = _checkedC
-
-    private val _checkedD = MutableLiveData<Boolean>()
-    val checkedD: LiveData<Boolean> = _checkedD
 
     private val _isButtonEnabled = MutableLiveData<Boolean>()
     val isButtonEnabled: LiveData<Boolean> = _isButtonEnabled
@@ -74,6 +37,20 @@ class TrainingViewModel : ViewModel() {
 
     private val _favouriteColor = MutableLiveData<Int>()
     val favouriteColor: LiveData<Int> = _favouriteColor
+
+    private val _checkedState = MutableLiveData<Boolean>()
+    val checkedState: LiveData<Boolean> = _checkedState
+
+    fun onChangeCheckedState(checkedState: Boolean) {
+        CoroutineScope(Dispatchers.IO).launch {
+            onChangeCheckedStateCoroutine(checkedState)
+        }
+    }
+
+    private suspend fun onChangeCheckedStateCoroutine(checkedState: Boolean) =
+        withContext(Dispatchers.IO) {
+            _checkedState.postValue(checkedState)
+        }
 
     fun onChangeFavouriteState(isFavourite: Int) {
         CoroutineScope(Dispatchers.IO).launch {
@@ -127,30 +104,8 @@ class TrainingViewModel : ViewModel() {
             Constants.TRAINING_SELECTION_C -> return question.optionC
             Constants.TRAINING_SELECTION_D -> return question.optionD
         }
-        return ""
+        return "ERROR"
     }
-
-    fun onChangeCheckedOption(selection: Boolean, checkedAnswer: String) {
-        CoroutineScope(Dispatchers.IO).launch {
-            onChangeCheckedOptionCoroutine(selection, checkedAnswer)
-        }
-    }
-
-    private suspend fun onChangeCheckedOptionCoroutine(selection: Boolean, checkedAnswer: String) =
-        withContext(Dispatchers.IO) {
-            var newSelectionValue = false
-            if (selection) {
-                newSelectionValue = false
-            } else if (!selection) {
-                newSelectionValue = true
-            }
-            when (checkedAnswer) {
-                Constants.TRAINING_SELECTION_A -> _checkedA.postValue(newSelectionValue)
-                Constants.TRAINING_SELECTION_B -> _checkedB.postValue(newSelectionValue)
-                Constants.TRAINING_SELECTION_C -> _checkedC.postValue(newSelectionValue)
-                Constants.TRAINING_SELECTION_D -> _checkedD.postValue(newSelectionValue)
-            }
-        }
 
     fun checkStates(
         currentQuestion: QuestionProjection,
@@ -160,26 +115,49 @@ class TrainingViewModel : ViewModel() {
         for (cb in currentQuestion.checkboxList) {
             if (cb.option == checkbox.option) {
                 checkedState.value = cb.checked
+                when (cb.option) {
+                    Constants.TRAINING_SELECTION_A -> currentQuestion.checkboxA.checked =
+                        checkedState.value
+                }
             }
         }
+        _currentQuestion.postValue(currentQuestion)
         return checkedState.value
     }
 
-    fun onChangeSelection(selection: String) {
+    fun onChangeCheckboxes(
+        checkbox: QuestionCheckbox,
+        currentQuestion: QuestionProjection,
+        checkedState: MutableState<Boolean>
+    ) {
         CoroutineScope(Dispatchers.IO).launch {
-            onChangeSelectionCoroutine(selection)
+            onChangeCheckboxesCoroutine(checkbox, currentQuestion, checkedState)
         }
     }
 
-    private suspend fun onChangeSelectionCoroutine(selection: String) =
-        withContext(Dispatchers.IO) {
-            when (selection) {
-                Constants.TRAINING_SELECTION_A -> _selectA.postValue(selection)
-                Constants.TRAINING_SELECTION_B -> _selectB.postValue(selection)
-                Constants.TRAINING_SELECTION_C -> _selectC.postValue(selection)
-                Constants.TRAINING_SELECTION_D -> _selectD.postValue(selection)
+    private suspend fun onChangeCheckboxesCoroutine(
+        checkbox: QuestionCheckbox,
+        currentQuestion: QuestionProjection,
+        checkedState: MutableState<Boolean>
+    ) = withContext(Dispatchers.IO) {
+        checkbox.checked = !checkbox.checked
+        when (checkbox.option) {
+            Constants.TRAINING_SELECTION_A -> currentQuestion.checkboxA = checkbox.apply {
+                checkedState.value = checkbox.checked
+            }
+            Constants.TRAINING_SELECTION_B -> currentQuestion.checkboxB = checkbox.apply {
+                checkedState.value = checkbox.checked
+            }
+            Constants.TRAINING_SELECTION_C -> currentQuestion.checkboxC = checkbox.apply {
+                checkedState.value = checkbox.checked
+            }
+            Constants.TRAINING_SELECTION_D -> currentQuestion.checkboxD = checkbox.apply {
+                checkedState.value = checkbox.checked
             }
         }
+        _currentQuestion.postValue(currentQuestion)
+        onChangeCurrentQuestion(currentQuestion)
+    }
 
     fun onChangeAnswerButtonText(answerBtnText: String) {
         CoroutineScope(Dispatchers.IO).launch {
@@ -192,61 +170,48 @@ class TrainingViewModel : ViewModel() {
             _answerBtnText.postValue(answerBtnText)
         }
 
-    fun currentSelection(isChecked: Boolean, option: String) {
-        if (!isChecked) {
+    fun currentSelection(
+        currentQuestion: QuestionProjection,
+        checkedState: Boolean,
+        option: String
+    ) {
+        if (!checkedState) {
             _checkedAnswers.add(option)
         } else {
             _checkedAnswers.remove(option)
         }
         Log.v("Selected Options", checkedAnswers.toString())
+        currentQuestion.currentSelection = checkedAnswers.toSortedSet().toString()
+    }
+
+    fun resetCurrentSelection() {
+        _checkedAnswers.clear()
+        _currentQuestion.value?.checkboxA?.checked = false
+        _currentQuestion.value?.checkboxB?.checked = false
+        _currentQuestion.value?.checkboxC?.checked = false
+        _currentQuestion.value?.checkboxD?.checked = false
     }
 
     @Suppress("JavaCollectionsStaticMethodOnImmutableList")
     fun isSelectionCorrect(
         correctAnswers: QuestionProjection,
-        currentCheckedAnswers: List<String>,
-        checkBoxes: List<QuestionCheckbox>
     ): Boolean {
         var result = false
-        Collections.sort(currentCheckedAnswers)
 
-        if (correctAnswers.correctAnswers == currentCheckedAnswers.toString()) {
+        if (correctAnswers.correctAnswers == checkedAnswers.toSortedSet().toString()) {
             result = true
         }
-        changeCheckboxColors(correctAnswers.correctAnswers, checkBoxes)
         Log.v("Correct Answers", correctAnswers.correctAnswers)
-        Log.v("Current Answers", currentCheckedAnswers.toString())
         Log.v("Question answered", result.toString())
         return result
     }
 
-    //A selection is made of nested Pairs and contains all related checkbox values like isSelect, Value and Checkbox color
-    private fun changeCheckboxColors(
-        correctAnswers: String,
-        checkBoxes: List<QuestionCheckbox>
-    ) {
-        checkBoxes.forEach { checkbox ->
-            if (correctAnswers.contains(checkbox.option)) {
-                when (checkbox.option) {
-                    Constants.TRAINING_SELECTION_A -> checkbox.color = Color.Green
-                    Constants.TRAINING_SELECTION_B -> checkbox.color = Color.Green
-                    Constants.TRAINING_SELECTION_C -> checkbox.color = Color.Green
-                    Constants.TRAINING_SELECTION_D -> checkbox.color = Color.Green
-                }
-            } else {
-                when (checkbox.option) {
-                    Constants.TRAINING_SELECTION_A -> checkbox.color = Color.Red
-                    Constants.TRAINING_SELECTION_B -> checkbox.color = Color.Red
-                    Constants.TRAINING_SELECTION_C -> checkbox.color = Color.Red
-                    Constants.TRAINING_SELECTION_D -> checkbox.color = Color.Red
-                }
-            }
-            //Check all Checkboxes in order to show correct and wrong selections
-            _checkedA.postValue(true)
-            _checkedB.postValue(true)
-            _checkedC.postValue(true)
-            _checkedD.postValue(true)
+    fun changeColorByResult(question: QuestionProjection, checkbox: QuestionCheckbox): Color {
+        var result = Color.Red
+        if (question.correctAnswers.contains(checkbox.option)) {
+            result = Color.Green
         }
+        return result
     }
 
     fun onChangeEnableNavButtons(enabled: Boolean) {
@@ -260,18 +225,6 @@ class TrainingViewModel : ViewModel() {
             _isButtonEnabled.postValue(enabled)
         }
 
-    fun resetSelections() {
-        _checkedA.postValue(false)
-        _checkedB.postValue(false)
-        _checkedC.postValue(false)
-        _checkedD.postValue(false)
-        _checkBoxColorA.postValue(Color.Black)
-        _checkBoxColorB.postValue(Color.Black)
-        _checkBoxColorC.postValue(Color.Black)
-        _checkBoxColorD.postValue(Color.Black)
-        _checkedAnswers.clear()
-    }
-
     //Navigation bar with buttons
     fun setNavigationButton(
         direction: NavigationButton,
@@ -284,7 +237,6 @@ class TrainingViewModel : ViewModel() {
             NavigationButton.NEXT_PAGE -> nextPage(index, questions)
             NavigationButton.LAST_PAGE -> lastPage(questions)
         }
-        resetSelections()
     }
 
     private fun firstPage(questions: List<QuestionProjection>) {

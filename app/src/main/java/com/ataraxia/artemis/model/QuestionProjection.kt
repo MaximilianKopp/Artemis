@@ -21,7 +21,12 @@ class QuestionProjection(
     var checkboxB: QuestionCheckbox = QuestionCheckbox(false, "b", Color.Black),
     var checkboxC: QuestionCheckbox = QuestionCheckbox(false, "c", Color.Black),
     var checkboxD: QuestionCheckbox = QuestionCheckbox(false, "d", Color.Black),
-    var checkboxList: List<QuestionCheckbox> = listOf(checkboxA, checkboxB, checkboxC, checkboxD),
+    var checkboxList: List<QuestionCheckbox> = listOf(
+        checkboxA,
+        checkboxB,
+        checkboxC,
+        checkboxD
+    ).shuffled(),
     var currentSelection: String
 ) {
     companion object {
@@ -49,7 +54,7 @@ class QuestionProjection(
                     QuestionCheckbox(false, "b", Color.Black),
                     QuestionCheckbox(false, "c", Color.Black),
                     QuestionCheckbox(false, "d", Color.Black)
-                ),
+                ).shuffled(),
                 currentSelection = ""
             )
         }
@@ -58,10 +63,10 @@ class QuestionProjection(
             return Question(
                 question.id,
                 question.text,
-                "",
-                "",
-                "",
-                "",
+                question.optionA,
+                question.optionB,
+                question.optionC,
+                question.optionD,
                 question.correctAnswers,
                 question.topic,
                 question.favourite,

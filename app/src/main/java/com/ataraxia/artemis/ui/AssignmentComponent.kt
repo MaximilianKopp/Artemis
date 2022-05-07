@@ -13,7 +13,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -286,7 +285,7 @@ class AssignmentComponent {
                             if (currentQuestion.checkboxList.isNotEmpty()) {
                                 for (checkbox in currentQuestion.checkboxList) {
                                     val checkedState =
-                                        rememberSaveable { mutableStateOf(checkbox.checked) }
+                                        remember { mutableStateOf(checkbox.checked) }
                                     val currentQuestionText: String =
                                         assignmentViewModel.setCurrentQuestionText(
                                             currentQuestion, checkbox
