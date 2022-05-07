@@ -34,8 +34,8 @@ abstract class ArtemisDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     ArtemisDatabase::class.java,
-                    "artemisRlp_2022_05_01.db"
-                ).createFromAsset("database/artemisRlp_2022_05_01.db")
+                    "artemisRlp_2022_05_07.db"
+                ).createFromAsset("database/artemisRlp_2022_05_07.db")
                     .build()
                 INSTANCE = instance
                 return instance

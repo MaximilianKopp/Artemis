@@ -22,5 +22,8 @@ class Constants {
         const val TRAINING_SELECTION_C = "c"
         const val TRAINING_SELECTION_D = "d"
 
+        const val SIZE_OF_EACH_ASSIGNMENT_TOPIC = 20
+        const val SIZE_OF_ASSIGNMENT_TOTAL = 120
+        const val AMOUNT_OF_TOPICS = 6
     }
 }

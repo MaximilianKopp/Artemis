@@ -64,6 +64,8 @@ class AppBarComponent {
         val searchWidgetState by generalViewModel.searchWidgetState
         val searchTextState by generalViewModel.searchTextState
 
+        val showAppBar: Boolean by generalViewModel.showAppBar.observeAsState(true)
+
         if (searchWidgetState) {
             SearchAppBar(
                 text = searchTextState,
@@ -76,7 +78,7 @@ class AppBarComponent {
                     Log.v("Clicked", "Auf search geklickt")
                 }
             )
-        } else {
+        } else if (showAppBar) {
             DefaultAppBar(
                 title = title,
                 currentScreen = currentScreen,

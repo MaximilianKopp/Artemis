@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.helper.CriteriaFilter
-import com.ataraxia.artemis.model.Question
+import com.ataraxia.artemis.model.QuestionProjection
 import com.ataraxia.artemis.model.Screen
 import com.ataraxia.artemis.ui.theme.Artemis_Blue
 import com.ataraxia.artemis.ui.theme.Artemis_Green
@@ -105,7 +105,7 @@ class QuestionListComponent {
                         modifier = Modifier.padding(8.dp),
                         colors = ButtonDefaults.buttonColors(Artemis_Blue),
                         onClick = {
-                            val preparedTrainingData: List<Question>
+                            val preparedTrainingData: List<QuestionProjection>
                             if (currentFilter.value == CriteriaFilter.ALL_QUESTIONS_SHUFFLED) {
                                 preparedTrainingData =
                                     questionsLiveData.value.shuffled().take(sizeOfTrainingUnit)
@@ -168,11 +168,15 @@ class QuestionListComponent {
                                 if (currentFilter.value == CriteriaFilter.FAVOURITES) {
                                     question.favourite = 0
                                     isFavourite.value = question.favourite
-                                    questionViewModel.updateQuestion(question)
+                                    questionViewModel.updateQuestion(
+                                        QuestionProjection.modelToEntity(
+                                            question
+                                        )
+                                    )
                                     questionViewModel.onChangeQuestionList(filterAbleQuestions.filter { it.favourite == 1 })
                                 } else
                                     questionViewModel.setFavourite(
-                                        question,
+                                        QuestionProjection.modelToEntity(question),
                                         isFavourite,
                                         currentFilter.value!!
                                     )
