@@ -241,14 +241,18 @@ class TrainingViewModel : ViewModel() {
 
     private fun firstPage(questions: List<QuestionProjection>) {
         onChangeIndex(0)
-        onChangeCurrentQuestion(questions[0])
+        onChangeCurrentQuestion(questions[0].apply {
+            this.checkboxList = this.checkboxList.shuffled()
+        })
         onChangeFavouriteState(questions[0].favourite)
     }
 
     private fun prevPage(index: Int, questions: List<QuestionProjection>) {
         if (index > 0) {
             onChangeIndex(index - 1)
-            onChangeCurrentQuestion(questions[index - 1])
+            onChangeCurrentQuestion(questions[index - 1].apply {
+                this.checkboxList = this.checkboxList.shuffled()
+            })
             onChangeFavouriteState(questions[index - 1].favourite)
         }
     }
@@ -256,14 +260,18 @@ class TrainingViewModel : ViewModel() {
     private fun nextPage(index: Int, questions: List<QuestionProjection>) {
         if (index < questions.size - 1) {
             onChangeIndex(index + 1)
-            onChangeCurrentQuestion(questions[index + 1])
+            onChangeCurrentQuestion(questions[index + 1].apply {
+                this.checkboxList = this.checkboxList.shuffled()
+            })
             onChangeFavouriteState(questions[index + 1].favourite)
         }
     }
 
     private fun lastPage(questions: List<QuestionProjection>) {
         onChangeIndex(questions.size - 1)
-        onChangeCurrentQuestion(questions[questions.size - 1])
+        onChangeCurrentQuestion(questions[questions.size - 1].apply {
+            this.checkboxList = this.checkboxList.shuffled()
+        })
         onChangeFavouriteState(questions[questions.size - 1].favourite)
     }
 

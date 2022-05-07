@@ -95,7 +95,7 @@ class TrainingComponent {
         )
         val isNavButtonEnabled: Boolean by trainingViewModel.isButtonEnabled.observeAsState(true)
         val isAnswerButtonEnabled = remember { mutableStateOf(false) }
-        val answerBtnText: String by trainingViewModel.answerBtnText.observeAsState("ten")
+        val answerBtnText: String by trainingViewModel.answerBtnText.observeAsState("Antworten")
 
         val favouriteState: Int by trainingViewModel.favouriteColor.observeAsState(currentQuestion.favourite)
         val currentTopic = questionViewModel.currentTopic.value
