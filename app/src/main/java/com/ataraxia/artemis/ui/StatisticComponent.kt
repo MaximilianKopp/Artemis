@@ -141,28 +141,28 @@ class StatisticComponent {
                         )
                         .padding(25.dp)
                 ) {
-                    TableCell(text = statistic.topic, weight = 4.75f)
+                    TableCell(text = statistic.topic, weight = 3.0f)
                     TableCell(
                         text = statistic.totalOnceLearned.toString(),
                         Icons.Filled.Done,
                         Artemis_Yellow,
-                        weight = 1.25f
+                        weight = 1.75f
                     )
                     TableCell(
                         text = statistic.totalLearned.toString(),
                         Icons.Filled.Done,
                         Artemis_Green,
-                        weight = 1.25f
+                        weight = 1.75f
                     )
                     TableCell(
                         text = statistic.totalFailed.toString(),
                         Icons.Filled.Close,
                         Artemis_Red,
-                        weight = 1.25f
+                        weight = 1.75f
                     )
                     TableCell(
                         text = statistic.totalPercentage.toString() + "%",
-                        weight = 1.50f
+                        weight = 1.75f
                     )
                 }
             }

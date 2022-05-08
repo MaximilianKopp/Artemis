@@ -375,6 +375,7 @@ class AssignmentComponent {
                 }
                 val horizontalAssignmentScrollState = rememberScrollState()
                 val horizontalEvaluationScrollState = rememberScrollState()
+
                 if (evaluationButtonText.value == "Auswertung") {
                     Row(
                         modifier = Modifier
@@ -382,14 +383,13 @@ class AssignmentComponent {
                             .fillMaxWidth()
                             .horizontalScroll(horizontalAssignmentScrollState, true, null, false)
                     ) {
+                        val skippedBoxColor: MutableState<Color> = remember {
+                            mutableStateOf(Color.White)
+                        }
                         for (skippedIndex in 0..110 step 10) {
-                            val skippedBoxColor: MutableState<Color> = remember {
-                                mutableStateOf(
-                                    Color.White
-                                )
-                            }
-                            skippedBoxColor.value = assignmentViewModel.changeSkippedBoxColor(
-                                assignmentQuestions,
+                            assignmentViewModel.changeSkippedBoxColor(
+                                resultListOfAnsweredQuestions,
+                                skippedBoxColor,
                                 skippedIndex
                             )
                             TextButton(
@@ -406,10 +406,6 @@ class AssignmentComponent {
                                     .height(40.dp)
                                     .padding(end = 5.dp)
                             ) {
-                                assignmentViewModel.changeSkippedBoxColor(
-                                    assignmentQuestions,
-                                    skippedIndex
-                                )
                                 Text(
                                     style = MaterialTheme.typography.caption,
                                     text = if (skippedIndex != 0) skippedIndex.toString() else "1",

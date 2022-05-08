@@ -30,9 +30,6 @@ class AssignmentViewModel : ViewModel() {
     private val _favouriteColor = MutableLiveData<Int>()
     val favouriteColor: LiveData<Int> = _favouriteColor
 
-    private val _skippedBoxColor = MutableLiveData<Color>()
-    val skippedBoxColor: LiveData<Color> = _skippedBoxColor
-
     private val _checkedAnswers = mutableSetOf<String>()
     private val checkedAnswers: Set<String> = _checkedAnswers as HashSet<String>
 
@@ -219,27 +216,48 @@ class AssignmentViewModel : ViewModel() {
         return counter
     }
 
-    //If a decade of questions has been
     fun changeSkippedBoxColor(
         assignmentQuestions: List<QuestionProjection>,
-        skippedIndex: Int
-    ): Color {
-        val indexStart = if (skippedIndex != 0) skippedIndex - 10 else 0
-        val indexEnd = if (skippedIndex == 0) 10 else skippedIndex
-        val sublist = assignmentQuestions.subList(indexStart, indexEnd)
-        var amountOfSelections = 0
+        skippedBoxColor: MutableState<Color>, skippedIndex: Int
+    ) {
+        val startIndex = skippedIndex
+        val endIndex = skippedIndex + 10
+        val isColorChanged: Boolean
 
-        for (question in sublist) {
-            if (question.currentSelection.isNotBlank() && question.currentSelection != "[]") {
-                amountOfSelections++
-            }
-        }
-        return if (amountOfSelections > 1) {
-            Artemis_Yellow
+        val currentSubList = assignmentQuestions.subList(startIndex, endIndex)
+
+        isColorChanged = currentSubList.stream()
+            .allMatch { it.currentSelection != "[]" && it.currentSelection != "" }
+        if (isColorChanged) {
+            skippedBoxColor.value = Artemis_Yellow
         } else {
-            Color.White
+            skippedBoxColor.value = Color.White
         }
     }
+
+    //If a decade of questions has been
+//    fun changeSkippedBoxColor(
+//        assignmentQuestions: List<QuestionProjection>,
+//        skippedIndex: Int
+//    ): Color {
+//        val indexStart = if (skippedIndex != 0) skippedIndex - 10 else 0
+//        val indexEnd = if (skippedIndex == 0) 10 else skippedIndex
+//        val sublist = assignmentQuestions.subList(indexStart, indexEnd)
+//        var amountOfSelections = 0
+//
+//        for (question in sublist) {
+//            if (question.currentSelection.isNotBlank() && question.currentSelection != "[]") {
+//                amountOfSelections++
+//            }
+//        }
+//        Log.v("Current indexStart", indexStart.toString())
+//        Log.v("Current indexEnd", indexEnd.toString())
+//        return if (amountOfSelections == 10) {
+//            Artemis_Yellow
+//        } else {
+//            Color.White
+//        }
+//    }
 
     fun calculateMark(resultOfCorrectAnswers: Int): Int {
         var mark = 6
