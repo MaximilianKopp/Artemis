@@ -46,11 +46,11 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
             questionRepository = QuestionRepository(questionDao)
             allQuestions =
                 questionRepository.getAllQuestions().map { QuestionProjection.entityToModel(it) }
-            onceLearnedQuestions = allQuestions.filter { it.learnedTwice == 1 }.count()
-            learnedQuestions = allQuestions.filter { it.learnedTwice == 1 }.count()
-            failedQuestions = allQuestions.filter { it.failed == 1 }.count()
+            onceLearnedQuestions = allQuestions.count { it.learnedTwice == 1 }
+            learnedQuestions = allQuestions.count { it.learnedTwice == 1 }
+            failedQuestions = allQuestions.count { it.failed == 1 }
             progressInPercent = if (allQuestions.isNotEmpty()) {
-                calculatePercentage(learnedQuestions, allQuestions.count())
+                calculatePercentagePerTopic(learnedQuestions, allQuestions.count())
             } else {
                 BigDecimal.ZERO
             }
@@ -99,7 +99,7 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
         return questions
     }
 
-    private fun calculatePercentage(learnedQuestions: Int, allQuestions: Int): BigDecimal {
+    private fun calculatePercentagePerTopic(learnedQuestions: Int, allQuestions: Int): BigDecimal {
         val learnedQuestionsInPercent =
             BigDecimal(
                 (learnedQuestions.toDouble() / allQuestions.toDouble()) * 100.0
@@ -202,6 +202,19 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
         return filteredQuestions
     }
 
+    fun getTopicOfQuestion(currentQuestionNumericTopic: Int): String {
+        var topic = ""
+        when (currentQuestionNumericTopic) {
+            0 -> topic = Screen.DrawerScreen.TopicWildLife.title
+            1 -> topic = Screen.DrawerScreen.TopicHuntingOperations.title
+            2 -> topic = Screen.DrawerScreen.TopicWeaponsLawAndTechnology.title
+            3 -> topic = Screen.DrawerScreen.TopicWildLifeTreatment.title
+            4 -> topic = Screen.DrawerScreen.TopicHuntingLaw.title
+            5 -> topic = Screen.DrawerScreen.TopicPreservationOfWildLifeAndNature.title
+        }
+        return topic
+    }
+
     fun prepareQuestionData(
         criteriaFilter: CriteriaFilter,
         questions: List<QuestionProjection>,
@@ -259,10 +272,10 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
             filteredQuestions = filteredQuestions.filter { it.topic == item.second.ordinal }
             val allQuestions: Int = filteredQuestions.size
             val onceLearnedQuestions: Int =
-                filteredQuestions.filter { it.learnedOnce == 1 && it.learnedTwice == 0 }.count()
+                filteredQuestions.count { it.learnedOnce == 1 && it.learnedTwice == 0 }
             val learnedQuestions: Int =
-                filteredQuestions.filter { it.learnedOnce == 0 && it.learnedTwice == 1 }.count()
-            val failedQuestions: Int = filteredQuestions.filter { it.failed == 1 }.count()
+                filteredQuestions.count { it.learnedOnce == 0 && it.learnedTwice == 1 }
+            val failedQuestions: Int = filteredQuestions.count { it.failed == 1 }
 
             statistics.add(
                 StatisticProjection(
@@ -271,11 +284,30 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
                     onceLearnedQuestions,
                     learnedQuestions,
                     failedQuestions,
-                    calculatePercentage(learnedQuestions, allQuestions)
+                    calculatePercentagePerTopic(learnedQuestions, allQuestions)
                 )
             )
         }
         return statistics
+    }
+
+    fun extractTotalStatistics(): Map<String, BigDecimal> {
+        val statisticsByTopic: List<StatisticProjection> = extractStatisticsFromTopics()
+        val onceLearnedQuestionsTotal =
+            statisticsByTopic.sumOf { it.totalOnceLearned }.toBigDecimal()
+                .setScale(0, RoundingMode.HALF_UP)
+        val failedQuestionsTotal = statisticsByTopic.sumOf { it.totalFailed }.toBigDecimal()
+            .setScale(0, RoundingMode.HALF_UP)
+        val twiceLearnedQuestionsTotal = statisticsByTopic.sumOf { it.totalLearned }.toBigDecimal()
+            .setScale(0, RoundingMode.HALF_UP)
+        val totalPercentage =
+            calculatePercentagePerTopic(twiceLearnedQuestionsTotal.toInt(), allQuestions.size)
+        return hashMapOf(
+            "OnceLearnedTotal" to onceLearnedQuestionsTotal,
+            "FailedTotal" to failedQuestionsTotal,
+            "TwiceLearnedTotal" to twiceLearnedQuestionsTotal,
+            "TotalPercentage" to totalPercentage
+        )
     }
 
     fun setQuestionStateColor(question: QuestionProjection): Color {

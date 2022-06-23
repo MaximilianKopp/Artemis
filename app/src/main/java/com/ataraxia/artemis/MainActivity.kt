@@ -7,7 +7,10 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ataraxia.artemis.ui.StartMenuComponent
 import com.ataraxia.artemis.ui.theme.ArtemisTheme
-import com.ataraxia.artemis.viewModel.*
+import com.ataraxia.artemis.viewModel.AssignmentViewModel
+import com.ataraxia.artemis.viewModel.GeneralViewModel
+import com.ataraxia.artemis.viewModel.QuestionViewModel
+import com.ataraxia.artemis.viewModel.TrainingViewModel
 
 @ExperimentalFoundationApi
 class MainActivity : ComponentActivity() {
@@ -19,7 +22,6 @@ class MainActivity : ComponentActivity() {
             val generalViewModel: GeneralViewModel = viewModel()
             val questionViewModel: QuestionViewModel = viewModel()
             val trainingViewModel: TrainingViewModel = viewModel()
-            val statisticViewModel: StatisticViewModel = viewModel()
             val assignmentViewModel: AssignmentViewModel = viewModel()
 
             ArtemisTheme {
@@ -27,7 +29,6 @@ class MainActivity : ComponentActivity() {
                     generalViewModel,
                     questionViewModel,
                     trainingViewModel,
-                    statisticViewModel,
                     assignmentViewModel
                 )
             }

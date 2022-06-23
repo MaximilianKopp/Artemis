@@ -60,14 +60,12 @@ class TopicCatalogueComponent {
                     questionViewModel.selectTopic(
                         topicScreen.topic,
                         CriteriaFilter.ALL_QUESTIONS_SHUFFLED
-                    )
-                        .filter { it.failed == 1 }.count()
+                    ).count { it.failed == 1 }
                 countLearnedQuestions =
                     questionViewModel.selectTopic(
                         topicScreen.topic,
                         CriteriaFilter.ALL_QUESTIONS_SHUFFLED
-                    )
-                        .filter { it.learnedTwice == 1 }.count()
+                    ).count { it.learnedTwice == 1 }
                 countAllQuestionsByTopic =
                     questionViewModel.selectTopic(
                         topicScreen.topic,

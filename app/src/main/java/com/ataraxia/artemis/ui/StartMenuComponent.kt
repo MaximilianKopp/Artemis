@@ -26,8 +26,10 @@ import com.ataraxia.artemis.templates.TextButtonTemplate
 import com.ataraxia.artemis.templates.TextTemplate
 import com.ataraxia.artemis.ui.theme.Artemis_Green
 import com.ataraxia.artemis.ui.theme.Artemis_Yellow
-import com.ataraxia.artemis.viewModel.*
-import java.math.BigDecimal
+import com.ataraxia.artemis.viewModel.AssignmentViewModel
+import com.ataraxia.artemis.viewModel.GeneralViewModel
+import com.ataraxia.artemis.viewModel.QuestionViewModel
+import com.ataraxia.artemis.viewModel.TrainingViewModel
 
 class StartMenuComponent {
     private val appBarComposition = AppBarComponent()
@@ -38,14 +40,12 @@ class StartMenuComponent {
         generalViewModel: GeneralViewModel,
         questionViewModel: QuestionViewModel,
         trainingViewModel: TrainingViewModel,
-        statisticViewModel: StatisticViewModel,
         assignmentViewModel: AssignmentViewModel
     ) {
         StartContent(
             generalViewModel,
             questionViewModel,
             trainingViewModel,
-            statisticViewModel,
             assignmentViewModel
         )
     }
@@ -56,7 +56,6 @@ class StartMenuComponent {
         generalViewModel: GeneralViewModel,
         questionViewModel: QuestionViewModel,
         trainingViewModel: TrainingViewModel,
-        statisticViewModel: StatisticViewModel,
         assignmentViewModel: AssignmentViewModel
     ) {
         val navController: NavHostController = rememberNavController()
@@ -111,7 +110,6 @@ class StartMenuComponent {
                 generalViewModel = generalViewModel,
                 questionViewModel = questionViewModel,
                 trainingViewModel = trainingViewModel,
-                statisticViewModel = statisticViewModel,
                 assignmentViewModel = assignmentViewModel
             )
         }
@@ -158,7 +156,6 @@ class StartMenuComponent {
         generalViewModel: GeneralViewModel,
         questionViewModel: QuestionViewModel,
         assignmentViewModel: AssignmentViewModel,
-        statisticViewModel: StatisticViewModel,
         navController: NavController
     ) {
         val scrollState = rememberScrollState()
@@ -172,7 +169,7 @@ class StartMenuComponent {
             horizontalAlignment = Alignment.CenterHorizontally
 
         ) {
-            ShowStartScreenInfo(statisticViewModel)
+            ShowStartScreenInfo(questionViewModel)
             Spacer(modifier = Modifier.padding(top = 5.dp))
             Row {
                 StartMenuButton(onClick = {
@@ -186,7 +183,7 @@ class StartMenuComponent {
                 }
                 StartMenuButton(onClick = {
                     val assignmentQuestions =
-                        questionViewModel.prepareQuestionsForAssignment().toList().shuffled()
+                        questionViewModel.prepareQuestionsForAssignment().toList()
                     questionViewModel.onChangeQuestionsForAssignment(assignmentQuestions)
                     assignmentViewModel.onChangeCurrentQuestion(assignmentQuestions[0])
                     generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Assignment)
@@ -251,17 +248,9 @@ class StartMenuComponent {
 
     @Composable
     fun ShowStartScreenInfo(
-        statisticViewModel: StatisticViewModel
+        questionViewModel: QuestionViewModel,
     ) {
-        val allQuestions: Int by statisticViewModel.allQuestionsCount.observeAsState(0)
-        val onceLearnedQuestions: Int by statisticViewModel.allLearnedOnceQuestionsCount.observeAsState(
-            0
-        )
-        val learnedQuestions: Int by statisticViewModel.allLearnedQuestionsCount.observeAsState(0)
-        val failedQuestions: Int by statisticViewModel.allFailedQuestionCount.observeAsState(0)
-        val progressInPercent: BigDecimal by statisticViewModel.progressInPercent.observeAsState(
-            BigDecimal.ZERO
-        )
+        val allQuestions: Int = questionViewModel.allQuestions.size
 
         Column {
             Row(
@@ -300,25 +289,25 @@ class StartMenuComponent {
                 modifier = Modifier.padding(start = 25.dp, top = 25.dp)
             )
             Text(
-                text = "1x richtig beantwortet: $onceLearnedQuestions",
+                text = "1x richtig beantwortet: ${questionViewModel.extractTotalStatistics()["OnceLearnedTotal"]}",
                 color = Color.White,
                 style = MaterialTheme.typography.body2,
                 modifier = Modifier.padding(start = 25.dp, top = 10.dp)
             )
             Text(
-                text = "2x richtig beantwortet: $learnedQuestions",
+                text = "2x richtig beantwortet: ${questionViewModel.extractTotalStatistics()["TwiceLearnedTotal"]}",
                 color = Color.White,
                 style = MaterialTheme.typography.body2,
                 modifier = Modifier.padding(start = 25.dp, top = 10.dp)
             )
             Text(
-                text = "Falsch beantwortet: $failedQuestions",
+                text = "Falsch beantwortet: ${questionViewModel.extractTotalStatistics()["FailedTotal"]}",
                 color = Color.White,
                 style = MaterialTheme.typography.body2,
                 modifier = Modifier.padding(start = 25.dp, top = 10.dp)
             )
             Text(
-                text = "$progressInPercent% gelernt",
+                text = "${questionViewModel.extractTotalStatistics()["TotalPercentage"]}% gelernt",
                 color = Color.White,
                 style = MaterialTheme.typography.body2,
                 modifier = Modifier.padding(start = 25.dp, top = 10.dp)

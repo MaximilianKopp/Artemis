@@ -95,6 +95,8 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
             Topic.TOPIC_5.ordinal -> currentScreen = Screen.DrawerScreen.TopicHuntingLaw
             Topic.TOPIC_6.ordinal -> currentScreen =
                 Screen.DrawerScreen.TopicPreservationOfWildLifeAndNature
+            Topic.TOPIC_7.ordinal -> currentScreen =
+                Screen.DrawerScreen.AllQuestions
         }
         return currentScreen
     }

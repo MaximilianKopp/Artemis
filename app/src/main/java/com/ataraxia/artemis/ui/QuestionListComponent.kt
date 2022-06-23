@@ -1,7 +1,6 @@
 package com.ataraxia.artemis.ui
 
 import android.util.Log
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,12 +14,14 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material.icons.rounded.ChevronRight
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -128,21 +129,47 @@ class QuestionListComponent {
                             generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Training)
                             navController.navigate(Screen.DrawerScreen.Training.route)
                         }) {
-                        Text(
-                            color = Color.White,
-                            text = "Training starten (${
-                                if (currentFilter.value == CriteriaFilter.ALL_QUESTIONS_SHUFFLED) sizeOfTrainingUnit else questionsLiveData.value.count()
-                            } Fragen)"
-                        )
+                        Column {
+                            Text(
+                                color = Color.White,
+                                text = "Training starten (${
+                                    if (currentFilter.value == CriteriaFilter.ALL_QUESTIONS_SHUFFLED) sizeOfTrainingUnit else questionsLiveData.value.count()
+                                } Fragen)"
+                            )
+                            Spacer(modifier = Modifier.padding(8.dp))
+                            Text(
+                                color = Color.White,
+                                text = "2x richtig: ${filterAbleQuestions.count { it.learnedTwice == 1 }}/${filterAbleQuestions.count()}",
+                                style = MaterialTheme.typography.overline
+                            )
+                            Text(
+                                color = Color.White,
+                                text = "1x richtig: ${filterAbleQuestions.count { it.learnedOnce == 1 }}",
+                                style = MaterialTheme.typography.overline
+                            )
+                            Text(
+                                color = Color.White,
+                                text = "Fehler: ${filterAbleQuestions.count { it.failed == 1 }}",
+                                style = MaterialTheme.typography.overline
+                            )
+                            Text(
+                                color = Color.White,
+                                text = "Noch nicht gelernt: ${filterAbleQuestions.count { it.learnedTwice == 0 }}",
+                                style = MaterialTheme.typography.overline
+                            )
+                        }
                     }
+                }
+                Column(
+                    Modifier
+                        .padding(8.dp)
+                ) {
+
                 }
             }
             items(questionsLiveData.value) { question ->
                 val isFavourite: MutableState<Int> =
                     rememberSaveable { mutableStateOf(question.favourite) }
-                val iconColor: State<Color> = animateColorAsState(
-                    if (isFavourite.value == 1 || currentFilter.value == CriteriaFilter.FAVOURITES) Color.Yellow else Color.Black
-                )
                 Card(
                     backgroundColor = Color.White,
                     modifier = Modifier
@@ -164,33 +191,17 @@ class QuestionListComponent {
                 ) {
                     Column {
                         Row {
-                            IconButton(onClick = {
-                                if (currentFilter.value == CriteriaFilter.FAVOURITES) {
-                                    question.favourite = 0
-                                    isFavourite.value = question.favourite
-                                    questionViewModel.updateQuestion(
-                                        QuestionProjection.modelToEntity(
-                                            question
-                                        )
-                                    )
-                                    questionViewModel.onChangeQuestionList(filterAbleQuestions.filter { it.favourite == 1 })
-                                } else
-                                    questionViewModel.setFavourite(
-                                        QuestionProjection.modelToEntity(question),
-                                        isFavourite,
-                                        currentFilter.value!!
-                                    )
-                            }) {
-                                Icon(
-                                    if (currentFilter.value == CriteriaFilter.FAVOURITES) Icons.Filled.Delete else Icons.Filled.Star,
-                                    contentDescription = "Icon for learned questions",
-                                    modifier = Modifier.size(20.dp),
-                                    tint = if (currentFilter.value == CriteriaFilter.FAVOURITES) Color.Black else iconColor.value
-                                )
-                            }
+                            Icon(
+                                imageVector = Icons.Filled.Star,
+                                contentDescription = "Favourite Icon",
+                                Modifier
+                                    .size(26.dp)
+                                    .padding(top = 8.dp),
+                                tint = if (isFavourite.value == 1) Color.Yellow else Color.Black,
+                            )
                             Text(
                                 text = question.text,
-                                Modifier.padding(start = 3.dp, top = 12.dp)
+                                Modifier.padding(start = 5.dp, top = 8.dp)
                             )
                         }
                         Row {

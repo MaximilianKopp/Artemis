@@ -36,7 +36,6 @@ import com.ataraxia.artemis.ui.theme.Artemis_Green
 import com.ataraxia.artemis.ui.theme.Artemis_Yellow
 import com.ataraxia.artemis.viewModel.GeneralViewModel
 import com.ataraxia.artemis.viewModel.QuestionViewModel
-import com.ataraxia.artemis.viewModel.StatisticViewModel
 import com.ataraxia.artemis.viewModel.TrainingViewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -52,8 +51,7 @@ class TrainingComponent {
         onOpenTrainingDialog: (Boolean) -> Unit,
         questionViewModel: QuestionViewModel,
         trainingViewModel: TrainingViewModel,
-        generalViewModel: GeneralViewModel,
-        statisticViewModel: StatisticViewModel,
+        generalViewModel: GeneralViewModel
     ) {
         val navIndex: Int by trainingViewModel.index.observeAsState(0)
         val currentFilter = questionViewModel.filter.observeAsState()
@@ -68,7 +66,6 @@ class TrainingComponent {
                 trainingViewModel = trainingViewModel,
                 questionViewModel = questionViewModel,
                 generalViewModel = generalViewModel,
-                statisticViewModel = statisticViewModel,
                 trainingData = trainingData.value,
                 index = navIndex,
                 isTrainingDialogOpen = isTrainingDialogOpen,
@@ -83,7 +80,6 @@ class TrainingComponent {
         trainingViewModel: TrainingViewModel,
         questionViewModel: QuestionViewModel,
         generalViewModel: GeneralViewModel,
-        statisticViewModel: StatisticViewModel,
         trainingData: List<QuestionProjection>,
         index: Int,
         isTrainingDialogOpen: Boolean,
@@ -147,12 +143,20 @@ class TrainingComponent {
                                     tint = if (favouriteState == 1) Color.Yellow else Color.Black
                                 )
                             }
-                            Text(
-                                modifier = Modifier.padding(6.dp),
-                                text = currentQuestion.text,
-                                style = MaterialTheme.typography.body1,
-                                color = Color.Black
-                            )
+                            Column {
+                                Text(
+                                    modifier = Modifier.padding(6.dp),
+                                    text = questionViewModel.getTopicOfQuestion(currentQuestion.topic),
+                                    style = MaterialTheme.typography.caption,
+                                    color = Color.Black
+                                )
+                                Text(
+                                    modifier = Modifier.padding(6.dp),
+                                    text = currentQuestion.text,
+                                    style = MaterialTheme.typography.body1,
+                                    color = Color.Black
+                                )
+                            }
                         }
                     }
                 }
@@ -380,7 +384,6 @@ class TrainingComponent {
                                     }
                                     trainingViewModel.onChangeAnswerButtonText("Antworten")
                                 }
-                                statisticViewModel.onChangeTotalStatisticsFromStartScreen()
                             }) {
                             Text(
                                 text = answerBtnText,

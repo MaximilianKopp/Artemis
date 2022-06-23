@@ -33,6 +33,9 @@ class AssignmentViewModel : ViewModel() {
     private val _checkedAnswers = mutableSetOf<String>()
     private val checkedAnswers: Set<String> = _checkedAnswers as HashSet<String>
 
+    private val _topicButtonColor = MutableLiveData<Color>()
+    val topicButtonColor: LiveData<Color> = _topicButtonColor
+
     fun setCurrentQuestionText(question: QuestionProjection, checkbox: QuestionCheckbox): String {
         when (checkbox.option) {
             Constants.TRAINING_SELECTION_A -> return question.optionA
@@ -42,6 +45,17 @@ class AssignmentViewModel : ViewModel() {
         }
         return "Error"
     }
+
+    fun onChangeTopicButtonColor(newValue: Color) {
+        CoroutineScope(Dispatchers.IO).launch {
+            onChangeTopicButtonColorCoroutine(newValue)
+        }
+    }
+
+    private suspend fun onChangeTopicButtonColorCoroutine(newValue: Color) =
+        withContext(Dispatchers.IO) {
+            _topicButtonColor.postValue(newValue)
+        }
 
     @Suppress("JavaCollectionsStaticMethodOnImmutableList")
     fun currentSelection(isChecked: Boolean, option: String, currentQuestion: QuestionProjection) {
@@ -136,11 +150,36 @@ class AssignmentViewModel : ViewModel() {
             _favouriteColor.postValue(isFavourite)
         }
 
+    fun setTopicBoxButton(
+        direction: NavigationButton,
+        topic: Int,
+        questions: List<QuestionProjection>
+    ) {
+        var index = 0
+        when (topic) {
+            0 -> index = 0
+            1 -> index = 21
+            2 -> index = 41
+            3 -> index = 61
+            4 -> index = 81
+            5 -> index = 101
+        }
+        setDirection(direction, questions, index)
+    }
+
     //Navigation bar with buttons
     fun setNavigationButton(
         direction: NavigationButton,
         index: Int,
         questions: List<QuestionProjection>,
+    ) {
+        setDirection(direction, questions, index)
+    }
+
+    private fun setDirection(
+        direction: NavigationButton,
+        questions: List<QuestionProjection>,
+        index: Int
     ) {
         when (direction) {
             NavigationButton.FIRST_PAGE -> firstPage(questions)
@@ -169,8 +208,7 @@ class AssignmentViewModel : ViewModel() {
     }
 
     fun filterCorrectAnswersOfEachTopic(resultList: List<QuestionProjection>, topic: Int): Int {
-        return resultList.filter { (it.currentSelection == it.correctAnswers).and(it.topic == topic) }
-            .count()
+        return resultList.count { (it.currentSelection == it.correctAnswers).and(it.topic == topic) }
     }
 
     fun filterWrongAnswersOfEachTopic(correctAnswersByTopic: Int): Int {
@@ -218,14 +256,49 @@ class AssignmentViewModel : ViewModel() {
 
     fun changeSkippedBoxColor(
         assignmentQuestions: List<QuestionProjection>,
-        skippedBoxColor: MutableState<Color>, skippedIndex: Int
+        skippedBoxColor: MutableState<Color>, topic: Int
     ) {
-        val startIndex = skippedIndex
-        val endIndex = skippedIndex + 10
+        CoroutineScope(Dispatchers.IO).launch {
+            changeSkippedBoxColorCoroutine(assignmentQuestions, skippedBoxColor, topic)
+        }
+    }
+
+    private suspend fun changeSkippedBoxColorCoroutine(
+        assignmentQuestions: List<QuestionProjection>,
+        skippedBoxColor: MutableState<Color>, topic: Int
+    ) = withContext(Dispatchers.Main) {
+        var startIndex = 0
+        var endIndex = 0
         val isColorChanged: Boolean
 
-        val currentSubList = assignmentQuestions.subList(startIndex, endIndex)
+        when (topic) {
+            0 -> {
+                startIndex = 0
+                endIndex = 20
+            }
+            1 -> {
+                startIndex = 21
+                endIndex = 40
+            }
+            2 -> {
+                startIndex = 41
+                endIndex = 60
+            }
+            3 -> {
+                startIndex = 61
+                endIndex = 80
+            }
+            4 -> {
+                startIndex = 81
+                endIndex = 100
+            }
+            5 -> {
+                startIndex = 101
+                endIndex = 120
+            }
+        }
 
+        val currentSubList = assignmentQuestions.subList(startIndex, endIndex)
         isColorChanged = currentSubList.stream()
             .allMatch { it.currentSelection != "[]" && it.currentSelection != "" }
         if (isColorChanged) {

@@ -11,7 +11,10 @@ import androidx.navigation.compose.composable
 import com.ataraxia.artemis.model.Screen
 import com.ataraxia.artemis.model.Screen.DrawerScreen.*
 import com.ataraxia.artemis.ui.*
-import com.ataraxia.artemis.viewModel.*
+import com.ataraxia.artemis.viewModel.AssignmentViewModel
+import com.ataraxia.artemis.viewModel.GeneralViewModel
+import com.ataraxia.artemis.viewModel.QuestionViewModel
+import com.ataraxia.artemis.viewModel.TrainingViewModel
 
 class NavHelper {
 
@@ -30,7 +33,6 @@ class NavHelper {
             generalViewModel: GeneralViewModel,
             questionViewModel: QuestionViewModel,
             trainingViewModel: TrainingViewModel,
-            statisticViewModel: StatisticViewModel,
             assignmentViewModel: AssignmentViewModel
         ) {
 
@@ -56,14 +58,13 @@ class NavHelper {
                                 generalViewModel,
                                 questionViewModel,
                                 assignmentViewModel,
-                                statisticViewModel,
                                 navController
                             )
                             Questions.route -> questionComponent.TopicCatalogueScreen(
                                 questionViewModel, navController
                             )
                             Statistics.route -> statisticComponent.StatisticScreen(
-                                questionViewModel, statisticViewModel, navController
+                                questionViewModel, navController
                             )
                             Configuration.route -> configComponent.ConfigScreen()
                             Imprint.route -> imprintComponent.ImprintScreen()
@@ -279,8 +280,7 @@ class NavHelper {
                             onOpenAssignmentDialog,
                             questionViewModel,
                             generalViewModel,
-                            assignmentViewModel,
-                            statisticViewModel
+                            assignmentViewModel
                         )
                         generalViewModel.onTopBarTitleChange(Assignment.title)
                         generalViewModel.onHideSearchWidget(
@@ -309,8 +309,7 @@ class NavHelper {
                             trainingViewModel = trainingViewModel,
                             generalViewModel = generalViewModel,
                             isTrainingDialogOpen = isTrainingDialogClosed,
-                            onOpenTrainingDialog = onOpenTrainingDialog,
-                            statisticViewModel = statisticViewModel
+                            onOpenTrainingDialog = onOpenTrainingDialog
                         )
                         generalViewModel.onTopBarTitleChange(Training.title)
                         generalViewModel.onHideSearchWidget(
