@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.ataraxia.artemis.helper.HyperlinkText
 
 class ImprintComponent {
 
@@ -43,11 +44,14 @@ class ImprintComponent {
                 color = Color.White
             )
             Text(
-                text = "Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:\n" +
-                        "http://ec.europa.eu/consumers/odr\n" +
-                        "Die E-Mail-Adresse des Verantwortlichen finden sie oben im Impressum.",
+                text = "Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:",
                 style = MaterialTheme.typography.body1,
                 color = Color.White
+            )
+            HyperlinkText(
+                fullText = "http://ec.europa.eu/consumers/odr",
+                linkText = listOf("http://ec.europa.eu/consumers/odr"),
+                hyperlinks = listOf("http://ec.europa.eu/consumers/odr")
             )
             Divider(
                 modifier = Modifier.padding(top = 10.dp, bottom = 10.dp),
@@ -81,9 +85,14 @@ class ImprintComponent {
                 color = Color.White
             )
             Text(
-                text = "Die verwendeten Fragen basieren auf dem offiziellen Fragenkatalog des Landesjagdverband Rheinland-Pfalz e.V \n https://ljv-rlp.de/ausbildung-und-beratung/pruefungsfragen/",
+                text = "Die verwendeten Fragen basieren auf dem offiziellen Fragenkatalog des Landesjagdverband Rheinland-Pfalz e.V:",
                 style = MaterialTheme.typography.body1,
                 color = Color.White
+            )
+            HyperlinkText(
+                fullText = "https://ljv-rlp.de/ausbildung-und-beratung/pruefungsfragen",
+                linkText = listOf("https://ljv-rlp.de/ausbildung-und-beratung/pruefungsfragen"),
+                hyperlinks = listOf("https://ljv-rlp.de/ausbildung-und-beratung/pruefungsfragen")
             )
             Divider(
                 modifier = Modifier.padding(top = 10.dp, bottom = 10.dp),
