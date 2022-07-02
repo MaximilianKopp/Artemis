@@ -63,7 +63,7 @@ class AssignmentViewModel : ViewModel() {
         return "Error"
     }
 
-    fun onChangeTopicButtonColor(newValue: Color, topic: Int) {
+    private fun onChangeTopicButtonColor(newValue: Color, topic: Int) {
         CoroutineScope(Dispatchers.IO).launch {
             onChangeTopicButtonColorCoroutine(newValue, topic)
         }

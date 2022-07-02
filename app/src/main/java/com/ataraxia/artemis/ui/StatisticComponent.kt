@@ -20,7 +20,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.ataraxia.artemis.helper.RowScopeExtension.Companion.TableCell
 import com.ataraxia.artemis.ui.theme.Artemis_Green
 import com.ataraxia.artemis.ui.theme.Artemis_Red
@@ -31,19 +30,16 @@ class StatisticComponent {
 
     @Composable
     fun StatisticScreen(
-        questionViewModel: QuestionViewModel,
-        navController: NavController
+        questionViewModel: QuestionViewModel
     ) {
         StatisticsContent(
             questionViewModel,
-            navController
         )
     }
 
     @Composable
     fun StatisticsContent(
         questionViewModel: QuestionViewModel,
-        navController: NavController
     ) {
         val allQuestions: Int = questionViewModel.allQuestions.size
         val scrollableState = rememberScrollState()

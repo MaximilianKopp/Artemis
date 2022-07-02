@@ -30,7 +30,6 @@ interface StatisticDao {
     @Query("SELECT COUNT(*) FROM questions WHERE topic =:topic AND failed = 1")
     fun getFailedQuestionsByTopic(topic: String): Int
 
-
     @Query("UPDATE statistics SET VALUE = (SELECT COUNT(*) FROM questions) WHERE name =:name")
     suspend fun updateAllQuestionsCount(name: String)
 }

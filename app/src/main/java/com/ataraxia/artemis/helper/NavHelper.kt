@@ -40,7 +40,6 @@ class NavHelper {
             val questionComponent = TopicCatalogueComponent()
             val examComponent = AssignmentComponent()
             val statisticComponent = StatisticComponent()
-            val configComponent = ConfigComponent()
             val questionListComponent = QuestionListComponent()
             val trainingComponent = TrainingComponent()
             val imprintComponent = ImprintComponent()
@@ -64,9 +63,8 @@ class NavHelper {
                                 questionViewModel, navController
                             )
                             Statistics.route -> statisticComponent.StatisticScreen(
-                                questionViewModel, navController
+                                questionViewModel
                             )
-                            Configuration.route -> configComponent.ConfigScreen()
                             Imprint.route -> imprintComponent.ImprintScreen()
                             Privacy.route -> privacyComponent.PrivacyScreen()
                         }

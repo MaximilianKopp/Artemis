@@ -688,7 +688,6 @@ class AssignmentComponent {
                     onOpenAssignmentDialog,
                     navController,
                     generalViewModel,
-                    assignmentQuestions
                 )
             }
         } else {
@@ -789,8 +788,7 @@ class AssignmentComponent {
     fun AssignmentAlertDialog(
         onOpenAssignmentDialog: (Boolean) -> Unit,
         navController: NavController,
-        generalViewModel: GeneralViewModel,
-        assignmentQuestions: List<QuestionProjection>
+        generalViewModel: GeneralViewModel
     ) {
         AlertDialog(
             onDismissRequest = { onOpenAssignmentDialog(false) },

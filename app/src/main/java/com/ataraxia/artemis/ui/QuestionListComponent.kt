@@ -309,7 +309,7 @@ class QuestionListComponent {
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 IconButton(onClick = {
-                                    if (sizeOfTrainingUnit != Constants.SIZE_PER_TRANINIG_UNIT_MIN) {
+                                    if (sizeOfTrainingUnit != Constants.SIZE_PER_TRAINING_UNIT_MIN) {
                                         generalViewModel.onChangeSizeOfTrainingUnit(
                                             sizeOfTrainingUnit - 10
                                         )
