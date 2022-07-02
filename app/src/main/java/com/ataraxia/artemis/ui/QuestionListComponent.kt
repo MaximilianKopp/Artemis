@@ -38,6 +38,10 @@ import com.ataraxia.artemis.ui.theme.Artemis_Yellow
 import com.ataraxia.artemis.viewModel.GeneralViewModel
 import com.ataraxia.artemis.viewModel.QuestionViewModel
 import com.ataraxia.artemis.viewModel.TrainingViewModel
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+import java.util.*
 
 @ExperimentalFoundationApi
 class QuestionListComponent {
@@ -81,6 +85,7 @@ class QuestionListComponent {
         val searchBarText: String by generalViewModel.searchTextState
         val sizeOfTrainingUnit: Int by generalViewModel.sizeOfTrainingUnit.observeAsState(20)
         Log.v("Current Searchtext", searchBarText)
+
 
         if (currentFilter.value == CriteriaFilter.SEARCH) {
             questionViewModel.onChangeQuestionList(
@@ -441,6 +446,44 @@ class QuestionListComponent {
                             Text(
                                 color = Color.Black,
                                 text = "Favouriten (${filterAbleQuestions.count { it.favourite == 1 }})",
+                                style = MaterialTheme.typography.body1
+                            )
+                        }
+                        Button(
+                            onClick = {
+                                Log.v("Last seen", LocalDateTime.now().minusWeeks(1L).toString())
+                                //Take all questions that have been longer than one week not viewed
+                                questionViewModel.onChangeFilter(CriteriaFilter.LAST_VIEWED)
+                                questionViewModel.onChangeQuestionList(
+                                    filterAbleQuestions.filter {
+                                        LocalDateTime.parse(
+                                            it.lastViewed,
+                                            DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
+                                                .withLocale(Locale("DE"))
+                                        )
+                                            .isBefore(LocalDateTime.now().minusWeeks(1L))
+                                    }
+                                        .sortedWith(Comparator.comparing { LocalDateTime.parse(it.lastViewed) })
+                                )
+                                onOpenDialog(false)
+                            },
+                            Modifier
+                                .width(300.dp)
+                                .padding(4.dp),
+                            colors = ButtonDefaults.buttonColors(Artemis_Yellow),
+                        ) {
+                            Text(
+                                color = Color.Black,
+                                text = "Längere Zeit nicht angesehen (${
+                                    filterAbleQuestions.count {
+                                        LocalDateTime.parse(
+                                            it.lastViewed,
+                                            DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
+                                                .withLocale(Locale("DE"))
+                                        )
+                                            .isBefore(LocalDateTime.now().minusWeeks(1L))
+                                    }
+                                })",
                                 style = MaterialTheme.typography.body1
                             )
                         }

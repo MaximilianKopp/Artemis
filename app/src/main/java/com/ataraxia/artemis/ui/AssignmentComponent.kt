@@ -30,6 +30,7 @@ import com.ataraxia.artemis.viewModel.AssignmentViewModel
 import com.ataraxia.artemis.viewModel.GeneralViewModel
 import com.ataraxia.artemis.viewModel.QuestionViewModel
 
+@ExperimentalFoundationApi
 class AssignmentComponent {
 
     @Composable
@@ -212,7 +213,6 @@ class AssignmentComponent {
         }
     }
 
-    @OptIn(ExperimentalFoundationApi::class)
     @Composable
     fun ResultContent(
         showResultContent: MutableState<Boolean>,
@@ -375,15 +375,7 @@ class AssignmentComponent {
             assignmentQuestions.toMutableList()
         val isEvaluationDialogOpen: MutableState<Boolean> = remember { mutableStateOf(false) }
 
-        val horizontalAssignmentScrollState = rememberScrollState()
-        Row(
-            modifier = Modifier
-                .padding(start = 5.dp, bottom = 25.dp)
-                .fillMaxWidth()
-                .horizontalScroll(horizontalAssignmentScrollState, true, null, false)
-        ) {
-            TopicButtons(assignmentViewModel, assignmentQuestions)
-        }
+
         if (!showResultContent.value) {
             Column(
                 modifier = Modifier
@@ -391,6 +383,15 @@ class AssignmentComponent {
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                val horizontalAssignmentScrollState = rememberScrollState()
+                Row(
+                    modifier = Modifier
+                        .padding(start = 5.dp, bottom = 10.dp)
+                        .fillMaxWidth()
+                        .horizontalScroll(horizontalAssignmentScrollState, true, null, false)
+                ) {
+                    TopicButtons(assignmentViewModel, assignmentQuestions)
+                }
                 val verticalScrollState = rememberScrollState()
                 Column(
                     Modifier
@@ -527,9 +528,7 @@ class AssignmentComponent {
                 }
                 val horizontalEvaluationScrollState = rememberScrollState()
 
-                if (evaluationButtonText.value == "Auswertung") {
-
-                } else if (evaluationButtonText.value == "Ergebnisse") {
+                if (evaluationButtonText.value == "Ergebnisse") {
                     enableCheckbox.value = false
                     Row(
                         modifier = Modifier
@@ -688,7 +687,8 @@ class AssignmentComponent {
                 AssignmentAlertDialog(
                     onOpenAssignmentDialog,
                     navController,
-                    generalViewModel
+                    generalViewModel,
+                    assignmentQuestions
                 )
             }
         } else {
@@ -790,6 +790,7 @@ class AssignmentComponent {
         onOpenAssignmentDialog: (Boolean) -> Unit,
         navController: NavController,
         generalViewModel: GeneralViewModel,
+        assignmentQuestions: List<QuestionProjection>
     ) {
         AlertDialog(
             onDismissRequest = { onOpenAssignmentDialog(false) },

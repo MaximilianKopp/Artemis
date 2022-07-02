@@ -1,7 +1,6 @@
 package com.ataraxia.artemis.viewModel
 
 import android.app.Application
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -319,25 +318,5 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
             result = Color.Green
         }
         return result
-    }
-
-    fun setFavourite(
-        question: Question,
-        isFavourite: MutableState<Int>,
-        currentFilter: CriteriaFilter
-    ) {
-        if (question.favourite == 0) {
-            question.favourite = 1
-            isFavourite.value = question.favourite
-        } else if (question.favourite == 1) {
-            question.favourite = 0
-            isFavourite.value = question.favourite
-        }
-
-        if (question.favourite == 1 && currentFilter == CriteriaFilter.FAVOURITES) {
-            question.favourite = 0
-            isFavourite.value = question.favourite
-        }
-        updateQuestion(question)
     }
 }

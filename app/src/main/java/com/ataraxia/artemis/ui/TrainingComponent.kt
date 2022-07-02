@@ -59,6 +59,7 @@ class TrainingComponent {
 
         Log.v("Current TrainingData", trainingData.value.forEach(::println).toString())
         Log.v("Current Filter", currentFilter.value.toString())
+        trainingViewModel.resetCurrentSelection()
 
         if (trainingData.value.isNotEmpty()) {
             TrainingContent(
