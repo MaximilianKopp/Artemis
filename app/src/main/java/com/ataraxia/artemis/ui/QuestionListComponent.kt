@@ -1,17 +1,15 @@
 package com.ataraxia.artemis.ui
 
 import android.util.Log
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowRight
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Star
@@ -32,7 +30,6 @@ import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.helper.CriteriaFilter
 import com.ataraxia.artemis.model.QuestionProjection
 import com.ataraxia.artemis.model.Screen
-import com.ataraxia.artemis.ui.theme.Artemis_Blue
 import com.ataraxia.artemis.ui.theme.Artemis_Green
 import com.ataraxia.artemis.ui.theme.Artemis_Yellow
 import com.ataraxia.artemis.viewModel.GeneralViewModel
@@ -106,59 +103,78 @@ class QuestionListComponent {
         LazyColumn {
             stickyHeader {
                 Row {
-                    Button(
-                        enabled = questionsLiveData.value.isNotEmpty(),
-                        modifier = Modifier.padding(8.dp),
-                        colors = ButtonDefaults.buttonColors(Artemis_Blue),
-                        onClick = {
-                            val preparedTrainingData: List<QuestionProjection>
-                            if (currentFilter.value == CriteriaFilter.ALL_QUESTIONS_SHUFFLED) {
-                                preparedTrainingData =
-                                    questionsLiveData.value.shuffled().take(sizeOfTrainingUnit)
-                                trainingViewModel.onChangeTrainingData(preparedTrainingData)
-                                trainingViewModel.onChangeCurrentQuestion(preparedTrainingData[0])
-                            } else {
-                                preparedTrainingData = questionsLiveData.value
-                                trainingViewModel.onChangeTrainingData(questionsLiveData.value)
-                                trainingViewModel.onChangeCurrentQuestion(preparedTrainingData[0])
-                            }
-                            generalViewModel.onChangeSearchWidgetState(false)
-                            generalViewModel.onHideSearchWidget(
-                                Pair(
-                                    Constants.ALPHA_INVISIBLE,
-                                    Constants.DISABLED
+                    Card(
+                        backgroundColor = Artemis_Yellow,
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .border(BorderStroke(2.dp, Color.White), RoundedCornerShape(15.dp)),
+                        shape = RoundedCornerShape(15.dp),
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(10.dp)
+                        ) {
+                            Button(
+                                enabled = questionsLiveData.value.isNotEmpty(),
+                                colors = ButtonDefaults.buttonColors(Artemis_Green),
+                                onClick = {
+                                    val preparedTrainingData: List<QuestionProjection>
+                                    if (currentFilter.value == CriteriaFilter.ALL_QUESTIONS_SHUFFLED) {
+                                        preparedTrainingData =
+                                            questionsLiveData.value.shuffled()
+                                                .take(sizeOfTrainingUnit)
+                                        trainingViewModel.onChangeTrainingData(preparedTrainingData)
+                                        trainingViewModel.onChangeCurrentQuestion(
+                                            preparedTrainingData[0]
+                                        )
+                                    } else {
+                                        preparedTrainingData = questionsLiveData.value
+                                        trainingViewModel.onChangeTrainingData(questionsLiveData.value)
+                                        trainingViewModel.onChangeCurrentQuestion(
+                                            preparedTrainingData[0]
+                                        )
+                                    }
+                                    generalViewModel.onChangeSearchWidgetState(false)
+                                    generalViewModel.onHideSearchWidget(
+                                        Pair(
+                                            Constants.ALPHA_INVISIBLE,
+                                            Constants.DISABLED
+                                        )
+                                    )
+                                    trainingViewModel.onChangeIndex(0)
+                                    generalViewModel.onChangeSearchWidgetState(false)
+                                    generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Training)
+                                    navController.navigate(Screen.DrawerScreen.Training.route)
+                                }) {
+                                Icon(
+                                    Icons.Filled.ArrowRight,
+                                    contentDescription = "Start button icon"
                                 )
-                            )
-                            trainingViewModel.onChangeIndex(0)
-                            generalViewModel.onChangeSearchWidgetState(false)
-                            generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Training)
-                            navController.navigate(Screen.DrawerScreen.Training.route)
-                        }) {
-                        Column {
+                                Text(
+                                    color = Color.White,
+                                    text = "Training starten (${
+                                        if (currentFilter.value == CriteriaFilter.ALL_QUESTIONS_SHUFFLED) sizeOfTrainingUnit else questionsLiveData.value.count()
+                                    } Fragen)",
+                                    style = MaterialTheme.typography.caption
+                                )
+                            }
+
                             Text(
-                                color = Color.White,
-                                text = "Training starten (${
-                                    if (currentFilter.value == CriteriaFilter.ALL_QUESTIONS_SHUFFLED) sizeOfTrainingUnit else questionsLiveData.value.count()
-                                } Fragen)"
-                            )
-                            Spacer(modifier = Modifier.padding(8.dp))
-                            Text(
-                                color = Color.White,
+                                color = Color.Black,
                                 text = "2x richtig: ${filterAbleQuestions.count { it.learnedTwice == 1 }}/${filterAbleQuestions.count()}",
                                 style = MaterialTheme.typography.overline
                             )
                             Text(
-                                color = Color.White,
+                                color = Color.Black,
                                 text = "1x richtig: ${filterAbleQuestions.count { it.learnedOnce == 1 }}",
                                 style = MaterialTheme.typography.overline
                             )
                             Text(
-                                color = Color.White,
+                                color = Color.Black,
                                 text = "Fehler: ${filterAbleQuestions.count { it.failed == 1 }}",
                                 style = MaterialTheme.typography.overline
                             )
                             Text(
-                                color = Color.White,
+                                color = Color.Black,
                                 text = "Noch nicht gelernt: ${filterAbleQuestions.count { it.learnedTwice == 0 }}",
                                 style = MaterialTheme.typography.overline
                             )
@@ -221,7 +237,9 @@ class QuestionListComponent {
                                             Icons.Filled.Check,
                                             contentDescription = "Icon for learned questions",
                                             modifier = Modifier.size(20.dp),
-                                            tint = questionViewModel.setQuestionStateColor(question)
+                                            tint = questionViewModel.setQuestionStateColor(
+                                                question
+                                            )
                                         )
                                         //Icon for failed questions
                                         Icon(
@@ -451,19 +469,27 @@ class QuestionListComponent {
                         }
                         Button(
                             onClick = {
-                                Log.v("Last seen", LocalDateTime.now().minusWeeks(1L).toString())
+                                val dtf =
+                                    DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
+                                        .withLocale(Locale("DE"))
+
+                                Log.v(
+                                    "Last seen",
+                                    LocalDateTime.now().minusWeeks(1L).toString()
+                                )
                                 //Take all questions that have been longer than one week not viewed
                                 questionViewModel.onChangeFilter(CriteriaFilter.LAST_VIEWED)
                                 questionViewModel.onChangeQuestionList(
                                     filterAbleQuestions.filter {
                                         LocalDateTime.parse(
-                                            it.lastViewed,
-                                            DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
-                                                .withLocale(Locale("DE"))
+                                            it.lastViewed, dtf
                                         )
                                             .isBefore(LocalDateTime.now().minusWeeks(1L))
                                     }
-                                        .sortedWith(Comparator.comparing { LocalDateTime.parse(it.lastViewed) })
+                                        .sortedWith(Comparator.comparing {
+                                            LocalDateTime.parse(it.lastViewed, dtf)
+                                        }
+                                        )
                                 )
                                 onOpenDialog(false)
                             },
