@@ -6,7 +6,6 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.ataraxia.artemis.data.configuration.ConfigurationDao
 import com.ataraxia.artemis.data.questions.QuestionDao
-import com.ataraxia.artemis.data.statistics.StatisticDao
 import com.ataraxia.artemis.model.Configuration
 import com.ataraxia.artemis.model.Question
 import com.ataraxia.artemis.model.Statistic
@@ -19,7 +18,6 @@ import com.ataraxia.artemis.model.Statistic
 abstract class ArtemisDatabase : RoomDatabase() {
 
     abstract fun questionDao(): QuestionDao
-    abstract fun statisticDao(): StatisticDao
     abstract fun configurationDao(): ConfigurationDao
 
     companion object {

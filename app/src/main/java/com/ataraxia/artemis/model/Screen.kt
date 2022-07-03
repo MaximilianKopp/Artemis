@@ -39,7 +39,7 @@ class Screen {
         )
 
 
-        object Questions : DrawerScreen(
+        object QuestionCatalogue : DrawerScreen(
             R.drawable.ic_baseline_menu_book_24,
             "Sachgebiete",
             "questioncatalogue"
@@ -125,7 +125,7 @@ class Screen {
     companion object {
         val GENERAL_SCREENS = listOf(
             DrawerScreen.Home,
-            DrawerScreen.Questions,
+            DrawerScreen.QuestionCatalogue,
             DrawerScreen.Assignment,
             DrawerScreen.Statistics,
             DrawerScreen.Configuration,

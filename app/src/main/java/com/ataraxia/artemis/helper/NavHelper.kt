@@ -28,7 +28,7 @@ class NavHelper {
             onOpenFilterDialog: (Boolean) -> Unit,
             isTrainingDialogClosed: Boolean,
             onOpenTrainingDialog: (Boolean) -> Unit,
-            isAssignmentDialogClosed: Boolean,
+            isAssignmentDialogOpen: Boolean,
             onOpenAssignmentDialog: (Boolean) -> Unit,
             generalViewModel: GeneralViewModel,
             questionViewModel: QuestionViewModel,
@@ -59,7 +59,7 @@ class NavHelper {
                                 assignmentViewModel,
                                 navController
                             )
-                            Questions.route -> questionComponent.TopicCatalogueScreen(
+                            QuestionCatalogue.route -> questionComponent.TopicCatalogueScreen(
                                 questionViewModel, navController
                             )
                             Statistics.route -> statisticComponent.StatisticScreen(
@@ -274,7 +274,7 @@ class NavHelper {
                     composable(Assignment.route) {
                         examComponent.AssignmentScreen(
                             navController,
-                            isAssignmentDialogClosed,
+                            isAssignmentDialogOpen,
                             onOpenAssignmentDialog,
                             questionViewModel,
                             generalViewModel,
