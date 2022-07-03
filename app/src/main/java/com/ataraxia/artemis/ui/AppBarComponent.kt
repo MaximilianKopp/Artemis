@@ -5,7 +5,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
@@ -17,10 +16,13 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -36,8 +38,8 @@ import com.ataraxia.artemis.viewModel.QuestionViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
+@ExperimentalComposeUiApi
 class AppBarComponent {
-
 
     @Composable
     fun GeneralTopAppBar(
@@ -164,6 +166,9 @@ class AppBarComponent {
         onCloseClicked: () -> Unit,
         onSearchClicked: (String) -> Unit
     ) {
+        val keyboardController = LocalSoftwareKeyboardController.current
+        val keyboardFocus = LocalFocusManager.current
+
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
@@ -187,7 +192,9 @@ class AppBarComponent {
                     IconButton(
                         modifier = Modifier
                             .alpha(ContentAlpha.medium),
-                        onClick = {}
+                        onClick = {
+                            keyboardController?.hide()
+                        }
                     ) {
                         Icon(
                             imageVector = Icons.Default.Search,
@@ -215,11 +222,6 @@ class AppBarComponent {
                 },
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Search
-                ),
-                keyboardActions = KeyboardActions(
-                    onSearch = {
-                        onSearchClicked(text)
-                    }
                 ),
                 colors = TextFieldDefaults.textFieldColors(
                     textColor = Color.Black,

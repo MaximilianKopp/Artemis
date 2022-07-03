@@ -33,10 +33,10 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
 
     lateinit var allQuestions: List<QuestionProjection>
 
-    var onceLearnedQuestions: Int = 0
-    var learnedQuestions: Int = 0
-    var failedQuestions: Int = 0
-    var progressInPercent: BigDecimal = BigDecimal.ZERO
+    private var onceLearnedQuestions: Int = 0
+    private var learnedQuestions: Int = 0
+    private var failedQuestions: Int = 0
+    private var progressInPercent: BigDecimal = BigDecimal.ZERO
 
     init {
         CoroutineScope(Dispatchers.IO).launch {
@@ -183,7 +183,6 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
         return questions
     }
 
-
     private fun filterQuestions(
         criteriaFilter: CriteriaFilter,
         questions: List<QuestionProjection>
@@ -199,6 +198,24 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
             }
         }
         return filteredQuestions
+    }
+
+    fun getCurrentCriteriaFilter(currentCriteriaFilter: CriteriaFilter): String {
+        var currentFilterAsString = ""
+        currentFilterAsString = when (currentCriteriaFilter) {
+            CriteriaFilter.ALL_QUESTIONS_SHUFFLED -> "Zufällige Auswahl"
+            CriteriaFilter.ALL_QUESTIONS_CHRONOLOGICAL -> "Alle Fragen"
+            CriteriaFilter.NOT_LEARNED -> "Noch nicht gelernt"
+            CriteriaFilter.ONCE_LEARNED -> "Mind. 1x richtig beantwortet"
+            CriteriaFilter.FAILED -> "Falsch beantwortet"
+            CriteriaFilter.FAVOURITES -> "Favouriten"
+            CriteriaFilter.LAST_VIEWED -> "Seit 1 Woche nicht angesehen"
+            CriteriaFilter.SEARCH -> "Benutzerdefinierte Suche"
+            else -> {
+                "Keine Auswahl"
+            }
+        }
+        return currentFilterAsString
     }
 
     fun getTopicOfQuestion(currentQuestionNumericTopic: Int): String {
@@ -235,9 +252,9 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
         val favourites = questions.filter { it.favourite == 1 }
         val remainingQuestions = questions.toMutableList()
         remainingQuestions.also {
-            it.removeAll(learnedOnceQuestions)
-            it.removeAll(learnedTwiceQuestions)
-            it.removeAll(failedQuestions)
+            it.removeAll(learnedOnceQuestions.toSet())
+            it.removeAll(learnedTwiceQuestions.toSet())
+            it.removeAll(failedQuestions.toSet())
         }
         val trainingDataWithoutFilter = mutableListOf<QuestionProjection>()
         trainingDataWithoutFilter.addAll(failedQuestions.take(8))

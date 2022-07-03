@@ -2,6 +2,7 @@ package com.ataraxia.artemis.ui
 
 import android.util.Log
 import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -22,8 +23,13 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.ataraxia.artemis.helper.Constants
@@ -40,6 +46,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.*
 
+@ExperimentalComposeUiApi
 @ExperimentalFoundationApi
 class QuestionListComponent {
 
@@ -77,12 +84,12 @@ class QuestionListComponent {
         val filterAbleQuestions =
             questionViewModel.selectTopic(currentTopic, CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
         val questionsLiveData = questionViewModel.questions.observeAsState(filterAbleQuestions)
-        val currentFilter = questionViewModel.filter.observeAsState()
+        val currentFilter =
+            questionViewModel.filter.observeAsState(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
         val isVibrating: Int by generalViewModel.isVibrating.observeAsState(1)
         val searchBarText: String by generalViewModel.searchTextState
         val sizeOfTrainingUnit: Int by generalViewModel.sizeOfTrainingUnit.observeAsState(20)
         Log.v("Current Searchtext", searchBarText)
-
 
         if (currentFilter.value == CriteriaFilter.SEARCH) {
             questionViewModel.onChangeQuestionList(
@@ -100,7 +107,18 @@ class QuestionListComponent {
 
         Log.v("Current Filter", currentFilter.toString())
 
-        LazyColumn {
+        val keyboardController = LocalSoftwareKeyboardController.current
+        val keyboardFocus = LocalFocusManager.current
+        LazyColumn(
+            modifier = Modifier.pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = {
+                        keyboardController?.hide()
+                        keyboardFocus.clearFocus(true)
+                    }
+                )
+            }
+        ) {
             stickyHeader {
                 Row {
                     Card(
@@ -113,6 +131,10 @@ class QuestionListComponent {
                         Column(
                             modifier = Modifier.padding(10.dp)
                         ) {
+                            Text(
+                                text = questionViewModel.getCurrentCriteriaFilter(currentFilter.value),
+                                style = MaterialTheme.typography.body2
+                            )
                             Button(
                                 enabled = questionsLiveData.value.isNotEmpty(),
                                 colors = ButtonDefaults.buttonColors(Artemis_Green),
@@ -232,6 +254,11 @@ class QuestionListComponent {
                             ) {
                                 Box(modifier = Modifier.padding(end = 4.dp)) {
                                     Row {
+                                        Text(
+                                            text = "Zuletzt angesehen am ${question.lastViewed}",
+                                            style = MaterialTheme.typography.caption,
+                                            fontStyle = FontStyle.Italic
+                                        )
                                         //Icon for learned questions
                                         Icon(
                                             Icons.Filled.Check,
@@ -500,7 +527,7 @@ class QuestionListComponent {
                         ) {
                             Text(
                                 color = Color.Black,
-                                text = "Längere Zeit nicht angesehen (${
+                                text = "Seit 1 Woche nicht angesehen (${
                                     filterAbleQuestions.count {
                                         LocalDateTime.parse(
                                             it.lastViewed,
