@@ -29,9 +29,164 @@ import com.ataraxia.artemis.ui.theme.Artemis_Yellow
 import com.ataraxia.artemis.viewModel.AssignmentViewModel
 import com.ataraxia.artemis.viewModel.GeneralViewModel
 import com.ataraxia.artemis.viewModel.QuestionViewModel
-import com.ataraxia.artemis.viewModel.StatisticViewModel
 
+@ExperimentalFoundationApi
 class AssignmentComponent {
+
+    @Composable
+    fun TopicButtons(
+        assignmentViewModel: AssignmentViewModel,
+        assignmentQuestions: List<QuestionProjection>
+    ) {
+        val topicWildLifeButtonColor: Color by assignmentViewModel.topicWildlifeButtonColor.observeAsState(
+            Color.White
+        )
+        val topicHuntingOperations: Color by assignmentViewModel.topicHuntingOperations.observeAsState(
+            Color.White
+        )
+        val topicWeaponsLawAndTechnology: Color by assignmentViewModel.topicWeaponsLawAndTechnology.observeAsState(
+            Color.White
+        )
+        val topicWildLifeTreatment: Color by assignmentViewModel.topicWildLifeTreatment.observeAsState(
+            Color.White
+        )
+        val topicHuntingLaw: Color by assignmentViewModel.topicHuntingLaw.observeAsState(Color.White)
+        val topicPreservationOfWildLifeAndNature: Color by assignmentViewModel.topicPreservationOfWildLifeAndNature.observeAsState(
+            Color.White
+        )
+
+        //Topic wildlife
+        TextButton(
+            modifier = Modifier
+                .width(100.dp)
+                .height(60.dp)
+                .padding(5.dp),
+            colors = ButtonDefaults.textButtonColors(topicWildLifeButtonColor),
+            onClick = {
+                assignmentViewModel.setTopicBoxButton(
+                    NavigationButton.SKIPPED_INDEX,
+                    Screen.DrawerScreen.TopicWildLife.topic,
+                    assignmentQuestions
+                )
+            },
+        ) {
+            Text(
+                color = Color.Black,
+                style = MaterialTheme.typography.overline,
+                text = Screen.DrawerScreen.TopicWildLife.title,
+            )
+        }
+
+        //Topic hunting operations
+        TextButton(
+            modifier = Modifier
+                .width(100.dp)
+                .height(60.dp)
+                .padding(5.dp),
+            colors = ButtonDefaults.textButtonColors(topicHuntingOperations),
+            onClick = {
+                assignmentViewModel.setTopicBoxButton(
+                    NavigationButton.SKIPPED_INDEX,
+                    Screen.DrawerScreen.TopicHuntingOperations.topic,
+                    assignmentQuestions
+                )
+            },
+        ) {
+            Text(
+                color = Color.Black,
+                style = MaterialTheme.typography.overline,
+                text = Screen.DrawerScreen.TopicHuntingOperations.title,
+            )
+        }
+
+        //Topic weapons and law
+        TextButton(
+            modifier = Modifier
+                .width(100.dp)
+                .height(60.dp)
+                .padding(5.dp),
+            colors = ButtonDefaults.textButtonColors(topicWeaponsLawAndTechnology),
+            onClick = {
+                assignmentViewModel.setTopicBoxButton(
+                    NavigationButton.SKIPPED_INDEX,
+                    Screen.DrawerScreen.TopicWeaponsLawAndTechnology.topic,
+                    assignmentQuestions
+                )
+            },
+        ) {
+            Text(
+                color = Color.Black,
+                style = MaterialTheme.typography.overline,
+                text = Screen.DrawerScreen.TopicWeaponsLawAndTechnology.title,
+            )
+        }
+
+        //Topic wildlife treatment
+        TextButton(
+            modifier = Modifier
+                .width(100.dp)
+                .height(60.dp)
+                .padding(5.dp),
+            colors = ButtonDefaults.textButtonColors(topicWildLifeTreatment),
+            onClick = {
+                assignmentViewModel.setTopicBoxButton(
+                    NavigationButton.SKIPPED_INDEX,
+                    Screen.DrawerScreen.TopicWildLifeTreatment.topic,
+                    assignmentQuestions
+                )
+            },
+        ) {
+            Text(
+                color = Color.Black,
+                style = MaterialTheme.typography.overline,
+                text = Screen.DrawerScreen.TopicWildLifeTreatment.title,
+            )
+        }
+
+        //Topic hunting law
+        TextButton(
+            modifier = Modifier
+                .width(100.dp)
+                .height(60.dp)
+                .padding(5.dp),
+            colors = ButtonDefaults.textButtonColors(topicHuntingLaw),
+            onClick = {
+                assignmentViewModel.setTopicBoxButton(
+                    NavigationButton.SKIPPED_INDEX,
+                    Screen.DrawerScreen.TopicHuntingLaw.topic,
+                    assignmentQuestions
+                )
+            },
+        ) {
+            Text(
+                color = Color.Black,
+                style = MaterialTheme.typography.overline,
+                text = Screen.DrawerScreen.TopicHuntingLaw.title,
+            )
+        }
+
+        //Topic preservation of wildlife and nature
+        TextButton(
+            modifier = Modifier
+                .width(100.dp)
+                .height(60.dp)
+                .padding(5.dp),
+            colors = ButtonDefaults.textButtonColors(topicPreservationOfWildLifeAndNature),
+            onClick = {
+                assignmentViewModel.setTopicBoxButton(
+                    NavigationButton.SKIPPED_INDEX,
+                    Screen.DrawerScreen.TopicPreservationOfWildLifeAndNature.topic,
+                    assignmentQuestions
+                )
+            },
+        ) {
+            Text(
+                color = Color.Black,
+                style = MaterialTheme.typography.overline,
+                text = Screen.DrawerScreen.TopicPreservationOfWildLifeAndNature.title,
+            )
+        }
+    }
 
     @Composable
     fun AssignmentScreen(
@@ -41,12 +196,10 @@ class AssignmentComponent {
         questionViewModel: QuestionViewModel,
         generalViewModel: GeneralViewModel,
         assignmentViewModel: AssignmentViewModel,
-        statisticViewModel: StatisticViewModel,
     ) {
         val assignmentQuestions: List<QuestionProjection> by questionViewModel.questionsForAssignment.observeAsState(
             listOf()
         )
-
         if (assignmentQuestions.isNotEmpty()) {
             AssignmentContent(
                 assignmentQuestions = assignmentQuestions,
@@ -55,13 +208,11 @@ class AssignmentComponent {
                 onOpenAssignmentDialog = onOpenAssignmentDialog,
                 questionViewModel = questionViewModel,
                 generalViewModel = generalViewModel,
-                assignmentViewModel = assignmentViewModel,
-                statisticViewModel = statisticViewModel
+                assignmentViewModel = assignmentViewModel
             )
         }
     }
 
-    @OptIn(ExperimentalFoundationApi::class)
     @Composable
     fun ResultContent(
         showResultContent: MutableState<Boolean>,
@@ -209,9 +360,7 @@ class AssignmentComponent {
         questionViewModel: QuestionViewModel,
         generalViewModel: GeneralViewModel,
         assignmentViewModel: AssignmentViewModel,
-        statisticViewModel: StatisticViewModel
     ) {
-
         val showResultContent: MutableState<Boolean> = remember { mutableStateOf(false) }
         val navIndex: Int by assignmentViewModel.index.observeAsState(0)
         val currentFilter = questionViewModel.filter.observeAsState()
@@ -221,13 +370,11 @@ class AssignmentComponent {
             assignmentQuestions[0]
         )
         Log.v("Current Filter", currentFilter.value.toString())
-
         val favouriteState: Int by assignmentViewModel.favouriteColor.observeAsState(currentQuestion.favourite)
-
         val resultListOfAnsweredQuestions: MutableList<QuestionProjection> =
             assignmentQuestions.toMutableList()
-
         val isEvaluationDialogOpen: MutableState<Boolean> = remember { mutableStateOf(false) }
+
 
         if (!showResultContent.value) {
             Column(
@@ -236,6 +383,15 @@ class AssignmentComponent {
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                val horizontalAssignmentScrollState = rememberScrollState()
+                Row(
+                    modifier = Modifier
+                        .padding(start = 5.dp, bottom = 10.dp)
+                        .fillMaxWidth()
+                        .horizontalScroll(horizontalAssignmentScrollState, true, null, false)
+                ) {
+                    TopicButtons(assignmentViewModel, assignmentQuestions)
+                }
                 val verticalScrollState = rememberScrollState()
                 Column(
                     Modifier
@@ -267,11 +423,19 @@ class AssignmentComponent {
                                         tint = if (favouriteState == 1) Color.Yellow else Color.Black
                                     )
                                 }
-                                Text(
-                                    modifier = Modifier.padding(6.dp),
-                                    text = currentQuestion.text,
-                                    style = MaterialTheme.typography.body1,
-                                )
+                                Column {
+                                    Text(
+                                        modifier = Modifier.padding(6.dp),
+                                        text = questionViewModel.getTopicOfQuestion(currentQuestion.topic),
+                                        style = MaterialTheme.typography.caption,
+                                        color = Color.Black
+                                    )
+                                    Text(
+                                        modifier = Modifier.padding(6.dp),
+                                        text = currentQuestion.text,
+                                        style = MaterialTheme.typography.body1,
+                                    )
+                                }
                             }
                         }
                     }
@@ -342,20 +506,9 @@ class AssignmentComponent {
                                         )
                                     }
                                 }
-                                Log.v("Current Question", currentQuestion.text)
-                                currentQuestion.checkboxList.forEach {
-                                    Log.v(
-                                        "Current option and check state",
-                                        "${it.option} ${it.checked}"
-                                    )
-                                }
-                                Log.v(
-                                    "Current Question Selection",
-                                    currentQuestion.currentSelection
-                                )
-                                Log.v(
-                                    "Current Question Correct Answers",
-                                    currentQuestion.correctAnswers
+                                assignmentViewModel.checkTopicButtonColors(
+                                    assignmentQuestions,
+                                    currentQuestion
                                 )
                             }
                         }
@@ -373,52 +526,9 @@ class AssignmentComponent {
                         color = Color.White
                     )
                 }
-                val horizontalAssignmentScrollState = rememberScrollState()
                 val horizontalEvaluationScrollState = rememberScrollState()
-                if (evaluationButtonText.value == "Auswertung") {
-                    Row(
-                        modifier = Modifier
-                            .padding(start = 5.dp, bottom = 25.dp)
-                            .fillMaxWidth()
-                            .horizontalScroll(horizontalAssignmentScrollState, true, null, false)
-                    ) {
-                        for (skippedIndex in 0..110 step 10) {
-                            val skippedBoxColor: MutableState<Color> = remember {
-                                mutableStateOf(
-                                    Color.White
-                                )
-                            }
-                            skippedBoxColor.value = assignmentViewModel.changeSkippedBoxColor(
-                                assignmentQuestions,
-                                skippedIndex
-                            )
-                            TextButton(
-                                colors = ButtonDefaults.textButtonColors(skippedBoxColor.value),
-                                onClick = {
-                                    assignmentViewModel.setNavigationButton(
-                                        NavigationButton.SKIPPED_INDEX,
-                                        skippedIndex,
-                                        assignmentQuestions
-                                    )
-                                },
-                                modifier = Modifier
-                                    .width(45.dp)
-                                    .height(40.dp)
-                                    .padding(end = 5.dp)
-                            ) {
-                                assignmentViewModel.changeSkippedBoxColor(
-                                    assignmentQuestions,
-                                    skippedIndex
-                                )
-                                Text(
-                                    style = MaterialTheme.typography.caption,
-                                    text = if (skippedIndex != 0) skippedIndex.toString() else "1",
-                                    color = Color.Black
-                                )
-                            }
-                        }
-                    }
-                } else if (evaluationButtonText.value == "Ergebnisse") {
+
+                if (evaluationButtonText.value == "Ergebnisse") {
                     enableCheckbox.value = false
                     Row(
                         modifier = Modifier
@@ -427,7 +537,9 @@ class AssignmentComponent {
                             .horizontalScroll(horizontalEvaluationScrollState, true, null, false)
                     ) {
                         for (question in assignmentQuestions) {
-                            if (question.correctAnswers != question.currentSelection) {
+                            if (question.correctAnswers != question.currentSelection.toSortedSet()
+                                    .toString()
+                            ) {
                                 TextButton(
                                     colors = ButtonDefaults.textButtonColors(Artemis_Red),
                                     onClick = {
@@ -499,9 +611,11 @@ class AssignmentComponent {
                                 colors = ButtonDefaults.buttonColors(Artemis_Blue),
                                 //Contains whole logic for further answer processing
                                 onClick = {
-                                    isEvaluationDialogOpen.value = true
-                                    evaluationButtonText.value = "Ergebnisse"
-                                    generalViewModel.onChangeAppBarAppearance(false)
+                                    if (evaluationButtonText.value == "Auswertung") {
+                                        isEvaluationDialogOpen.value = true
+                                    } else {
+                                        showResultContent.value = true
+                                    }
                                 })
                             {
                                 Text(
@@ -562,15 +676,18 @@ class AssignmentComponent {
                 EvaluationAlertDialog(
                     isEvaluationDialogOpen,
                     showResultContent,
-                    assignmentViewModel,
-                    assignmentQuestions
+                    questionViewModel,
+                    generalViewModel,
+                    assignmentQuestions,
+                    resultListOfAnsweredQuestions,
+                    evaluationButtonText
                 )
             }
             if (isAssignmentDialogOpen) {
                 AssignmentAlertDialog(
                     onOpenAssignmentDialog,
                     navController,
-                    generalViewModel
+                    generalViewModel,
                 )
             }
         } else {
@@ -587,54 +704,28 @@ class AssignmentComponent {
     fun EvaluationAlertDialog(
         isEvaluationDialogOpen: MutableState<Boolean>,
         showResultContent: MutableState<Boolean>,
-        assignmentViewModel: AssignmentViewModel,
-        assignmentQuestions: List<QuestionProjection>
+        questionViewModel: QuestionViewModel,
+        generalViewModel: GeneralViewModel,
+        assignmentQuestions: List<QuestionProjection>,
+        resultListOfAnsweredQuestions: List<QuestionProjection>,
+        evaluationButtonText: MutableState<String>,
     ) {
-        val marksByTopics = assignmentViewModel.calculateMarksByTopic(assignmentQuestions)
-        val finalMark = assignmentViewModel.calculateFinalMark(marksByTopics)
-        val evaluation = assignmentViewModel.evaluate(marksByTopics, finalMark)
-        val amountCorrectAnswers =
-            assignmentViewModel.filterCorrectAnswersInTotal(assignmentQuestions)
-        val amountWrongAnswers = assignmentViewModel.filterWrongAnswersInTotal(amountCorrectAnswers)
-        val failedTopics = assignmentViewModel.getFailedTopics(marksByTopics)
-        val passedTopics = Constants.AMOUNT_OF_TOPICS - failedTopics
+        val isAbleToEvaluate = assignmentQuestions.stream()
+            .allMatch { it.currentSelection != "[]" && it.currentSelection != "" }
 
         AlertDialog(
             onDismissRequest = { isEvaluationDialogOpen.value = false },
             shape = RoundedCornerShape(15.dp),
-            backgroundColor = if (evaluation) {
-                Artemis_Green
-            } else {
-                Artemis_Red
-            },
+            backgroundColor = Artemis_Green,
             text = {
                 Column {
                     Row {
                         Text(
-                            text = if (evaluation) {
-                                "Du hast die Prüfung bestanden"
+                            text = if (isAbleToEvaluate) {
+                                "Möchtest du die Prüfung auswerten?"
                             } else {
-                                "Du hast die Prüfung leider nicht bestanden"
+                                "Du hast noch nicht alle Fragen angekreuzt. Möchtest du die Prüfung trotzdem auswerten?"
                             }, color = Color.White
-                        )
-                    }
-                    Divider(color = Color.White, thickness = 2.dp)
-                    Row {
-                        Text(
-                            text = "Richtig beantwortet: $amountCorrectAnswers",
-                            color = Color.White
-                        )
-                    }
-                    Row {
-                        Text(text = "Falsch beantwortet: $amountWrongAnswers", color = Color.White)
-                    }
-                    Row {
-                        Text(text = "Bestandene Sachgebiete: $passedTopics", color = Color.White)
-                    }
-                    Row {
-                        Text(
-                            text = "Durchgefallene Sachgebiete: $failedTopics",
-                            color = Color.White
                         )
                     }
                 }
@@ -646,8 +737,23 @@ class AssignmentComponent {
                 ) {
                     Button(
                         onClick = {
-                            isEvaluationDialogOpen.value = false
                             showResultContent.value = true
+                            isEvaluationDialogOpen.value = false
+                            resultListOfAnsweredQuestions
+                                .filter {
+                                    it.currentSelection != it.correctAnswers
+                                }.map {
+                                    it.learnedOnce = 0
+                                    it.learnedTwice = 0
+                                    it.failed = 1
+                                    questionViewModel.updateQuestion(
+                                        QuestionProjection.modelToEntity(
+                                            it
+                                        )
+                                    )
+                                }
+                            evaluationButtonText.value = "Ergebnisse"
+                            generalViewModel.onChangeAppBarAppearance(false)
                         },
                         Modifier
                             .width(300.dp)
@@ -655,7 +761,21 @@ class AssignmentComponent {
                         colors = ButtonDefaults.buttonColors(Artemis_Yellow),
                     ) {
                         Text(
-                            text = "Ergebnisse ansehen",
+                            text = "Ja",
+                            style = MaterialTheme.typography.body1
+                        )
+                    }
+                    Button(
+                        onClick = {
+                            isEvaluationDialogOpen.value = false
+                        },
+                        Modifier
+                            .width(300.dp)
+                            .padding(4.dp),
+                        colors = ButtonDefaults.buttonColors(Artemis_Yellow),
+                    ) {
+                        Text(
+                            text = "Nein",
                             style = MaterialTheme.typography.body1
                         )
                     }
@@ -668,7 +788,7 @@ class AssignmentComponent {
     fun AssignmentAlertDialog(
         onOpenAssignmentDialog: (Boolean) -> Unit,
         navController: NavController,
-        generalViewModel: GeneralViewModel,
+        generalViewModel: GeneralViewModel
     ) {
         AlertDialog(
             onDismissRequest = { onOpenAssignmentDialog(false) },

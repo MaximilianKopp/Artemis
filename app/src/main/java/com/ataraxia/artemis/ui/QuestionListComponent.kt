@@ -1,43 +1,52 @@
 package com.ataraxia.artemis.ui
 
 import android.util.Log
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowRight
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material.icons.rounded.ChevronRight
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.helper.CriteriaFilter
 import com.ataraxia.artemis.model.QuestionProjection
 import com.ataraxia.artemis.model.Screen
-import com.ataraxia.artemis.ui.theme.Artemis_Blue
 import com.ataraxia.artemis.ui.theme.Artemis_Green
 import com.ataraxia.artemis.ui.theme.Artemis_Yellow
 import com.ataraxia.artemis.viewModel.GeneralViewModel
 import com.ataraxia.artemis.viewModel.QuestionViewModel
 import com.ataraxia.artemis.viewModel.TrainingViewModel
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+import java.util.*
 
+@ExperimentalComposeUiApi
 @ExperimentalFoundationApi
 class QuestionListComponent {
 
@@ -75,8 +84,10 @@ class QuestionListComponent {
         val filterAbleQuestions =
             questionViewModel.selectTopic(currentTopic, CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
         val questionsLiveData = questionViewModel.questions.observeAsState(filterAbleQuestions)
-        val currentFilter = questionViewModel.filter.observeAsState()
+        val currentFilter =
+            questionViewModel.filter.observeAsState(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
         val isVibrating: Int by generalViewModel.isVibrating.observeAsState(1)
+        val isHintShown: Int by generalViewModel.isHintShow.observeAsState(1)
         val searchBarText: String by generalViewModel.searchTextState
         val sizeOfTrainingUnit: Int by generalViewModel.sizeOfTrainingUnit.observeAsState(20)
         Log.v("Current Searchtext", searchBarText)
@@ -97,52 +108,112 @@ class QuestionListComponent {
 
         Log.v("Current Filter", currentFilter.toString())
 
-        LazyColumn {
+        val keyboardController = LocalSoftwareKeyboardController.current
+        val keyboardFocus = LocalFocusManager.current
+        LazyColumn(
+            modifier = Modifier.pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = {
+                        keyboardController?.hide()
+                        keyboardFocus.clearFocus(true)
+                    }
+                )
+            }
+        ) {
             stickyHeader {
                 Row {
-                    Button(
-                        enabled = questionsLiveData.value.isNotEmpty(),
-                        modifier = Modifier.padding(8.dp),
-                        colors = ButtonDefaults.buttonColors(Artemis_Blue),
-                        onClick = {
-                            val preparedTrainingData: List<QuestionProjection>
-                            if (currentFilter.value == CriteriaFilter.ALL_QUESTIONS_SHUFFLED) {
-                                preparedTrainingData =
-                                    questionsLiveData.value.shuffled().take(sizeOfTrainingUnit)
-                                trainingViewModel.onChangeTrainingData(preparedTrainingData)
-                                trainingViewModel.onChangeCurrentQuestion(preparedTrainingData[0])
-                            } else {
-                                preparedTrainingData = questionsLiveData.value
-                                trainingViewModel.onChangeTrainingData(questionsLiveData.value)
-                                trainingViewModel.onChangeCurrentQuestion(preparedTrainingData[0])
-                            }
-                            generalViewModel.onChangeSearchWidgetState(false)
-                            generalViewModel.onHideSearchWidget(
-                                Pair(
-                                    Constants.ALPHA_INVISIBLE,
-                                    Constants.DISABLED
-                                )
+                    Card(
+                        backgroundColor = Artemis_Yellow,
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .border(BorderStroke(2.dp, Color.White), RoundedCornerShape(15.dp)),
+                        shape = RoundedCornerShape(15.dp),
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(10.dp)
+                        ) {
+                            Text(
+                                text = questionViewModel.getCurrentCriteriaFilter(currentFilter.value),
+                                style = MaterialTheme.typography.body2
                             )
-                            trainingViewModel.onChangeIndex(0)
-                            generalViewModel.onChangeSearchWidgetState(false)
-                            generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Training)
-                            navController.navigate(Screen.DrawerScreen.Training.route)
-                        }) {
-                        Text(
-                            color = Color.White,
-                            text = "Training starten (${
-                                if (currentFilter.value == CriteriaFilter.ALL_QUESTIONS_SHUFFLED) sizeOfTrainingUnit else questionsLiveData.value.count()
-                            } Fragen)"
-                        )
+                            Button(
+                                enabled = questionsLiveData.value.isNotEmpty(),
+                                colors = ButtonDefaults.buttonColors(Artemis_Green),
+                                onClick = {
+                                    val preparedTrainingData: List<QuestionProjection>
+                                    if (currentFilter.value == CriteriaFilter.ALL_QUESTIONS_SHUFFLED) {
+                                        preparedTrainingData =
+                                            questionsLiveData.value.shuffled()
+                                                .take(sizeOfTrainingUnit)
+                                        trainingViewModel.onChangeTrainingData(preparedTrainingData)
+                                        trainingViewModel.onChangeCurrentQuestion(
+                                            preparedTrainingData[0]
+                                        )
+                                    } else {
+                                        preparedTrainingData = questionsLiveData.value
+                                        trainingViewModel.onChangeTrainingData(questionsLiveData.value)
+                                        trainingViewModel.onChangeCurrentQuestion(
+                                            preparedTrainingData[0]
+                                        )
+                                    }
+                                    generalViewModel.onChangeSearchWidgetState(false)
+                                    generalViewModel.onHideSearchWidget(
+                                        Pair(
+                                            Constants.ALPHA_INVISIBLE,
+                                            Constants.DISABLED
+                                        )
+                                    )
+                                    trainingViewModel.onChangeIndex(0)
+                                    generalViewModel.onChangeSearchWidgetState(false)
+                                    generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Training)
+                                    navController.navigate(Screen.DrawerScreen.Training.route)
+                                }) {
+                                Icon(
+                                    Icons.Filled.ArrowRight,
+                                    contentDescription = "Start button icon"
+                                )
+                                Text(
+                                    color = Color.White,
+                                    text = "Training starten (${
+                                        if (currentFilter.value == CriteriaFilter.ALL_QUESTIONS_SHUFFLED) sizeOfTrainingUnit else questionsLiveData.value.count()
+                                    } Fragen)",
+                                    style = MaterialTheme.typography.caption
+                                )
+                            }
+
+                            Text(
+                                color = Color.Black,
+                                text = "2x richtig: ${filterAbleQuestions.count { it.learnedTwice == 1 }}/${filterAbleQuestions.count()}",
+                                style = MaterialTheme.typography.overline
+                            )
+                            Text(
+                                color = Color.Black,
+                                text = "1x richtig: ${filterAbleQuestions.count { it.learnedOnce == 1 }}",
+                                style = MaterialTheme.typography.overline
+                            )
+                            Text(
+                                color = Color.Black,
+                                text = "Fehler: ${filterAbleQuestions.count { it.failed == 1 }}",
+                                style = MaterialTheme.typography.overline
+                            )
+                            Text(
+                                color = Color.Black,
+                                text = "Noch nicht gelernt: ${filterAbleQuestions.count { it.learnedTwice == 0 }}",
+                                style = MaterialTheme.typography.overline
+                            )
+                        }
                     }
+                }
+                Column(
+                    Modifier
+                        .padding(8.dp)
+                ) {
+
                 }
             }
             items(questionsLiveData.value) { question ->
                 val isFavourite: MutableState<Int> =
                     rememberSaveable { mutableStateOf(question.favourite) }
-                val iconColor: State<Color> = animateColorAsState(
-                    if (isFavourite.value == 1 || currentFilter.value == CriteriaFilter.FAVOURITES) Color.Yellow else Color.Black
-                )
                 Card(
                     backgroundColor = Color.White,
                     modifier = Modifier
@@ -164,33 +235,17 @@ class QuestionListComponent {
                 ) {
                     Column {
                         Row {
-                            IconButton(onClick = {
-                                if (currentFilter.value == CriteriaFilter.FAVOURITES) {
-                                    question.favourite = 0
-                                    isFavourite.value = question.favourite
-                                    questionViewModel.updateQuestion(
-                                        QuestionProjection.modelToEntity(
-                                            question
-                                        )
-                                    )
-                                    questionViewModel.onChangeQuestionList(filterAbleQuestions.filter { it.favourite == 1 })
-                                } else
-                                    questionViewModel.setFavourite(
-                                        QuestionProjection.modelToEntity(question),
-                                        isFavourite,
-                                        currentFilter.value!!
-                                    )
-                            }) {
-                                Icon(
-                                    if (currentFilter.value == CriteriaFilter.FAVOURITES) Icons.Filled.Delete else Icons.Filled.Star,
-                                    contentDescription = "Icon for learned questions",
-                                    modifier = Modifier.size(20.dp),
-                                    tint = if (currentFilter.value == CriteriaFilter.FAVOURITES) Color.Black else iconColor.value
-                                )
-                            }
+                            Icon(
+                                imageVector = Icons.Filled.Star,
+                                contentDescription = "Favourite Icon",
+                                Modifier
+                                    .size(26.dp)
+                                    .padding(top = 8.dp),
+                                tint = if (isFavourite.value == 1) Color.Yellow else Color.Black,
+                            )
                             Text(
                                 text = question.text,
-                                Modifier.padding(start = 3.dp, top = 12.dp)
+                                Modifier.padding(start = 5.dp, top = 8.dp)
                             )
                         }
                         Row {
@@ -200,12 +255,19 @@ class QuestionListComponent {
                             ) {
                                 Box(modifier = Modifier.padding(end = 4.dp)) {
                                     Row {
+                                        Text(
+                                            text = "Zuletzt angesehen am ${question.lastViewed}",
+                                            style = MaterialTheme.typography.caption,
+                                            fontStyle = FontStyle.Italic
+                                        )
                                         //Icon for learned questions
                                         Icon(
                                             Icons.Filled.Check,
                                             contentDescription = "Icon for learned questions",
                                             modifier = Modifier.size(20.dp),
-                                            tint = questionViewModel.setQuestionStateColor(question)
+                                            tint = questionViewModel.setQuestionStateColor(
+                                                question
+                                            )
                                         )
                                         //Icon for failed questions
                                         Icon(
@@ -285,6 +347,29 @@ class QuestionListComponent {
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
+                                text = "Hinweise einblenden",
+                                style = MaterialTheme.typography.body1
+                            )
+                            Switch(
+                                checked = isHintShown == 1,
+                                onCheckedChange = {
+                                    if (isHintShown == 1) generalViewModel.onChangeShowHints(
+                                        0
+                                    ) else generalViewModel.onChangeShowHints(1)
+                                },
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = Artemis_Yellow,
+                                    checkedTrackColor = Artemis_Yellow,
+                                    uncheckedThumbColor = Color.White,
+                                    uncheckedTrackColor = Artemis_Yellow
+                                )
+                            )
+                        }
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
                                 text = "Trainingsumfang",
                                 style = MaterialTheme.typography.body1
                             )
@@ -293,7 +378,7 @@ class QuestionListComponent {
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 IconButton(onClick = {
-                                    if (sizeOfTrainingUnit != Constants.SIZE_PER_TRANINIG_UNIT_MIN) {
+                                    if (sizeOfTrainingUnit != Constants.SIZE_PER_TRAINING_UNIT_MIN) {
                                         generalViewModel.onChangeSizeOfTrainingUnit(
                                             sizeOfTrainingUnit - 10
                                         )
@@ -430,6 +515,52 @@ class QuestionListComponent {
                             Text(
                                 color = Color.Black,
                                 text = "Favouriten (${filterAbleQuestions.count { it.favourite == 1 }})",
+                                style = MaterialTheme.typography.body1
+                            )
+                        }
+                        Button(
+                            onClick = {
+                                val dtf =
+                                    DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
+                                        .withLocale(Locale("DE"))
+
+                                Log.v(
+                                    "Last seen",
+                                    LocalDateTime.now().minusWeeks(1L).toString()
+                                )
+                                //Take all questions that have been longer than one week not viewed
+                                questionViewModel.onChangeFilter(CriteriaFilter.LAST_VIEWED)
+                                questionViewModel.onChangeQuestionList(
+                                    filterAbleQuestions.filter {
+                                        LocalDateTime.parse(
+                                            it.lastViewed, dtf
+                                        )
+                                            .isBefore(LocalDateTime.now().minusWeeks(1L))
+                                    }
+                                        .sortedWith(Comparator.comparing {
+                                            LocalDateTime.parse(it.lastViewed, dtf)
+                                        }
+                                        )
+                                )
+                                onOpenDialog(false)
+                            },
+                            Modifier
+                                .width(300.dp)
+                                .padding(4.dp),
+                            colors = ButtonDefaults.buttonColors(Artemis_Yellow),
+                        ) {
+                            Text(
+                                color = Color.Black,
+                                text = "Seit 1 Woche nicht angesehen (${
+                                    filterAbleQuestions.count {
+                                        LocalDateTime.parse(
+                                            it.lastViewed,
+                                            DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
+                                                .withLocale(Locale("DE"))
+                                        )
+                                            .isBefore(LocalDateTime.now().minusWeeks(1L))
+                                    }
+                                })",
                                 style = MaterialTheme.typography.body1
                             )
                         }

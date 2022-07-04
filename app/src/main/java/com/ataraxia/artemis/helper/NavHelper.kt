@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -11,10 +12,14 @@ import androidx.navigation.compose.composable
 import com.ataraxia.artemis.model.Screen
 import com.ataraxia.artemis.model.Screen.DrawerScreen.*
 import com.ataraxia.artemis.ui.*
-import com.ataraxia.artemis.viewModel.*
+import com.ataraxia.artemis.viewModel.AssignmentViewModel
+import com.ataraxia.artemis.viewModel.GeneralViewModel
+import com.ataraxia.artemis.viewModel.QuestionViewModel
+import com.ataraxia.artemis.viewModel.TrainingViewModel
 
 class NavHelper {
 
+    @ExperimentalComposeUiApi
     companion object {
         @ExperimentalFoundationApi
         @Composable
@@ -25,12 +30,11 @@ class NavHelper {
             onOpenFilterDialog: (Boolean) -> Unit,
             isTrainingDialogClosed: Boolean,
             onOpenTrainingDialog: (Boolean) -> Unit,
-            isAssignmentDialogClosed: Boolean,
+            isAssignmentDialogOpen: Boolean,
             onOpenAssignmentDialog: (Boolean) -> Unit,
             generalViewModel: GeneralViewModel,
             questionViewModel: QuestionViewModel,
             trainingViewModel: TrainingViewModel,
-            statisticViewModel: StatisticViewModel,
             assignmentViewModel: AssignmentViewModel
         ) {
 
@@ -38,7 +42,6 @@ class NavHelper {
             val questionComponent = TopicCatalogueComponent()
             val examComponent = AssignmentComponent()
             val statisticComponent = StatisticComponent()
-            val configComponent = ConfigComponent()
             val questionListComponent = QuestionListComponent()
             val trainingComponent = TrainingComponent()
             val imprintComponent = ImprintComponent()
@@ -56,16 +59,14 @@ class NavHelper {
                                 generalViewModel,
                                 questionViewModel,
                                 assignmentViewModel,
-                                statisticViewModel,
                                 navController
                             )
-                            Questions.route -> questionComponent.TopicCatalogueScreen(
+                            QuestionCatalogue.route -> questionComponent.TopicCatalogueScreen(
                                 questionViewModel, navController
                             )
                             Statistics.route -> statisticComponent.StatisticScreen(
-                                questionViewModel, statisticViewModel, navController
+                                questionViewModel
                             )
-                            Configuration.route -> configComponent.ConfigScreen()
                             Imprint.route -> imprintComponent.ImprintScreen()
                             Privacy.route -> privacyComponent.PrivacyScreen()
                         }
@@ -275,12 +276,11 @@ class NavHelper {
                     composable(Assignment.route) {
                         examComponent.AssignmentScreen(
                             navController,
-                            isAssignmentDialogClosed,
+                            isAssignmentDialogOpen,
                             onOpenAssignmentDialog,
                             questionViewModel,
                             generalViewModel,
-                            assignmentViewModel,
-                            statisticViewModel
+                            assignmentViewModel
                         )
                         generalViewModel.onTopBarTitleChange(Assignment.title)
                         generalViewModel.onHideSearchWidget(
@@ -309,8 +309,7 @@ class NavHelper {
                             trainingViewModel = trainingViewModel,
                             generalViewModel = generalViewModel,
                             isTrainingDialogOpen = isTrainingDialogClosed,
-                            onOpenTrainingDialog = onOpenTrainingDialog,
-                            statisticViewModel = statisticViewModel
+                            onOpenTrainingDialog = onOpenTrainingDialog
                         )
                         generalViewModel.onTopBarTitleChange(Training.title)
                         generalViewModel.onHideSearchWidget(

@@ -10,5 +10,4 @@ data class Configuration(
     val name: String,
     val value: String,
     val description: String
-
 )

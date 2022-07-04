@@ -56,6 +56,9 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
     private val _isVibrating = MutableLiveData<Int>()
     val isVibrating: LiveData<Int> = _isVibrating
 
+    private val _isHintShow = MutableLiveData<Int>()
+    val isHintShow: LiveData<Int> = _isHintShow
+
     private val _sizeOfTrainingUnit = MutableLiveData<Int>()
     val sizeOfTrainingUnit: LiveData<Int> = _sizeOfTrainingUnit
 
@@ -69,6 +72,7 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
         configurationRepository = ConfigurationRepository(configurationDao)
         CoroutineScope(Dispatchers.IO).launch {
             _isVibrating.postValue(configurationRepository.getVibrationConfig().toInt())
+            _isHintShow.postValue(configurationRepository.getShowHintConfig().toInt())
             _sizeOfTrainingUnit.postValue(configurationRepository.getSizePerTrainingUnit().toInt())
         }
     }
@@ -95,6 +99,8 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
             Topic.TOPIC_5.ordinal -> currentScreen = Screen.DrawerScreen.TopicHuntingLaw
             Topic.TOPIC_6.ordinal -> currentScreen =
                 Screen.DrawerScreen.TopicPreservationOfWildLifeAndNature
+            Topic.TOPIC_7.ordinal -> currentScreen =
+                Screen.DrawerScreen.AllQuestions
         }
         return currentScreen
     }
@@ -120,6 +126,18 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
         withContext(Dispatchers.IO) {
             _sizeOfTrainingUnit.postValue(size)
             configurationRepository.updateSizeOfTrainingUnit(size.toString())
+        }
+
+    fun onChangeShowHints(isHintShow: Int) {
+        CoroutineScope(Dispatchers.IO).launch {
+            onChangeShowHintsCoroutine(isHintShow)
+        }
+    }
+
+    private suspend fun onChangeShowHintsCoroutine(isHintShow: Int) =
+        withContext(Dispatchers.IO) {
+            _isHintShow.postValue(isHintShow)
+            configurationRepository.updateShowHints(isHintShow.toString())
         }
 
     fun onChangeEnableVibration(isVibrating: Int) {

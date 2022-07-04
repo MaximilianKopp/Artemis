@@ -11,6 +11,7 @@ import com.ataraxia.artemis.helper.NavigationButton
 import com.ataraxia.artemis.model.QuestionCheckbox
 import com.ataraxia.artemis.model.QuestionProjection
 import com.ataraxia.artemis.model.Screen
+import com.ataraxia.artemis.model.Topic
 import com.ataraxia.artemis.ui.theme.Artemis_Yellow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -30,11 +31,27 @@ class AssignmentViewModel : ViewModel() {
     private val _favouriteColor = MutableLiveData<Int>()
     val favouriteColor: LiveData<Int> = _favouriteColor
 
-    private val _skippedBoxColor = MutableLiveData<Color>()
-    val skippedBoxColor: LiveData<Color> = _skippedBoxColor
-
     private val _checkedAnswers = mutableSetOf<String>()
     private val checkedAnswers: Set<String> = _checkedAnswers as HashSet<String>
+
+    private val _topicWildlifeButtonColor = MutableLiveData<Color>()
+    val topicWildlifeButtonColor: LiveData<Color> = _topicWildlifeButtonColor
+
+    private val _topicHuntingOperations = MutableLiveData<Color>()
+    val topicHuntingOperations: LiveData<Color> = _topicHuntingOperations
+
+    private val _topicWildLifeTreatment = MutableLiveData<Color>()
+    val topicWildLifeTreatment: LiveData<Color> = _topicWildLifeTreatment
+
+    private val _topicWeaponsLawAndTechnology = MutableLiveData<Color>()
+    val topicWeaponsLawAndTechnology: LiveData<Color> = _topicWeaponsLawAndTechnology
+
+    private val _topicHuntingLaw = MutableLiveData<Color>()
+    val topicHuntingLaw: LiveData<Color> = _topicHuntingLaw
+
+    private val _topicPreservationOfWildLifeAndNature = MutableLiveData<Color>()
+    val topicPreservationOfWildLifeAndNature: LiveData<Color> =
+        _topicPreservationOfWildLifeAndNature
 
     fun setCurrentQuestionText(question: QuestionProjection, checkbox: QuestionCheckbox): String {
         when (checkbox.option) {
@@ -45,6 +62,24 @@ class AssignmentViewModel : ViewModel() {
         }
         return "Error"
     }
+
+    private fun onChangeTopicButtonColor(newValue: Color, topic: Int) {
+        CoroutineScope(Dispatchers.IO).launch {
+            onChangeTopicButtonColorCoroutine(newValue, topic)
+        }
+    }
+
+    private suspend fun onChangeTopicButtonColorCoroutine(newValue: Color, topic: Int) =
+        withContext(Dispatchers.IO) {
+            when (topic) {
+                Topic.TOPIC_1.ordinal -> _topicWildlifeButtonColor.postValue(newValue)
+                Topic.TOPIC_2.ordinal -> _topicHuntingOperations.postValue(newValue)
+                Topic.TOPIC_3.ordinal -> _topicWeaponsLawAndTechnology.postValue(newValue)
+                Topic.TOPIC_4.ordinal -> _topicWildLifeTreatment.postValue(newValue)
+                Topic.TOPIC_5.ordinal -> _topicHuntingLaw.postValue(newValue)
+                Topic.TOPIC_6.ordinal -> _topicPreservationOfWildLifeAndNature.postValue(newValue)
+            }
+        }
 
     @Suppress("JavaCollectionsStaticMethodOnImmutableList")
     fun currentSelection(isChecked: Boolean, option: String, currentQuestion: QuestionProjection) {
@@ -139,11 +174,36 @@ class AssignmentViewModel : ViewModel() {
             _favouriteColor.postValue(isFavourite)
         }
 
+    fun setTopicBoxButton(
+        direction: NavigationButton,
+        topic: Int,
+        questions: List<QuestionProjection>
+    ) {
+        var index = 0
+        when (topic) {
+            0 -> index = 0
+            1 -> index = 21
+            2 -> index = 41
+            3 -> index = 61
+            4 -> index = 81
+            5 -> index = 101
+        }
+        setDirection(direction, questions, index)
+    }
+
     //Navigation bar with buttons
     fun setNavigationButton(
         direction: NavigationButton,
         index: Int,
         questions: List<QuestionProjection>,
+    ) {
+        setDirection(direction, questions, index)
+    }
+
+    private fun setDirection(
+        direction: NavigationButton,
+        questions: List<QuestionProjection>,
+        index: Int
     ) {
         when (direction) {
             NavigationButton.FIRST_PAGE -> firstPage(questions)
@@ -162,22 +222,57 @@ class AssignmentViewModel : ViewModel() {
         return result
     }
 
-    fun filterCorrectAnswersInTotal(resultList: List<QuestionProjection>): Int {
-        return resultList.filter { (it.currentSelection == it.correctAnswers) }
-            .count()
-    }
-
-    fun filterWrongAnswersInTotal(correctAnswers: Int): Int {
-        return Constants.SIZE_OF_ASSIGNMENT_TOTAL - correctAnswers
-    }
-
     fun filterCorrectAnswersOfEachTopic(resultList: List<QuestionProjection>, topic: Int): Int {
-        return resultList.filter { (it.currentSelection == it.correctAnswers).and(it.topic == topic) }
-            .count()
+        return resultList.count { (it.currentSelection == it.correctAnswers).and(it.topic == topic) }
     }
 
     fun filterWrongAnswersOfEachTopic(correctAnswersByTopic: Int): Int {
         return Constants.SIZE_OF_EACH_ASSIGNMENT_TOPIC - correctAnswersByTopic
+    }
+
+    fun checkTopicButtonColors(
+        assignmentQuestions: List<QuestionProjection>,
+        currentQuestion: QuestionProjection
+    ) {
+        var count = 0
+        when (currentQuestion.topic) {
+            Topic.TOPIC_1.ordinal -> {
+                count = assignmentQuestions.subList(0, 20).count {
+                    it.checkboxList.stream().anyMatch { cb -> cb.checked }
+                }
+            }
+            Topic.TOPIC_2.ordinal -> {
+                count = assignmentQuestions.subList(20, 40).count {
+                    it.checkboxList.stream().anyMatch { cb -> cb.checked }
+                }
+            }
+            Topic.TOPIC_3.ordinal -> {
+                count = assignmentQuestions.subList(40, 60).count {
+                    it.checkboxList.stream().anyMatch { cb -> cb.checked }
+                }
+            }
+            Topic.TOPIC_4.ordinal -> {
+                count = assignmentQuestions.subList(60, 80).count {
+                    it.checkboxList.stream().anyMatch { cb -> cb.checked }
+                }
+            }
+            Topic.TOPIC_5.ordinal -> {
+                count = assignmentQuestions.subList(80, 100).count {
+                    it.checkboxList.stream().anyMatch { cb -> cb.checked }
+                }
+            }
+            Topic.TOPIC_6.ordinal -> {
+                count = assignmentQuestions.subList(100, 120).count {
+                    it.checkboxList.stream().anyMatch { cb -> cb.checked }
+                }
+            }
+        }
+        Log.v("Current count", count.toString() + " " + currentQuestion.text)
+        if (count == 20) {
+            onChangeTopicButtonColor(Artemis_Yellow, currentQuestion.topic)
+        } else {
+            onChangeTopicButtonColor(Color.White, currentQuestion.topic)
+        }
     }
 
     fun calculateMarksByTopic(resultList: List<QuestionProjection>): Map<String, Int> {
@@ -209,7 +304,7 @@ class AssignmentViewModel : ViewModel() {
         return result
     }
 
-    fun getFailedTopics(marksByTopics: Map<String, Int>): Int {
+    private fun getFailedTopics(marksByTopics: Map<String, Int>): Int {
         var counter = 0
         for ((_, value) in marksByTopics) {
             if (value > 4) {
@@ -220,26 +315,28 @@ class AssignmentViewModel : ViewModel() {
     }
 
     //If a decade of questions has been
-    fun changeSkippedBoxColor(
-        assignmentQuestions: List<QuestionProjection>,
-        skippedIndex: Int
-    ): Color {
-        val indexStart = if (skippedIndex != 0) skippedIndex - 10 else 0
-        val indexEnd = if (skippedIndex == 0) 10 else skippedIndex
-        val sublist = assignmentQuestions.subList(indexStart, indexEnd)
-        var amountOfSelections = 0
-
-        for (question in sublist) {
-            if (question.currentSelection.isNotBlank() && question.currentSelection != "[]") {
-                amountOfSelections++
-            }
-        }
-        return if (amountOfSelections > 1) {
-            Artemis_Yellow
-        } else {
-            Color.White
-        }
-    }
+//    fun changeSkippedBoxColor(
+//        assignmentQuestions: List<QuestionProjection>,
+//        skippedIndex: Int
+//    ): Color {
+//        val indexStart = if (skippedIndex != 0) skippedIndex - 10 else 0
+//        val indexEnd = if (skippedIndex == 0) 10 else skippedIndex
+//        val sublist = assignmentQuestions.subList(indexStart, indexEnd)
+//        var amountOfSelections = 0
+//
+//        for (question in sublist) {
+//            if (question.currentSelection.isNotBlank() && question.currentSelection != "[]") {
+//                amountOfSelections++
+//            }
+//        }
+//        Log.v("Current indexStart", indexStart.toString())
+//        Log.v("Current indexEnd", indexEnd.toString())
+//        return if (amountOfSelections == 10) {
+//            Artemis_Yellow
+//        } else {
+//            Color.White
+//        }
+//    }
 
     fun calculateMark(resultOfCorrectAnswers: Int): Int {
         var mark = 6

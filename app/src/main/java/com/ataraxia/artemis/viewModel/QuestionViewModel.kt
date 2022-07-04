@@ -1,12 +1,12 @@
 package com.ataraxia.artemis.viewModel
 
 import android.app.Application
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.ataraxia.artemis.data.db.ArtemisDatabase
+import com.ataraxia.artemis.data.dictionary.DictionaryRepository
 import com.ataraxia.artemis.data.questions.QuestionRepository
 import com.ataraxia.artemis.helper.CriteriaFilter
 import com.ataraxia.artemis.model.*
@@ -31,29 +31,37 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
     val filter: LiveData<CriteriaFilter> = _filter
 
     private lateinit var questionRepository: QuestionRepository
+    private lateinit var dictionaryRepository: DictionaryRepository
 
     lateinit var allQuestions: List<QuestionProjection>
+    lateinit var allDictionaryEntries: List<Dictionary>
 
-    var onceLearnedQuestions: Int = 0
-    var learnedQuestions: Int = 0
-    var failedQuestions: Int = 0
-    var progressInPercent: BigDecimal = BigDecimal.ZERO
+    private var onceLearnedQuestions: Int = 0
+    private var learnedQuestions: Int = 0
+    private var failedQuestions: Int = 0
+    private var progressInPercent: BigDecimal = BigDecimal.ZERO
 
     init {
         CoroutineScope(Dispatchers.IO).launch {
             val questionDao =
                 ArtemisDatabase.getDatabase(application.applicationContext).questionDao()
             questionRepository = QuestionRepository(questionDao)
+
+            val dictionaryDao =
+                ArtemisDatabase.getDatabase(application.applicationContext).dictionaryDao()
+            dictionaryRepository = DictionaryRepository(dictionaryDao)
+
             allQuestions =
                 questionRepository.getAllQuestions().map { QuestionProjection.entityToModel(it) }
-            onceLearnedQuestions = allQuestions.filter { it.learnedTwice == 1 }.count()
-            learnedQuestions = allQuestions.filter { it.learnedTwice == 1 }.count()
-            failedQuestions = allQuestions.filter { it.failed == 1 }.count()
+            onceLearnedQuestions = allQuestions.count { it.learnedTwice == 1 }
+            learnedQuestions = allQuestions.count { it.learnedTwice == 1 }
+            failedQuestions = allQuestions.count { it.failed == 1 }
             progressInPercent = if (allQuestions.isNotEmpty()) {
-                calculatePercentage(learnedQuestions, allQuestions.count())
+                calculatePercentagePerTopic(learnedQuestions, allQuestions.count())
             } else {
                 BigDecimal.ZERO
             }
+            allDictionaryEntries = dictionaryRepository.getAllDictionaryEntries()
         }
 
     }
@@ -99,7 +107,21 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
         return questions
     }
 
-    private fun calculatePercentage(learnedQuestions: Int, allQuestions: Int): BigDecimal {
+    fun checkDictionary(matchedText: String): Dictionary {
+        val dictionary = Dictionary(0, "", "", "")
+        var matched = false
+        for (entry in allDictionaryEntries) {
+            if (matchedText.contains(entry.item) && !matched) {
+                dictionary.item = entry.item
+                dictionary.definition = entry.definition
+                dictionary.url = entry.url
+                matched = true
+            }
+        }
+        return dictionary
+    }
+
+    private fun calculatePercentagePerTopic(learnedQuestions: Int, allQuestions: Int): BigDecimal {
         val learnedQuestionsInPercent =
             BigDecimal(
                 (learnedQuestions.toDouble() / allQuestions.toDouble()) * 100.0
@@ -184,7 +206,6 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
         return questions
     }
 
-
     private fun filterQuestions(
         criteriaFilter: CriteriaFilter,
         questions: List<QuestionProjection>
@@ -200,6 +221,36 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
             }
         }
         return filteredQuestions
+    }
+
+    fun getCurrentCriteriaFilter(currentCriteriaFilter: CriteriaFilter): String {
+        val currentFilterAsString: String = when (currentCriteriaFilter) {
+            CriteriaFilter.ALL_QUESTIONS_SHUFFLED -> "Zufällige Auswahl"
+            CriteriaFilter.ALL_QUESTIONS_CHRONOLOGICAL -> "Alle Fragen"
+            CriteriaFilter.NOT_LEARNED -> "Noch nicht gelernt"
+            CriteriaFilter.ONCE_LEARNED -> "Mind. 1x richtig beantwortet"
+            CriteriaFilter.FAILED -> "Falsch beantwortet"
+            CriteriaFilter.FAVOURITES -> "Favouriten"
+            CriteriaFilter.LAST_VIEWED -> "Seit 1 Woche nicht angesehen"
+            CriteriaFilter.SEARCH -> "Benutzerdefinierte Suche"
+            else -> {
+                "Keine Auswahl"
+            }
+        }
+        return currentFilterAsString
+    }
+
+    fun getTopicOfQuestion(currentQuestionNumericTopic: Int): String {
+        var topic = ""
+        when (currentQuestionNumericTopic) {
+            0 -> topic = Screen.DrawerScreen.TopicWildLife.title
+            1 -> topic = Screen.DrawerScreen.TopicHuntingOperations.title
+            2 -> topic = Screen.DrawerScreen.TopicWeaponsLawAndTechnology.title
+            3 -> topic = Screen.DrawerScreen.TopicWildLifeTreatment.title
+            4 -> topic = Screen.DrawerScreen.TopicHuntingLaw.title
+            5 -> topic = Screen.DrawerScreen.TopicPreservationOfWildLifeAndNature.title
+        }
+        return topic
     }
 
     fun prepareQuestionData(
@@ -223,9 +274,9 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
         val favourites = questions.filter { it.favourite == 1 }
         val remainingQuestions = questions.toMutableList()
         remainingQuestions.also {
-            it.removeAll(learnedOnceQuestions)
-            it.removeAll(learnedTwiceQuestions)
-            it.removeAll(failedQuestions)
+            it.removeAll(learnedOnceQuestions.toSet())
+            it.removeAll(learnedTwiceQuestions.toSet())
+            it.removeAll(failedQuestions.toSet())
         }
         val trainingDataWithoutFilter = mutableListOf<QuestionProjection>()
         trainingDataWithoutFilter.addAll(failedQuestions.take(8))
@@ -259,10 +310,10 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
             filteredQuestions = filteredQuestions.filter { it.topic == item.second.ordinal }
             val allQuestions: Int = filteredQuestions.size
             val onceLearnedQuestions: Int =
-                filteredQuestions.filter { it.learnedOnce == 1 && it.learnedTwice == 0 }.count()
+                filteredQuestions.count { it.learnedOnce == 1 && it.learnedTwice == 0 }
             val learnedQuestions: Int =
-                filteredQuestions.filter { it.learnedOnce == 0 && it.learnedTwice == 1 }.count()
-            val failedQuestions: Int = filteredQuestions.filter { it.failed == 1 }.count()
+                filteredQuestions.count { it.learnedOnce == 0 && it.learnedTwice == 1 }
+            val failedQuestions: Int = filteredQuestions.count { it.failed == 1 }
 
             statistics.add(
                 StatisticProjection(
@@ -271,11 +322,30 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
                     onceLearnedQuestions,
                     learnedQuestions,
                     failedQuestions,
-                    calculatePercentage(learnedQuestions, allQuestions)
+                    calculatePercentagePerTopic(learnedQuestions, allQuestions)
                 )
             )
         }
         return statistics
+    }
+
+    fun extractTotalStatistics(): Map<String, BigDecimal> {
+        val statisticsByTopic: List<StatisticProjection> = extractStatisticsFromTopics()
+        val onceLearnedQuestionsTotal =
+            statisticsByTopic.sumOf { it.totalOnceLearned }.toBigDecimal()
+                .setScale(0, RoundingMode.HALF_UP)
+        val failedQuestionsTotal = statisticsByTopic.sumOf { it.totalFailed }.toBigDecimal()
+            .setScale(0, RoundingMode.HALF_UP)
+        val twiceLearnedQuestionsTotal = statisticsByTopic.sumOf { it.totalLearned }.toBigDecimal()
+            .setScale(0, RoundingMode.HALF_UP)
+        val totalPercentage =
+            calculatePercentagePerTopic(twiceLearnedQuestionsTotal.toInt(), allQuestions.size)
+        return hashMapOf(
+            "OnceLearnedTotal" to onceLearnedQuestionsTotal,
+            "FailedTotal" to failedQuestionsTotal,
+            "TwiceLearnedTotal" to twiceLearnedQuestionsTotal,
+            "TotalPercentage" to totalPercentage
+        )
     }
 
     fun setQuestionStateColor(question: QuestionProjection): Color {
@@ -287,25 +357,5 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
             result = Color.Green
         }
         return result
-    }
-
-    fun setFavourite(
-        question: Question,
-        isFavourite: MutableState<Int>,
-        currentFilter: CriteriaFilter
-    ) {
-        if (question.favourite == 0) {
-            question.favourite = 1
-            isFavourite.value = question.favourite
-        } else if (question.favourite == 1) {
-            question.favourite = 0
-            isFavourite.value = question.favourite
-        }
-
-        if (question.favourite == 1 && currentFilter == CriteriaFilter.FAVOURITES) {
-            question.favourite = 0
-            isFavourite.value = question.favourite
-        }
-        updateQuestion(question)
     }
 }

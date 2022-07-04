@@ -15,52 +15,33 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.ataraxia.artemis.helper.RowScopeExtension.Companion.TableCell
 import com.ataraxia.artemis.ui.theme.Artemis_Green
 import com.ataraxia.artemis.ui.theme.Artemis_Red
 import com.ataraxia.artemis.ui.theme.Artemis_Yellow
 import com.ataraxia.artemis.viewModel.QuestionViewModel
-import com.ataraxia.artemis.viewModel.StatisticViewModel
-import java.math.BigDecimal
 
 class StatisticComponent {
 
     @Composable
     fun StatisticScreen(
-        questionViewModel: QuestionViewModel,
-        statisticViewModel: StatisticViewModel,
-        navController: NavController
+        questionViewModel: QuestionViewModel
     ) {
         StatisticsContent(
             questionViewModel,
-            statisticViewModel,
-            navController
         )
     }
 
     @Composable
     fun StatisticsContent(
         questionViewModel: QuestionViewModel,
-        statisticViewModel: StatisticViewModel,
-        navController: NavController
     ) {
-        val allQuestions: Int by statisticViewModel.allQuestionsCount.observeAsState(0)
-        val onceLearnedQuestions: Int by statisticViewModel.allLearnedOnceQuestionsCount.observeAsState(
-            0
-        )
-        val learnedQuestions: Int by statisticViewModel.allLearnedQuestionsCount.observeAsState(0)
-        val failedQuestions: Int by statisticViewModel.allFailedQuestionCount.observeAsState(0)
-        val progressInPercent: BigDecimal by statisticViewModel.progressInPercent.observeAsState(
-            BigDecimal.ZERO
-        )
+        val allQuestions: Int = questionViewModel.allQuestions.size
         val scrollableState = rememberScrollState()
         Column(
             modifier = Modifier.verticalScroll(
@@ -87,13 +68,13 @@ class StatisticComponent {
             Row {
                 Column {
                     Text(
-                        text = "1x richtig beantwortet: $onceLearnedQuestions",
+                        text = "1x richtig beantwortet: ${questionViewModel.extractTotalStatistics()["OnceLearnedTotal"]}",
                         color = Color.White,
                         style = MaterialTheme.typography.body2,
                         modifier = Modifier.padding(start = 25.dp, top = 10.dp)
                     )
                     Text(
-                        text = "Falsch beantwortet: $failedQuestions",
+                        text = "Falsch beantwortet: ${questionViewModel.extractTotalStatistics()["FailedTotal"]}",
                         color = Color.White,
                         style = MaterialTheme.typography.body2,
                         modifier = Modifier.padding(start = 25.dp, top = 10.dp)
@@ -101,13 +82,13 @@ class StatisticComponent {
                 }
                 Column {
                     Text(
-                        text = "2x richtig beantwortet: $learnedQuestions",
+                        text = "2x richtig beantwortet: ${questionViewModel.extractTotalStatistics()["TwiceLearnedTotal"]}",
                         color = Color.White,
                         style = MaterialTheme.typography.body2,
                         modifier = Modifier.padding(start = 25.dp, top = 10.dp)
                     )
                     Text(
-                        text = "$progressInPercent% gelernt",
+                        text = "${questionViewModel.extractTotalStatistics()["TotalPercentage"]}% gelernt",
                         color = Color.White,
                         style = MaterialTheme.typography.body2,
                         modifier = Modifier.padding(start = 25.dp, top = 10.dp)
@@ -141,28 +122,27 @@ class StatisticComponent {
                         )
                         .padding(25.dp)
                 ) {
-                    TableCell(text = statistic.topic, weight = 4.75f)
                     TableCell(
-                        text = statistic.totalOnceLearned.toString(),
-                        Icons.Filled.Done,
-                        Artemis_Yellow,
-                        weight = 1.25f
+                        text = statistic.topic + " " + statistic.totalPercentage.toString() + "%",
+                        weight = 4.0f
                     )
                     TableCell(
                         text = statistic.totalLearned.toString(),
                         Icons.Filled.Done,
                         Artemis_Green,
-                        weight = 1.25f
+                        weight = 2.0f
+                    )
+                    TableCell(
+                        text = statistic.totalOnceLearned.toString(),
+                        Icons.Filled.Done,
+                        Artemis_Yellow,
+                        weight = 2.0f
                     )
                     TableCell(
                         text = statistic.totalFailed.toString(),
                         Icons.Filled.Close,
                         Artemis_Red,
-                        weight = 1.25f
-                    )
-                    TableCell(
-                        text = statistic.totalPercentage.toString() + "%",
-                        weight = 1.50f
+                        weight = 2.0f
                     )
                 }
             }

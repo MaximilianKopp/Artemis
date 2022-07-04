@@ -24,7 +24,7 @@ class TrainingViewModel : ViewModel() {
     val trainingData: LiveData<List<QuestionProjection>> = _trainingData
 
     private val _checkedAnswers = mutableSetOf<String>()
-    val checkedAnswers: Set<String> = _checkedAnswers as HashSet<String>
+    private val checkedAnswers: Set<String> = _checkedAnswers as HashSet<String>
 
     private val _index = MutableLiveData<Int>()
     val index: LiveData<Int> = _index
@@ -37,20 +37,6 @@ class TrainingViewModel : ViewModel() {
 
     private val _favouriteColor = MutableLiveData<Int>()
     val favouriteColor: LiveData<Int> = _favouriteColor
-
-    private val _checkedState = MutableLiveData<Boolean>()
-    val checkedState: LiveData<Boolean> = _checkedState
-
-    fun onChangeCheckedState(checkedState: Boolean) {
-        CoroutineScope(Dispatchers.IO).launch {
-            onChangeCheckedStateCoroutine(checkedState)
-        }
-    }
-
-    private suspend fun onChangeCheckedStateCoroutine(checkedState: Boolean) =
-        withContext(Dispatchers.IO) {
-            _checkedState.postValue(checkedState)
-        }
 
     fun onChangeFavouriteState(isFavourite: Int) {
         CoroutineScope(Dispatchers.IO).launch {
@@ -97,7 +83,7 @@ class TrainingViewModel : ViewModel() {
             _index.postValue(newIndex)
         }
 
-    fun setCurrentQuestionText(question: QuestionProjection, checkedAnswer: String): String {
+    fun setCurrentCheckboxText(question: QuestionProjection, checkedAnswer: String): String {
         when (checkedAnswer) {
             Constants.TRAINING_SELECTION_A -> return question.optionA
             Constants.TRAINING_SELECTION_B -> return question.optionB
@@ -236,6 +222,7 @@ class TrainingViewModel : ViewModel() {
             NavigationButton.PREV_PAGE -> prevPage(index, questions)
             NavigationButton.NEXT_PAGE -> nextPage(index, questions)
             NavigationButton.LAST_PAGE -> lastPage(questions)
+            else -> {}
         }
     }
 
@@ -274,25 +261,4 @@ class TrainingViewModel : ViewModel() {
         })
         onChangeFavouriteState(questions[questions.size - 1].favourite)
     }
-
-//    fun setFavourite(
-//        question: Question,
-//        isFavourite: MutableState<Int>,
-//        currentFilter: CriteriaFilter
-//    ) {
-//        if (question.favourite == 0) {
-//            question.favourite = 1
-//            isFavourite.value = question.favourite
-//        }
-//        else if (question.favourite == 1) {
-//            question.favourite = 0
-//            isFavourite.value = question.favourite
-//        }
-//
-//        if (question.favourite == 1 && currentFilter == CriteriaFilter.FAVOURITES) {
-//            question.favourite = 0
-//            isFavourite.value = question.favourite
-//        }
-//        updateQuestion(question)
-//    }
 }

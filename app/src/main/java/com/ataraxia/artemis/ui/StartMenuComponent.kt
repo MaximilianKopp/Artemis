@@ -1,19 +1,21 @@
 package com.ataraxia.artemis.ui
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.*
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -25,10 +27,12 @@ import com.ataraxia.artemis.model.Screen
 import com.ataraxia.artemis.templates.TextButtonTemplate
 import com.ataraxia.artemis.templates.TextTemplate
 import com.ataraxia.artemis.ui.theme.Artemis_Green
-import com.ataraxia.artemis.ui.theme.Artemis_Yellow
-import com.ataraxia.artemis.viewModel.*
-import java.math.BigDecimal
+import com.ataraxia.artemis.viewModel.AssignmentViewModel
+import com.ataraxia.artemis.viewModel.GeneralViewModel
+import com.ataraxia.artemis.viewModel.QuestionViewModel
+import com.ataraxia.artemis.viewModel.TrainingViewModel
 
+@ExperimentalComposeUiApi
 class StartMenuComponent {
     private val appBarComposition = AppBarComponent()
 
@@ -38,14 +42,12 @@ class StartMenuComponent {
         generalViewModel: GeneralViewModel,
         questionViewModel: QuestionViewModel,
         trainingViewModel: TrainingViewModel,
-        statisticViewModel: StatisticViewModel,
         assignmentViewModel: AssignmentViewModel
     ) {
         StartContent(
             generalViewModel,
             questionViewModel,
             trainingViewModel,
-            statisticViewModel,
             assignmentViewModel
         )
     }
@@ -56,7 +58,6 @@ class StartMenuComponent {
         generalViewModel: GeneralViewModel,
         questionViewModel: QuestionViewModel,
         trainingViewModel: TrainingViewModel,
-        statisticViewModel: StatisticViewModel,
         assignmentViewModel: AssignmentViewModel
     ) {
         val navController: NavHostController = rememberNavController()
@@ -106,12 +107,11 @@ class StartMenuComponent {
                 onOpenFilterDialog = { generalViewModel.onOpenFilterDialog(it) },
                 isTrainingDialogClosed = isTrainingDialogClosed,
                 onOpenTrainingDialog = { generalViewModel.onOpenTrainingDialog(it) },
-                isAssignmentDialogClosed = isAssignmentDialogClosed,
+                isAssignmentDialogOpen = isAssignmentDialogClosed,
                 onOpenAssignmentDialog = { generalViewModel.onOpenAssignmentDialog(it) },
                 generalViewModel = generalViewModel,
                 questionViewModel = questionViewModel,
                 trainingViewModel = trainingViewModel,
-                statisticViewModel = statisticViewModel,
                 assignmentViewModel = assignmentViewModel
             )
         }
@@ -158,7 +158,6 @@ class StartMenuComponent {
         generalViewModel: GeneralViewModel,
         questionViewModel: QuestionViewModel,
         assignmentViewModel: AssignmentViewModel,
-        statisticViewModel: StatisticViewModel,
         navController: NavController
     ) {
         val scrollState = rememberScrollState()
@@ -172,21 +171,21 @@ class StartMenuComponent {
             horizontalAlignment = Alignment.CenterHorizontally
 
         ) {
-            ShowStartScreenInfo(statisticViewModel)
+            ShowStartScreenInfo(questionViewModel)
             Spacer(modifier = Modifier.padding(top = 5.dp))
             Row {
                 StartMenuButton(onClick = {
-                    navController.navigate(Screen.DrawerScreen.Questions.route)
+                    navController.navigate(Screen.DrawerScreen.QuestionCatalogue.route)
                 }) {
                     StartMenuContent(
                         drawable = R.drawable.ic_baseline_menu_book_24,
                         contentDescription = "Questions",
-                        text = Screen.DrawerScreen.Questions.title
+                        text = Screen.DrawerScreen.QuestionCatalogue.title
                     )
                 }
                 StartMenuButton(onClick = {
                     val assignmentQuestions =
-                        questionViewModel.prepareQuestionsForAssignment().toList().shuffled()
+                        questionViewModel.prepareQuestionsForAssignment().toList()
                     questionViewModel.onChangeQuestionsForAssignment(assignmentQuestions)
                     assignmentViewModel.onChangeCurrentQuestion(assignmentQuestions[0])
                     generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Assignment)
@@ -219,49 +218,14 @@ class StartMenuComponent {
                     )
                 }
             }
-            Row {
-                Card(
-                    shape = RoundedCornerShape(15.dp),
-                    modifier =
-                    Modifier
-                        .padding(15.dp)
-                        .size(200.dp, 35.dp)
-                        .border(BorderStroke(2.dp, Color.White), RoundedCornerShape(15.dp))
-                        .clickable {
-                            navController.navigate(Screen.DrawerScreen.Privacy.route)
-                        }
-                ) {
-                    Row(
-                        modifier = Modifier.background(Artemis_Yellow),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            modifier = Modifier.weight(1.4f),
-                            text = Screen.DrawerScreen.Privacy.title,
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.body2,
-                            color = Color.Black,
-                        )
-                    }
-                }
-            }
         }
     }
 
     @Composable
     fun ShowStartScreenInfo(
-        statisticViewModel: StatisticViewModel
+        questionViewModel: QuestionViewModel,
     ) {
-        val allQuestions: Int by statisticViewModel.allQuestionsCount.observeAsState(0)
-        val onceLearnedQuestions: Int by statisticViewModel.allLearnedOnceQuestionsCount.observeAsState(
-            0
-        )
-        val learnedQuestions: Int by statisticViewModel.allLearnedQuestionsCount.observeAsState(0)
-        val failedQuestions: Int by statisticViewModel.allFailedQuestionCount.observeAsState(0)
-        val progressInPercent: BigDecimal by statisticViewModel.progressInPercent.observeAsState(
-            BigDecimal.ZERO
-        )
+        val allQuestions: Int = questionViewModel.allQuestions.size
 
         Column {
             Row(
@@ -300,25 +264,25 @@ class StartMenuComponent {
                 modifier = Modifier.padding(start = 25.dp, top = 25.dp)
             )
             Text(
-                text = "1x richtig beantwortet: $onceLearnedQuestions",
+                text = "1x richtig beantwortet: ${questionViewModel.extractTotalStatistics()["OnceLearnedTotal"]}",
                 color = Color.White,
                 style = MaterialTheme.typography.body2,
                 modifier = Modifier.padding(start = 25.dp, top = 10.dp)
             )
             Text(
-                text = "2x richtig beantwortet: $learnedQuestions",
+                text = "2x richtig beantwortet: ${questionViewModel.extractTotalStatistics()["TwiceLearnedTotal"]}",
                 color = Color.White,
                 style = MaterialTheme.typography.body2,
                 modifier = Modifier.padding(start = 25.dp, top = 10.dp)
             )
             Text(
-                text = "Falsch beantwortet: $failedQuestions",
+                text = "Falsch beantwortet: ${questionViewModel.extractTotalStatistics()["FailedTotal"]}",
                 color = Color.White,
                 style = MaterialTheme.typography.body2,
                 modifier = Modifier.padding(start = 25.dp, top = 10.dp)
             )
             Text(
-                text = "$progressInPercent% gelernt",
+                text = "${questionViewModel.extractTotalStatistics()["TotalPercentage"]}% gelernt",
                 color = Color.White,
                 style = MaterialTheme.typography.body2,
                 modifier = Modifier.padding(start = 25.dp, top = 10.dp)
