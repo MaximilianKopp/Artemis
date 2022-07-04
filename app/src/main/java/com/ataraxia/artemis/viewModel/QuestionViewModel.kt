@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.ataraxia.artemis.data.db.ArtemisDatabase
+import com.ataraxia.artemis.data.dictionary.DictionaryRepository
 import com.ataraxia.artemis.data.questions.QuestionRepository
 import com.ataraxia.artemis.helper.CriteriaFilter
 import com.ataraxia.artemis.model.*
@@ -30,8 +31,10 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
     val filter: LiveData<CriteriaFilter> = _filter
 
     private lateinit var questionRepository: QuestionRepository
+    private lateinit var dictionaryRepository: DictionaryRepository
 
     lateinit var allQuestions: List<QuestionProjection>
+    lateinit var allDictionaryEntries: List<Dictionary>
 
     private var onceLearnedQuestions: Int = 0
     private var learnedQuestions: Int = 0
@@ -43,6 +46,11 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
             val questionDao =
                 ArtemisDatabase.getDatabase(application.applicationContext).questionDao()
             questionRepository = QuestionRepository(questionDao)
+
+            val dictionaryDao =
+                ArtemisDatabase.getDatabase(application.applicationContext).dictionaryDao()
+            dictionaryRepository = DictionaryRepository(dictionaryDao)
+
             allQuestions =
                 questionRepository.getAllQuestions().map { QuestionProjection.entityToModel(it) }
             onceLearnedQuestions = allQuestions.count { it.learnedTwice == 1 }
@@ -53,6 +61,7 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
             } else {
                 BigDecimal.ZERO
             }
+            allDictionaryEntries = dictionaryRepository.getAllDictionaryEntries()
         }
 
     }
@@ -96,6 +105,20 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
             }
         }
         return questions
+    }
+
+    fun checkDictionary(matchedText: String): Dictionary {
+        val dictionary = Dictionary(0, "", "", "")
+        var matched = false
+        for (entry in allDictionaryEntries) {
+            if (matchedText.contains(entry.item) && !matched) {
+                dictionary.item = entry.item
+                dictionary.definition = entry.definition
+                dictionary.url = entry.url
+                matched = true
+            }
+        }
+        return dictionary
     }
 
     private fun calculatePercentagePerTopic(learnedQuestions: Int, allQuestions: Int): BigDecimal {
@@ -201,8 +224,7 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun getCurrentCriteriaFilter(currentCriteriaFilter: CriteriaFilter): String {
-        var currentFilterAsString = ""
-        currentFilterAsString = when (currentCriteriaFilter) {
+        val currentFilterAsString: String = when (currentCriteriaFilter) {
             CriteriaFilter.ALL_QUESTIONS_SHUFFLED -> "Zufällige Auswahl"
             CriteriaFilter.ALL_QUESTIONS_CHRONOLOGICAL -> "Alle Fragen"
             CriteriaFilter.NOT_LEARNED -> "Noch nicht gelernt"

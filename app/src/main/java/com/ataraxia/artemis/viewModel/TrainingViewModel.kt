@@ -83,7 +83,7 @@ class TrainingViewModel : ViewModel() {
             _index.postValue(newIndex)
         }
 
-    fun setCurrentQuestionText(question: QuestionProjection, checkedAnswer: String): String {
+    fun setCurrentCheckboxText(question: QuestionProjection, checkedAnswer: String): String {
         when (checkedAnswer) {
             Constants.TRAINING_SELECTION_A -> return question.optionA
             Constants.TRAINING_SELECTION_B -> return question.optionB

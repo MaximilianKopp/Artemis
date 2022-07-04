@@ -87,6 +87,7 @@ class QuestionListComponent {
         val currentFilter =
             questionViewModel.filter.observeAsState(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
         val isVibrating: Int by generalViewModel.isVibrating.observeAsState(1)
+        val isHintShown: Int by generalViewModel.isHintShow.observeAsState(1)
         val searchBarText: String by generalViewModel.searchTextState
         val sizeOfTrainingUnit: Int by generalViewModel.sizeOfTrainingUnit.observeAsState(20)
         Log.v("Current Searchtext", searchBarText)
@@ -332,6 +333,29 @@ class QuestionListComponent {
                                     if (isVibrating == 1) generalViewModel.onChangeEnableVibration(
                                         0
                                     ) else generalViewModel.onChangeEnableVibration(1)
+                                },
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = Artemis_Yellow,
+                                    checkedTrackColor = Artemis_Yellow,
+                                    uncheckedThumbColor = Color.White,
+                                    uncheckedTrackColor = Artemis_Yellow
+                                )
+                            )
+                        }
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Hinweise einblenden",
+                                style = MaterialTheme.typography.body1
+                            )
+                            Switch(
+                                checked = isHintShown == 1,
+                                onCheckedChange = {
+                                    if (isHintShown == 1) generalViewModel.onChangeShowHints(
+                                        0
+                                    ) else generalViewModel.onChangeShowHints(1)
                                 },
                                 colors = SwitchDefaults.colors(
                                     checkedThumbColor = Artemis_Yellow,
