@@ -25,10 +25,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.helper.CriteriaFilter
+import com.ataraxia.artemis.helper.DictionaryLink
 import com.ataraxia.artemis.helper.NavigationButton
+import com.ataraxia.artemis.model.Dictionary
 import com.ataraxia.artemis.model.QuestionProjection
 import com.ataraxia.artemis.model.Screen
 import com.ataraxia.artemis.ui.theme.Artemis_Blue
@@ -151,12 +154,23 @@ class TrainingComponent {
                                     style = MaterialTheme.typography.caption,
                                     color = Color.Black
                                 )
-                                Text(
-                                    modifier = Modifier.padding(6.dp),
-                                    text = currentQuestion.text,
-                                    style = MaterialTheme.typography.body1,
-                                    color = Color.Black
-                                )
+                                val dictionaryEntryForQuestionHeader: Dictionary =
+                                    questionViewModel.checkDictionary(currentQuestion.text)
+                                if (dictionaryEntryForQuestionHeader.item.isBlank() || generalViewModel.isHintShow.value == 0) {
+                                    Text(
+                                        modifier = Modifier.padding(6.dp),
+                                        text = currentQuestion.text,
+                                        style = MaterialTheme.typography.body1,
+                                        color = Color.Black
+                                    )
+                                } else if (generalViewModel.isHintShow.value == 1) {
+                                    DictionaryLink(
+                                        fullText = currentQuestion.text,
+                                        fontSize = 16.sp,
+                                        linkText = listOf(dictionaryEntryForQuestionHeader.item),
+                                        dictionaryEntry = dictionaryEntryForQuestionHeader
+                                    )
+                                }
                             }
                         }
                     }
@@ -170,8 +184,8 @@ class TrainingComponent {
                         for (checkbox in currentQuestion.checkboxList) {
                             val checkedState =
                                 remember { mutableStateOf(checkbox.checked) }
-                            val currentQuestionText: String =
-                                trainingViewModel.setCurrentQuestionText(
+                            val currentCheckboxText: String =
+                                trainingViewModel.setCurrentCheckboxText(
                                     currentQuestion,
                                     checkbox.option
                                 )
@@ -219,20 +233,41 @@ class TrainingComponent {
                                     },
                                     modifier = Modifier.padding(start = 5.dp)
                                 )
-                                Text(
-                                    modifier = Modifier.padding(
-                                        start = 3.dp,
-                                        top = 12.dp,
-                                        end = 2.dp
-                                    ),
-                                    text = currentQuestionText,
-                                    style = MaterialTheme.typography.caption,
-                                    color = Color.Black
-                                )
+
+                                val dictionaryEntryForCheckbox: Dictionary =
+                                    questionViewModel.checkDictionary(currentCheckboxText)
+
+                                if (dictionaryEntryForCheckbox.item.isBlank() || generalViewModel.isHintShow.value == 0) {
+                                    Text(
+                                        modifier = Modifier.padding(
+                                            start = 3.dp,
+                                            top = 12.dp,
+                                            end = 2.dp
+                                        ),
+                                        text = currentCheckboxText,
+                                        style = MaterialTheme.typography.caption,
+                                        color = Color.Black
+                                    )
+                                } else if (generalViewModel.isHintShow.value == 1) {
+                                    DictionaryLink(
+                                        modifier = Modifier.padding(
+                                            start = 3.dp,
+                                            top = 12.dp,
+                                            end = 2.dp
+                                        ),
+                                        fullText = currentCheckboxText,
+                                        fontSize = 12.sp,
+                                        linkText = listOf(dictionaryEntryForCheckbox.item),
+                                        dictionaryEntry = dictionaryEntryForCheckbox,
+                                    )
+                                }
                             }
                         }
-                        isAnswerButtonEnabled.value =
-                            !currentQuestion.checkboxList.stream().allMatch { !it.checked }
+                    }
+                    isAnswerButtonEnabled.value =
+                        !currentQuestion.checkboxList.stream().allMatch { !it.checked }
+                    if (answerBtnText == "Weiter") {
+                        isAnswerButtonEnabled.value = true
                     }
                 }
             }

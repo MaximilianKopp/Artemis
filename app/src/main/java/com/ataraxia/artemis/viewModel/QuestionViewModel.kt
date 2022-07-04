@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.ataraxia.artemis.data.db.ArtemisDatabase
+import com.ataraxia.artemis.data.dictionary.DictionaryRepository
 import com.ataraxia.artemis.data.questions.QuestionRepository
 import com.ataraxia.artemis.helper.CriteriaFilter
 import com.ataraxia.artemis.model.*
@@ -30,19 +31,26 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
     val filter: LiveData<CriteriaFilter> = _filter
 
     private lateinit var questionRepository: QuestionRepository
+    private lateinit var dictionaryRepository: DictionaryRepository
 
     lateinit var allQuestions: List<QuestionProjection>
+    lateinit var allDictionaryEntries: List<Dictionary>
 
-    var onceLearnedQuestions: Int = 0
-    var learnedQuestions: Int = 0
-    var failedQuestions: Int = 0
-    var progressInPercent: BigDecimal = BigDecimal.ZERO
+    private var onceLearnedQuestions: Int = 0
+    private var learnedQuestions: Int = 0
+    private var failedQuestions: Int = 0
+    private var progressInPercent: BigDecimal = BigDecimal.ZERO
 
     init {
         CoroutineScope(Dispatchers.IO).launch {
             val questionDao =
                 ArtemisDatabase.getDatabase(application.applicationContext).questionDao()
             questionRepository = QuestionRepository(questionDao)
+
+            val dictionaryDao =
+                ArtemisDatabase.getDatabase(application.applicationContext).dictionaryDao()
+            dictionaryRepository = DictionaryRepository(dictionaryDao)
+
             allQuestions =
                 questionRepository.getAllQuestions().map { QuestionProjection.entityToModel(it) }
             onceLearnedQuestions = allQuestions.count { it.learnedTwice == 1 }
@@ -53,6 +61,7 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
             } else {
                 BigDecimal.ZERO
             }
+            allDictionaryEntries = dictionaryRepository.getAllDictionaryEntries()
         }
 
     }
@@ -96,6 +105,20 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
             }
         }
         return questions
+    }
+
+    fun checkDictionary(matchedText: String): Dictionary {
+        val dictionary = Dictionary(0, "", "", "")
+        var matched = false
+        for (entry in allDictionaryEntries) {
+            if (matchedText.contains(entry.item) && !matched) {
+                dictionary.item = entry.item
+                dictionary.definition = entry.definition
+                dictionary.url = entry.url
+                matched = true
+            }
+        }
+        return dictionary
     }
 
     private fun calculatePercentagePerTopic(learnedQuestions: Int, allQuestions: Int): BigDecimal {
@@ -183,7 +206,6 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
         return questions
     }
 
-
     private fun filterQuestions(
         criteriaFilter: CriteriaFilter,
         questions: List<QuestionProjection>
@@ -199,6 +221,23 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
             }
         }
         return filteredQuestions
+    }
+
+    fun getCurrentCriteriaFilter(currentCriteriaFilter: CriteriaFilter): String {
+        val currentFilterAsString: String = when (currentCriteriaFilter) {
+            CriteriaFilter.ALL_QUESTIONS_SHUFFLED -> "Zufällige Auswahl"
+            CriteriaFilter.ALL_QUESTIONS_CHRONOLOGICAL -> "Alle Fragen"
+            CriteriaFilter.NOT_LEARNED -> "Noch nicht gelernt"
+            CriteriaFilter.ONCE_LEARNED -> "Mind. 1x richtig beantwortet"
+            CriteriaFilter.FAILED -> "Falsch beantwortet"
+            CriteriaFilter.FAVOURITES -> "Favouriten"
+            CriteriaFilter.LAST_VIEWED -> "Seit 1 Woche nicht angesehen"
+            CriteriaFilter.SEARCH -> "Benutzerdefinierte Suche"
+            else -> {
+                "Keine Auswahl"
+            }
+        }
+        return currentFilterAsString
     }
 
     fun getTopicOfQuestion(currentQuestionNumericTopic: Int): String {
@@ -235,9 +274,9 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
         val favourites = questions.filter { it.favourite == 1 }
         val remainingQuestions = questions.toMutableList()
         remainingQuestions.also {
-            it.removeAll(learnedOnceQuestions)
-            it.removeAll(learnedTwiceQuestions)
-            it.removeAll(failedQuestions)
+            it.removeAll(learnedOnceQuestions.toSet())
+            it.removeAll(learnedTwiceQuestions.toSet())
+            it.removeAll(failedQuestions.toSet())
         }
         val trainingDataWithoutFilter = mutableListOf<QuestionProjection>()
         trainingDataWithoutFilter.addAll(failedQuestions.take(8))

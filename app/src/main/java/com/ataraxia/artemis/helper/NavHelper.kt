@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -18,6 +19,7 @@ import com.ataraxia.artemis.viewModel.TrainingViewModel
 
 class NavHelper {
 
+    @ExperimentalComposeUiApi
     companion object {
         @ExperimentalFoundationApi
         @Composable
@@ -28,7 +30,7 @@ class NavHelper {
             onOpenFilterDialog: (Boolean) -> Unit,
             isTrainingDialogClosed: Boolean,
             onOpenTrainingDialog: (Boolean) -> Unit,
-            isAssignmentDialogClosed: Boolean,
+            isAssignmentDialogOpen: Boolean,
             onOpenAssignmentDialog: (Boolean) -> Unit,
             generalViewModel: GeneralViewModel,
             questionViewModel: QuestionViewModel,
@@ -59,7 +61,7 @@ class NavHelper {
                                 assignmentViewModel,
                                 navController
                             )
-                            Questions.route -> questionComponent.TopicCatalogueScreen(
+                            QuestionCatalogue.route -> questionComponent.TopicCatalogueScreen(
                                 questionViewModel, navController
                             )
                             Statistics.route -> statisticComponent.StatisticScreen(
@@ -274,7 +276,7 @@ class NavHelper {
                     composable(Assignment.route) {
                         examComponent.AssignmentScreen(
                             navController,
-                            isAssignmentDialogClosed,
+                            isAssignmentDialogOpen,
                             onOpenAssignmentDialog,
                             questionViewModel,
                             generalViewModel,

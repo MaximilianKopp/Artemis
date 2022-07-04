@@ -1,17 +1,16 @@
 package com.ataraxia.artemis.ui
 
 import android.util.Log
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowRight
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Star
@@ -24,15 +23,19 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.helper.CriteriaFilter
 import com.ataraxia.artemis.model.QuestionProjection
 import com.ataraxia.artemis.model.Screen
-import com.ataraxia.artemis.ui.theme.Artemis_Blue
 import com.ataraxia.artemis.ui.theme.Artemis_Green
 import com.ataraxia.artemis.ui.theme.Artemis_Yellow
 import com.ataraxia.artemis.viewModel.GeneralViewModel
@@ -43,6 +46,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.*
 
+@ExperimentalComposeUiApi
 @ExperimentalFoundationApi
 class QuestionListComponent {
 
@@ -80,12 +84,13 @@ class QuestionListComponent {
         val filterAbleQuestions =
             questionViewModel.selectTopic(currentTopic, CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
         val questionsLiveData = questionViewModel.questions.observeAsState(filterAbleQuestions)
-        val currentFilter = questionViewModel.filter.observeAsState()
+        val currentFilter =
+            questionViewModel.filter.observeAsState(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
         val isVibrating: Int by generalViewModel.isVibrating.observeAsState(1)
+        val isHintShown: Int by generalViewModel.isHintShow.observeAsState(1)
         val searchBarText: String by generalViewModel.searchTextState
         val sizeOfTrainingUnit: Int by generalViewModel.sizeOfTrainingUnit.observeAsState(20)
         Log.v("Current Searchtext", searchBarText)
-
 
         if (currentFilter.value == CriteriaFilter.SEARCH) {
             questionViewModel.onChangeQuestionList(
@@ -103,62 +108,96 @@ class QuestionListComponent {
 
         Log.v("Current Filter", currentFilter.toString())
 
-        LazyColumn {
+        val keyboardController = LocalSoftwareKeyboardController.current
+        val keyboardFocus = LocalFocusManager.current
+        LazyColumn(
+            modifier = Modifier.pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = {
+                        keyboardController?.hide()
+                        keyboardFocus.clearFocus(true)
+                    }
+                )
+            }
+        ) {
             stickyHeader {
                 Row {
-                    Button(
-                        enabled = questionsLiveData.value.isNotEmpty(),
-                        modifier = Modifier.padding(8.dp),
-                        colors = ButtonDefaults.buttonColors(Artemis_Blue),
-                        onClick = {
-                            val preparedTrainingData: List<QuestionProjection>
-                            if (currentFilter.value == CriteriaFilter.ALL_QUESTIONS_SHUFFLED) {
-                                preparedTrainingData =
-                                    questionsLiveData.value.shuffled().take(sizeOfTrainingUnit)
-                                trainingViewModel.onChangeTrainingData(preparedTrainingData)
-                                trainingViewModel.onChangeCurrentQuestion(preparedTrainingData[0])
-                            } else {
-                                preparedTrainingData = questionsLiveData.value
-                                trainingViewModel.onChangeTrainingData(questionsLiveData.value)
-                                trainingViewModel.onChangeCurrentQuestion(preparedTrainingData[0])
-                            }
-                            generalViewModel.onChangeSearchWidgetState(false)
-                            generalViewModel.onHideSearchWidget(
-                                Pair(
-                                    Constants.ALPHA_INVISIBLE,
-                                    Constants.DISABLED
+                    Card(
+                        backgroundColor = Artemis_Yellow,
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .border(BorderStroke(2.dp, Color.White), RoundedCornerShape(15.dp)),
+                        shape = RoundedCornerShape(15.dp),
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(10.dp)
+                        ) {
+                            Text(
+                                text = questionViewModel.getCurrentCriteriaFilter(currentFilter.value),
+                                style = MaterialTheme.typography.body2
+                            )
+                            Button(
+                                enabled = questionsLiveData.value.isNotEmpty(),
+                                colors = ButtonDefaults.buttonColors(Artemis_Green),
+                                onClick = {
+                                    val preparedTrainingData: List<QuestionProjection>
+                                    if (currentFilter.value == CriteriaFilter.ALL_QUESTIONS_SHUFFLED) {
+                                        preparedTrainingData =
+                                            questionsLiveData.value.shuffled()
+                                                .take(sizeOfTrainingUnit)
+                                        trainingViewModel.onChangeTrainingData(preparedTrainingData)
+                                        trainingViewModel.onChangeCurrentQuestion(
+                                            preparedTrainingData[0]
+                                        )
+                                    } else {
+                                        preparedTrainingData = questionsLiveData.value
+                                        trainingViewModel.onChangeTrainingData(questionsLiveData.value)
+                                        trainingViewModel.onChangeCurrentQuestion(
+                                            preparedTrainingData[0]
+                                        )
+                                    }
+                                    generalViewModel.onChangeSearchWidgetState(false)
+                                    generalViewModel.onHideSearchWidget(
+                                        Pair(
+                                            Constants.ALPHA_INVISIBLE,
+                                            Constants.DISABLED
+                                        )
+                                    )
+                                    trainingViewModel.onChangeIndex(0)
+                                    generalViewModel.onChangeSearchWidgetState(false)
+                                    generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Training)
+                                    navController.navigate(Screen.DrawerScreen.Training.route)
+                                }) {
+                                Icon(
+                                    Icons.Filled.ArrowRight,
+                                    contentDescription = "Start button icon"
                                 )
-                            )
-                            trainingViewModel.onChangeIndex(0)
-                            generalViewModel.onChangeSearchWidgetState(false)
-                            generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Training)
-                            navController.navigate(Screen.DrawerScreen.Training.route)
-                        }) {
-                        Column {
+                                Text(
+                                    color = Color.White,
+                                    text = "Training starten (${
+                                        if (currentFilter.value == CriteriaFilter.ALL_QUESTIONS_SHUFFLED) sizeOfTrainingUnit else questionsLiveData.value.count()
+                                    } Fragen)",
+                                    style = MaterialTheme.typography.caption
+                                )
+                            }
+
                             Text(
-                                color = Color.White,
-                                text = "Training starten (${
-                                    if (currentFilter.value == CriteriaFilter.ALL_QUESTIONS_SHUFFLED) sizeOfTrainingUnit else questionsLiveData.value.count()
-                                } Fragen)"
-                            )
-                            Spacer(modifier = Modifier.padding(8.dp))
-                            Text(
-                                color = Color.White,
+                                color = Color.Black,
                                 text = "2x richtig: ${filterAbleQuestions.count { it.learnedTwice == 1 }}/${filterAbleQuestions.count()}",
                                 style = MaterialTheme.typography.overline
                             )
                             Text(
-                                color = Color.White,
+                                color = Color.Black,
                                 text = "1x richtig: ${filterAbleQuestions.count { it.learnedOnce == 1 }}",
                                 style = MaterialTheme.typography.overline
                             )
                             Text(
-                                color = Color.White,
+                                color = Color.Black,
                                 text = "Fehler: ${filterAbleQuestions.count { it.failed == 1 }}",
                                 style = MaterialTheme.typography.overline
                             )
                             Text(
-                                color = Color.White,
+                                color = Color.Black,
                                 text = "Noch nicht gelernt: ${filterAbleQuestions.count { it.learnedTwice == 0 }}",
                                 style = MaterialTheme.typography.overline
                             )
@@ -216,12 +255,19 @@ class QuestionListComponent {
                             ) {
                                 Box(modifier = Modifier.padding(end = 4.dp)) {
                                     Row {
+                                        Text(
+                                            text = "Zuletzt angesehen am ${question.lastViewed}",
+                                            style = MaterialTheme.typography.caption,
+                                            fontStyle = FontStyle.Italic
+                                        )
                                         //Icon for learned questions
                                         Icon(
                                             Icons.Filled.Check,
                                             contentDescription = "Icon for learned questions",
                                             modifier = Modifier.size(20.dp),
-                                            tint = questionViewModel.setQuestionStateColor(question)
+                                            tint = questionViewModel.setQuestionStateColor(
+                                                question
+                                            )
                                         )
                                         //Icon for failed questions
                                         Icon(
@@ -287,6 +333,29 @@ class QuestionListComponent {
                                     if (isVibrating == 1) generalViewModel.onChangeEnableVibration(
                                         0
                                     ) else generalViewModel.onChangeEnableVibration(1)
+                                },
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = Artemis_Yellow,
+                                    checkedTrackColor = Artemis_Yellow,
+                                    uncheckedThumbColor = Color.White,
+                                    uncheckedTrackColor = Artemis_Yellow
+                                )
+                            )
+                        }
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Hinweise einblenden",
+                                style = MaterialTheme.typography.body1
+                            )
+                            Switch(
+                                checked = isHintShown == 1,
+                                onCheckedChange = {
+                                    if (isHintShown == 1) generalViewModel.onChangeShowHints(
+                                        0
+                                    ) else generalViewModel.onChangeShowHints(1)
                                 },
                                 colors = SwitchDefaults.colors(
                                     checkedThumbColor = Artemis_Yellow,
@@ -451,19 +520,27 @@ class QuestionListComponent {
                         }
                         Button(
                             onClick = {
-                                Log.v("Last seen", LocalDateTime.now().minusWeeks(1L).toString())
+                                val dtf =
+                                    DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
+                                        .withLocale(Locale("DE"))
+
+                                Log.v(
+                                    "Last seen",
+                                    LocalDateTime.now().minusWeeks(1L).toString()
+                                )
                                 //Take all questions that have been longer than one week not viewed
                                 questionViewModel.onChangeFilter(CriteriaFilter.LAST_VIEWED)
                                 questionViewModel.onChangeQuestionList(
                                     filterAbleQuestions.filter {
                                         LocalDateTime.parse(
-                                            it.lastViewed,
-                                            DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
-                                                .withLocale(Locale("DE"))
+                                            it.lastViewed, dtf
                                         )
                                             .isBefore(LocalDateTime.now().minusWeeks(1L))
                                     }
-                                        .sortedWith(Comparator.comparing { LocalDateTime.parse(it.lastViewed) })
+                                        .sortedWith(Comparator.comparing {
+                                            LocalDateTime.parse(it.lastViewed, dtf)
+                                        }
+                                        )
                                 )
                                 onOpenDialog(false)
                             },
@@ -474,7 +551,7 @@ class QuestionListComponent {
                         ) {
                             Text(
                                 color = Color.Black,
-                                text = "Längere Zeit nicht angesehen (${
+                                text = "Seit 1 Woche nicht angesehen (${
                                     filterAbleQuestions.count {
                                         LocalDateTime.parse(
                                             it.lastViewed,

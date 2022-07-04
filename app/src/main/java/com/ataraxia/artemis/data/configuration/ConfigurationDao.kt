@@ -15,6 +15,12 @@ interface ConfigurationDao {
     @Query("UPDATE configuration set value =:value WHERE name = 'vibration'")
     suspend fun updateVibrationConfig(value: String)
 
+    @Query("SELECT value FROM configuration WHERE name = 'vibration'")
+    suspend fun getShowHintConfig(): String
+
+    @Query("UPDATE configuration set value =:value WHERE name = 'showHints'")
+    suspend fun updateShowHints(value: String)
+
     @Query("UPDATE configuration set value =:value WHERE name = 'sizeOfTrainingUnit'")
     suspend fun updateSizePerTrainingUnit(value: String)
 }

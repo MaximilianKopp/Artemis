@@ -5,7 +5,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
@@ -14,14 +13,16 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -37,8 +38,8 @@ import com.ataraxia.artemis.viewModel.QuestionViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
+@ExperimentalComposeUiApi
 class AppBarComponent {
-
 
     @Composable
     fun GeneralTopAppBar(
@@ -165,6 +166,9 @@ class AppBarComponent {
         onCloseClicked: () -> Unit,
         onSearchClicked: (String) -> Unit
     ) {
+        val keyboardController = LocalSoftwareKeyboardController.current
+        val keyboardFocus = LocalFocusManager.current
+
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
@@ -188,7 +192,9 @@ class AppBarComponent {
                     IconButton(
                         modifier = Modifier
                             .alpha(ContentAlpha.medium),
-                        onClick = {}
+                        onClick = {
+                            keyboardController?.hide()
+                        }
                     ) {
                         Icon(
                             imageVector = Icons.Default.Search,
@@ -217,11 +223,6 @@ class AppBarComponent {
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Search
                 ),
-                keyboardActions = KeyboardActions(
-                    onSearch = {
-                        onSearchClicked(text)
-                    }
-                ),
                 colors = TextFieldDefaults.textFieldColors(
                     textColor = Color.Black,
                     backgroundColor = Artemis_Yellow,
@@ -241,12 +242,55 @@ class AppBarComponent {
     }
 
     @Composable
+    fun ExpandTopicList(
+        scope: CoroutineScope,
+        state: ScaffoldState,
+        navController: NavHostController,
+        questionViewModel: QuestionViewModel,
+        isTopicListExpanded: MutableState<Boolean>
+    ) {
+        ///Display Topic Screens
+        Column(
+            modifier = Modifier.padding(start = 10.dp)
+        ) {
+            for (topic in Screen.TOPIC_SCREENS) {
+                TextButton(onClick = {
+                    scope.launch {
+                        state.drawerState.close()
+                        navController.navigate(topic.route)
+                        questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
+                        isTopicListExpanded.value = false
+                    }
+
+                }) {
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_baseline_keyboard_arrow_right_24),
+                            contentDescription = "Topics"
+                        )
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = topic.title,
+                            style = MaterialTheme.typography.subtitle2,
+                            color = Color.White
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
     fun DrawerContent(
         questionViewModel: QuestionViewModel,
         scope: CoroutineScope,
         state: ScaffoldState,
         navController: NavHostController
     ) {
+        val isTopicListExpanded: MutableState<Boolean> = remember { mutableStateOf(false) }
         val scrollState = rememberScrollState()
         Column(
             Modifier.verticalScroll(state = scrollState, true)
@@ -285,40 +329,65 @@ class AppBarComponent {
                     )
                 }
             }
-            //Display Topic Screens
-            for (topic in Screen.TOPIC_SCREENS) {
-                TextButton(onClick = {
-                    scope.launch {
-                        state.drawerState.close()
-                        navController.navigate(topic.route)
-                        questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
-                    }
-
-                }) {
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.ic_baseline_keyboard_arrow_right_24),
-                            contentDescription = "Topics"
-                        )
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = topic.title,
-                            style = MaterialTheme.typography.subtitle2,
-                            color = Color.White
-                        )
-                    }
-                }
-            }
-            Divider(
-                color = Color.Gray, thickness = 2.dp
-            )
             TextButton(onClick = {
                 scope.launch { state.drawerState.close() }
                     .also {
-                        navController.navigate(Screen.DrawerScreen.Questions.route)
+                        navController.navigate(Screen.DrawerScreen.Home.route)
+                        questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
+                    }
+            }) {
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_baseline_home_24),
+                        contentDescription = "Startmenü"
+                    )
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = Screen.DrawerScreen.Home.title,
+                        style = MaterialTheme.typography.subtitle2,
+                        color = Color.White
+                    )
+                }
+            }
+            TextButton(onClick = {
+                isTopicListExpanded.value = !isTopicListExpanded.value
+            }) {
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    var arrowIconOfTopic = R.drawable.ic_baseline_keyboard_arrow_right_24
+                    if (isTopicListExpanded.value) {
+                        arrowIconOfTopic = R.drawable.ic_baseline_keyboard_arrow_left_24
+                    }
+                    Image(
+                        painter = painterResource(id = arrowIconOfTopic),
+                        contentDescription = "Sachgebiete"
+                    )
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = Screen.DrawerScreen.QuestionCatalogue.title,
+                        style = MaterialTheme.typography.subtitle2,
+                        color = Color.White
+                    )
+                }
+            }
+            if (isTopicListExpanded.value) {
+                ExpandTopicList(
+                    scope = scope,
+                    state = state,
+                    navController = navController,
+                    questionViewModel = questionViewModel,
+                    isTopicListExpanded = isTopicListExpanded
+                )
+            }
+            TextButton(onClick = {
+                scope.launch { state.drawerState.close() }
+                    .also {
+                        navController.navigate(Screen.DrawerScreen.Statistics.route)
                         questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
                     }
             }) {
@@ -328,11 +397,11 @@ class AppBarComponent {
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.ic_baseline_keyboard_arrow_right_24),
-                        contentDescription = "Sachgebiete"
+                        contentDescription = "Dictionary"
                     )
                     Text(
                         modifier = Modifier.fillMaxWidth(),
-                        text = Screen.DrawerScreen.Questions.title,
+                        text = "Wörterbuch",
                         style = MaterialTheme.typography.subtitle2,
                         color = Color.White
                     )
@@ -356,6 +425,32 @@ class AppBarComponent {
                     Text(
                         modifier = Modifier.fillMaxWidth(),
                         text = Screen.DrawerScreen.Statistics.title,
+                        style = MaterialTheme.typography.subtitle2,
+                        color = Color.White
+                    )
+                }
+            }
+            Divider(
+                color = Color.Gray, thickness = 2.dp
+            )
+            TextButton(onClick = {
+                scope.launch { state.drawerState.close() }
+                    .also {
+                        navController.navigate(Screen.DrawerScreen.QuestionCatalogue.route)
+                        questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
+                    }
+            }) {
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_baseline_keyboard_arrow_right_24),
+                        contentDescription = "Themenkatalog"
+                    )
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = "Themenkatalog",
                         style = MaterialTheme.typography.subtitle2,
                         color = Color.White
                     )
