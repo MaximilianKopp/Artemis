@@ -11,7 +11,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.ataraxia.artemis.helper.HyperlinkText
+import com.ataraxia.artemis.ui.theme.Artemis_Yellow
 
 class ImprintComponent {
 
@@ -51,6 +53,8 @@ class ImprintComponent {
             HyperlinkText(
                 fullText = "http://ec.europa.eu/consumers/odr",
                 linkText = listOf("http://ec.europa.eu/consumers/odr"),
+                linkTextColor = Artemis_Yellow,
+                fontSize = 16.sp,
                 hyperlinks = listOf("http://ec.europa.eu/consumers/odr")
             )
             Divider(
@@ -92,6 +96,8 @@ class ImprintComponent {
             HyperlinkText(
                 fullText = "https://ljv-rlp.de/ausbildung-und-beratung/pruefungsfragen",
                 linkText = listOf("https://ljv-rlp.de/ausbildung-und-beratung/pruefungsfragen"),
+                linkTextColor = Artemis_Yellow,
+                fontSize = 16.sp,
                 hyperlinks = listOf("https://ljv-rlp.de/ausbildung-und-beratung/pruefungsfragen")
             )
             Divider(
