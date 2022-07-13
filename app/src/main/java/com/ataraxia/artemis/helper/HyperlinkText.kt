@@ -9,15 +9,15 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.unit.sp
-import com.ataraxia.artemis.ui.theme.Artemis_Yellow
+import androidx.compose.ui.unit.TextUnit
 
 @Composable
 fun HyperlinkText(
     modifier: Modifier = Modifier,
     fullText: String,
     linkText: List<String>,
-    linkTextColor: Color = Artemis_Yellow,
+    linkTextColor: Color,
+    fontSize: TextUnit,
     linkTextFontWeight: FontWeight = FontWeight.Medium,
     linkTextDecoration: TextDecoration = TextDecoration.Underline,
     hyperlinks: List<String> = listOf("https://stevdza-san.com")
@@ -30,7 +30,7 @@ fun HyperlinkText(
             addStyle(
                 style = SpanStyle(
                     color = linkTextColor,
-                    fontSize = 16.sp,
+                    fontSize = fontSize,
                     fontWeight = linkTextFontWeight,
                     textDecoration = linkTextDecoration
                 ),
@@ -46,7 +46,7 @@ fun HyperlinkText(
         }
         addStyle(
             style = SpanStyle(
-                fontSize = 16.sp,
+                fontSize = fontSize,
             ),
             start = 0,
             end = fullText.length

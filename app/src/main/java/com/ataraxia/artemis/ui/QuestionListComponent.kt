@@ -36,6 +36,7 @@ import com.ataraxia.artemis.helper.Constants
 import com.ataraxia.artemis.helper.CriteriaFilter
 import com.ataraxia.artemis.model.QuestionProjection
 import com.ataraxia.artemis.model.Screen
+import com.ataraxia.artemis.ui.theme.Artemis_Blue
 import com.ataraxia.artemis.ui.theme.Artemis_Green
 import com.ataraxia.artemis.ui.theme.Artemis_Yellow
 import com.ataraxia.artemis.viewModel.GeneralViewModel
@@ -138,7 +139,7 @@ class QuestionListComponent {
                             )
                             Button(
                                 enabled = questionsLiveData.value.isNotEmpty(),
-                                colors = ButtonDefaults.buttonColors(Artemis_Green),
+                                colors = ButtonDefaults.buttonColors(Artemis_Blue),
                                 onClick = {
                                     val preparedTrainingData: List<QuestionProjection>
                                     if (currentFilter.value == CriteriaFilter.ALL_QUESTIONS_SHUFFLED) {
@@ -204,12 +205,6 @@ class QuestionListComponent {
                         }
                     }
                 }
-                Column(
-                    Modifier
-                        .padding(8.dp)
-                ) {
-
-                }
             }
             items(questionsLiveData.value) { question ->
                 val isFavourite: MutableState<Int> =
@@ -256,7 +251,7 @@ class QuestionListComponent {
                                 Box(modifier = Modifier.padding(end = 4.dp)) {
                                     Row {
                                         Text(
-                                            text = "Zuletzt angesehen am ${question.lastViewed}",
+                                            text = if (question.lastViewed == Constants.LAST_SEEN_DEFAULT) Constants.EMPTY_STRING else "Zuletzt angesehen am ${question.lastViewed}",
                                             style = MaterialTheme.typography.caption,
                                             fontStyle = FontStyle.Italic
                                         )
@@ -298,7 +293,7 @@ class QuestionListComponent {
                 shape = RoundedCornerShape(CornerSize(25.dp)),
                 buttons = {
                     Column(
-                        Modifier.padding(12.dp),
+                        Modifier.padding(8.dp),
                         horizontalAlignment = Alignment.Start
                     ) {
                         Row(
@@ -406,7 +401,7 @@ class QuestionListComponent {
                         }
                     }
                     Column(
-                        Modifier.padding(12.dp),
+                        Modifier.padding(6.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Button(

@@ -2,6 +2,7 @@ package com.ataraxia.artemis.helper
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
@@ -20,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.ataraxia.artemis.model.Dictionary
 import com.ataraxia.artemis.ui.theme.Artemis_Yellow
 
@@ -101,6 +103,21 @@ fun DictionaryAlertDialog(
                     style = MaterialTheme.typography.body2,
                     color = Color.Black
                 )
+                Column(
+                    modifier = Modifier.padding(top = 5.dp)
+                ) {
+                    HyperlinkText(
+                        fullText = dictionaryEntry.url,
+                        linkText = listOf(dictionaryEntry.url),
+                        fontSize = 12.sp,
+                        linkTextColor = Color.Black,
+                        hyperlinks = listOf(dictionaryEntry.url)
+                    )
+                    Text(
+                        text = "Das Anklicken dieses Links öffnet Ihren Web-Browser und leitet Sie zum Wikipedia-Eintrag weiter",
+                        style = MaterialTheme.typography.overline
+                    )
+                }
             }
         },
         buttons = {}
