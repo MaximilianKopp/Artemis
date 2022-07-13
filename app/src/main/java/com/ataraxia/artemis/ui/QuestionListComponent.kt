@@ -251,7 +251,7 @@ class QuestionListComponent {
                                 Box(modifier = Modifier.padding(end = 4.dp)) {
                                     Row {
                                         Text(
-                                            text = "Zuletzt angesehen am ${question.lastViewed}",
+                                            text = if (question.lastViewed == Constants.LAST_SEEN_DEFAULT) Constants.EMPTY_STRING else "Zuletzt angesehen am ${question.lastViewed}",
                                             style = MaterialTheme.typography.caption,
                                             fontStyle = FontStyle.Italic
                                         )
