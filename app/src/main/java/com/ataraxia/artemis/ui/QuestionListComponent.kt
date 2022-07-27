@@ -520,7 +520,7 @@ class QuestionListComponent {
                                         .withLocale(Locale("DE"))
 
                                 Log.v(
-                                    "Last seen",
+                                    "Last seen questions",
                                     LocalDateTime.now().minusWeeks(1L).toString()
                                 )
                                 //Take all questions that have been longer than one week not viewed

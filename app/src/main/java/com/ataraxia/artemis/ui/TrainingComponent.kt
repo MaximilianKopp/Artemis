@@ -59,9 +59,6 @@ class TrainingComponent {
         val navIndex: Int by trainingViewModel.index.observeAsState(0)
         val currentFilter = questionViewModel.filter.observeAsState()
         val trainingData = trainingViewModel.trainingData.observeAsState(listOf())
-
-        Log.v("Current TrainingData", trainingData.value.forEach(::println).toString())
-        Log.v("Current Filter", currentFilter.value.toString())
         trainingViewModel.resetCurrentSelection()
 
         if (trainingData.value.isNotEmpty()) {

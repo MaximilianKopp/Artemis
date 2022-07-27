@@ -76,7 +76,7 @@ class AppBarComponent {
                     questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
                 },
                 onSearchClicked = {
-                    Log.v("Clicked", "Auf search geklickt")
+                    Log.v("Clicked", "Search bar is active")
                 }
             )
         } else if (showAppBar) {
