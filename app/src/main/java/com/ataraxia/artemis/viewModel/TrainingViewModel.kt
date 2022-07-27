@@ -220,6 +220,8 @@ class TrainingViewModel : ViewModel() {
         when (direction) {
             NavigationButton.FIRST_PAGE -> firstPage(questions)
             NavigationButton.PREV_PAGE -> prevPage(index, questions)
+            NavigationButton.SKIP_TEN_BACKWARD -> skipTenBackward(index, questions)
+            NavigationButton.SKIP_TEN_FORWARD -> skipTenForward(index, questions)
             NavigationButton.NEXT_PAGE -> nextPage(index, questions)
             NavigationButton.LAST_PAGE -> lastPage(questions)
             else -> {}
@@ -241,6 +243,33 @@ class TrainingViewModel : ViewModel() {
                 this.checkboxList = this.checkboxList.shuffled()
             })
             onChangeFavouriteState(questions[index - 1].favourite)
+        }
+    }
+
+    private fun skipTenBackward(index: Int, questions: List<QuestionProjection>) {
+        var offset = 10
+        if ((index - offset) < 0) {
+            offset = index
+        }
+        onChangeIndex(index - offset)
+        onChangeCurrentQuestion(questions[index - offset].apply {
+            this.checkboxList = this.checkboxList.shuffled()
+        })
+        onChangeFavouriteState(questions[index - offset].favourite)
+
+    }
+
+    private fun skipTenForward(index: Int, questions: List<QuestionProjection>) {
+        var offset = 10
+        if (index < questions.size - 10) {
+            if (index == 0) {
+                offset = 9
+            }
+            onChangeIndex(index + offset)
+            onChangeCurrentQuestion(questions[index + offset].apply {
+                this.checkboxList = this.checkboxList.shuffled()
+            })
+            onChangeFavouriteState(questions[index + offset].favourite)
         }
     }
 

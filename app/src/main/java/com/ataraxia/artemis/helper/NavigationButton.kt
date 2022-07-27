@@ -1,5 +1,5 @@
 package com.ataraxia.artemis.helper
 
 enum class NavigationButton {
-    FIRST_PAGE, PREV_PAGE, NEXT_PAGE, LAST_PAGE, SKIPPED_INDEX
+    FIRST_PAGE, PREV_PAGE, NEXT_PAGE, LAST_PAGE, SKIPPED_INDEX, SKIP_TEN_FORWARD, SKIP_TEN_BACKWARD
 }

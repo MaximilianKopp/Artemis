@@ -566,100 +566,130 @@ class AssignmentComponent {
                 }
                 //Navigation Buttons
                 Column {
-                    Row {
-                        Row(
-                            modifier = Modifier.padding(bottom = 30.dp)
-                        ) {
-                            //Loads first question
-                            IconButton(
-                                onClick = {
-                                    assignmentViewModel.setNavigationButton(
-                                        NavigationButton.FIRST_PAGE,
-                                        navIndex,
-                                        assignmentQuestions
-                                    )
-                                }) {
-                                Icon(
-                                    Icons.Filled.FirstPage,
-                                    contentDescription = "First page button",
-                                    modifier = Modifier.size(50.dp),
-                                    tint = Artemis_Yellow
+                    Row(
+                        modifier = Modifier.padding(bottom = 30.dp)
+                    ) {
+                        //Loads first question
+                        IconButton(
+                            modifier = Modifier.weight(0.1f),
+                            onClick = {
+                                assignmentViewModel.setNavigationButton(
+                                    NavigationButton.FIRST_PAGE,
+                                    navIndex,
+                                    assignmentQuestions
+                                )
+                            }) {
+                            Icon(
+                                Icons.Filled.FirstPage,
+                                contentDescription = "First page button",
+                                modifier = Modifier.size(50.dp),
+                                tint = Artemis_Yellow
+                            )
+                        }
+                        //Loads previous question
+                        IconButton(
+                            modifier = Modifier.weight(0.1f),
+                            onClick = {
+                                assignmentViewModel.setNavigationButton(
+                                    NavigationButton.PREV_PAGE,
+                                    navIndex,
+                                    assignmentQuestions
                                 )
                             }
-                            //Loads previous question
-                            IconButton(
-                                onClick = {
-                                    assignmentViewModel.setNavigationButton(
-                                        NavigationButton.PREV_PAGE,
-                                        navIndex,
-                                        assignmentQuestions
-                                    )
+                        ) {
+                            Icon(
+                                Icons.Filled.ChevronLeft,
+                                contentDescription = "Prev question button",
+                                modifier = Modifier.size(50.dp),
+                                tint = Artemis_Yellow
+                            )
+                        }
+                        //Skip to 10 questions backward
+                        IconButton(
+                            modifier = Modifier.weight(0.1f),
+                            onClick = {
+                                assignmentViewModel.setNavigationButton(
+                                    NavigationButton.SKIP_TEN_BACKWARD,
+                                    navIndex,
+                                    assignmentQuestions
+                                )
+                            }
+                        ) {
+                            Icon(
+                                Icons.Filled.RotateLeft,
+                                contentDescription = "Prev question button",
+                                modifier = Modifier.size(25.dp),
+                                tint = Artemis_Yellow
+                            )
+                        }
+                        Button(
+                            modifier = Modifier.weight(0.4f),
+                            colors = ButtonDefaults.buttonColors(Artemis_Blue),
+                            //Contains whole logic for further answer processing
+                            onClick = {
+                                if (evaluationButtonText.value == "Auswertung") {
+                                    isEvaluationDialogOpen.value = true
+                                } else {
+                                    showResultContent.value = true
                                 }
-                            ) {
-                                Icon(
-                                    Icons.Filled.ChevronLeft,
-                                    contentDescription = "Prev question button",
-                                    modifier = Modifier.size(50.dp),
-                                    tint = Artemis_Yellow
-                                )
-                            }
+                            })
+                        {
+                            Text(
+                                color = Color.White,
+                                text = evaluationButtonText.value
+                            )
                         }
-                        Row(
-                            modifier = Modifier.padding(start = 20.dp, end = 20.dp)
-                        ) {
-                            Button(
-                                colors = ButtonDefaults.buttonColors(Artemis_Blue),
-                                //Contains whole logic for further answer processing
-                                onClick = {
-                                    if (evaluationButtonText.value == "Auswertung") {
-                                        isEvaluationDialogOpen.value = true
-                                    } else {
-                                        showResultContent.value = true
-                                    }
-                                })
-                            {
-                                Text(
-                                    color = Color.White,
-                                    text = evaluationButtonText.value
+                        //Skip to 10 questions forward
+                        IconButton(
+                            modifier = Modifier.weight(0.1f),
+                            onClick = {
+                                assignmentViewModel.setNavigationButton(
+                                    NavigationButton.SKIP_TEN_FORWARD,
+                                    navIndex,
+                                    assignmentQuestions
                                 )
                             }
+                        ) {
+                            Icon(
+                                Icons.Filled.RotateRight,
+                                contentDescription = "Prev question button",
+                                modifier = Modifier.size(25.dp),
+                                tint = Artemis_Yellow
+                            )
                         }
-                        Row(
-                            modifier = Modifier.padding(bottom = 30.dp)
-                        ) {
-                            //Loads next question
-                            IconButton(
-                                onClick = {
-                                    assignmentViewModel.setNavigationButton(
-                                        NavigationButton.NEXT_PAGE,
-                                        navIndex,
-                                        assignmentQuestions
-                                    )
-                                }) {
-                                Icon(
-                                    Icons.Filled.ChevronRight,
-                                    contentDescription = "Next question button",
-                                    modifier = Modifier.size(50.dp),
-                                    tint = Artemis_Yellow
+                        //Loads next question
+                        IconButton(
+                            modifier = Modifier.weight(0.1f),
+                            onClick = {
+                                assignmentViewModel.setNavigationButton(
+                                    NavigationButton.NEXT_PAGE,
+                                    navIndex,
+                                    assignmentQuestions
                                 )
-                            }
-
-                            //Loads last question
-                            IconButton(
-                                onClick = {
-                                    assignmentViewModel.setNavigationButton(
-                                        NavigationButton.LAST_PAGE,
-                                        navIndex,
-                                        assignmentQuestions
-                                    )
-                                }) {
-                                Icon(
-                                    Icons.Filled.LastPage,
-                                    contentDescription = "Last page button",
-                                    modifier = Modifier.size(50.dp),
-                                    tint = Artemis_Yellow
+                            }) {
+                            Icon(
+                                Icons.Filled.ChevronRight,
+                                contentDescription = "Next question button",
+                                modifier = Modifier.size(50.dp),
+                                tint = Artemis_Yellow
+                            )
+                        }
+                        //Loads last question
+                        IconButton(
+                            modifier = Modifier.weight(0.1f),
+                            onClick = {
+                                assignmentViewModel.setNavigationButton(
+                                    NavigationButton.LAST_PAGE,
+                                    navIndex,
+                                    assignmentQuestions
                                 )
-                            }
+                            }) {
+                            Icon(
+                                Icons.Filled.LastPage,
+                                contentDescription = "Last page button",
+                                modifier = Modifier.size(50.dp),
+                                tint = Artemis_Yellow
+                            )
                         }
                     }
                 }

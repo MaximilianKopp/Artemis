@@ -34,7 +34,7 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
     private lateinit var dictionaryRepository: DictionaryRepository
 
     lateinit var allQuestions: List<QuestionProjection>
-    lateinit var allDictionaryEntries: List<Dictionary>
+    private lateinit var allDictionaryEntries: List<Dictionary>
 
     private var onceLearnedQuestions: Int = 0
     private var learnedQuestions: Int = 0

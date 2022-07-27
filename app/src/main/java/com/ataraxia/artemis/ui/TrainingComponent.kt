@@ -285,188 +285,219 @@ class TrainingComponent {
             }
             //Navigation Buttons
             Column {
-                Row {
-                    Row(
-                        modifier = Modifier.padding(bottom = 30.dp)
-                    ) {
-                        //Loads first question
-                        IconButton(
-                            enabled = isNavButtonEnabled,
-                            onClick = {
-                                trainingViewModel.setNavigationButton(
-                                    NavigationButton.FIRST_PAGE,
-                                    index,
-                                    trainingData
-                                )
-                                trainingViewModel.resetCurrentSelection()
-                            }) {
-                            Icon(
-                                Icons.Filled.FirstPage,
-                                contentDescription = "First page button",
-                                modifier = Modifier.size(50.dp),
-                                tint = Artemis_Yellow
+                Row(modifier = Modifier.padding(bottom = 30.dp)) {
+                    //Loads first question
+                    IconButton(
+                        modifier = Modifier.weight(0.1f),
+                        enabled = isNavButtonEnabled,
+                        onClick = {
+                            trainingViewModel.setNavigationButton(
+                                NavigationButton.FIRST_PAGE,
+                                index,
+                                trainingData
                             )
-                        }
-                        //Loads previous question
-                        IconButton(
-                            enabled = isNavButtonEnabled,
-                            onClick = {
-                                trainingViewModel.setNavigationButton(
-                                    NavigationButton.PREV_PAGE,
-                                    index,
-                                    trainingData
-                                )
-                                trainingViewModel.resetCurrentSelection()
-                            }) {
-                            Icon(
-                                Icons.Filled.ChevronLeft,
-                                contentDescription = "Prev question button",
-                                modifier = Modifier.size(50.dp),
-                                tint = Artemis_Yellow
-                            )
-                        }
+                            trainingViewModel.resetCurrentSelection()
+                        }) {
+                        Icon(
+                            Icons.Filled.FirstPage,
+                            contentDescription = "First page button",
+                            modifier = Modifier.size(50.dp),
+                            tint = Artemis_Yellow
+                        )
                     }
-                    Row(
-                        modifier = Modifier.padding(start = 25.dp, end = 25.dp)
-                    ) {
-                        Button(
-                            enabled = isAnswerButtonEnabled.value,
-                            colors = ButtonDefaults.buttonColors(Artemis_Blue),
-                            //Contains whole logic for further answer processing
-                            onClick = {
-                                if (answerBtnText == "Antworten") {
-                                    //Change last viewed record by current timestamp
-                                    currentQuestion.lastViewed =
-                                        LocalDateTime.now().format(
-                                            DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
-                                                .withLocale(
-                                                    Locale("de")
-                                                )
-                                        )
-                                    questionViewModel.updateQuestion(
-                                        QuestionProjection.modelToEntity(
-                                            currentQuestion
-                                        )
+                    //Loads previous question
+                    IconButton(
+                        modifier = Modifier.weight(0.1f),
+                        enabled = isNavButtonEnabled,
+                        onClick = {
+                            trainingViewModel.setNavigationButton(
+                                NavigationButton.PREV_PAGE,
+                                index,
+                                trainingData
+                            )
+                            trainingViewModel.resetCurrentSelection()
+                        }) {
+                        Icon(
+                            Icons.Filled.ChevronLeft,
+                            contentDescription = "Prev question button",
+                            modifier = Modifier.size(50.dp),
+                            tint = Artemis_Yellow
+                        )
+                    }
+                    //Skip to 10 questions backward
+                    IconButton(
+                        modifier = Modifier.weight(0.1f),
+                        enabled = isNavButtonEnabled,
+                        onClick = {
+                            trainingViewModel.setNavigationButton(
+                                NavigationButton.SKIP_TEN_BACKWARD,
+                                index,
+                                trainingData
+                            )
+                            trainingViewModel.resetCurrentSelection()
+                        }) {
+                        Icon(
+                            Icons.Filled.RotateLeft,
+                            contentDescription = "Prev question button",
+                            modifier = Modifier.size(25.dp),
+                            tint = Artemis_Yellow
+                        )
+                    }
+                    Button(
+                        modifier = Modifier.weight(0.4f),
+                        enabled = isAnswerButtonEnabled.value,
+                        colors = ButtonDefaults.buttonColors(Artemis_Blue),
+                        //Contains whole logic for further answer processing
+                        onClick = {
+                            if (answerBtnText == "Antworten") {
+                                //Change last viewed record by current timestamp
+                                currentQuestion.lastViewed =
+                                    LocalDateTime.now().format(
+                                        DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
+                                            .withLocale(
+                                                Locale("de")
+                                            )
                                     )
-                                    trainingViewModel.onChangeAnswerButtonText("Weiter")
-                                    if (trainingViewModel.isSelectionCorrect(
-                                            currentQuestion
+                                questionViewModel.updateQuestion(
+                                    QuestionProjection.modelToEntity(
+                                        currentQuestion
+                                    )
+                                )
+                                trainingViewModel.onChangeAnswerButtonText("Weiter")
+                                if (trainingViewModel.isSelectionCorrect(
+                                        currentQuestion
+                                    )
+                                ) {
+                                    showMessage(context, "Korrekt")
+                                    if (currentQuestion.learnedOnce == 0 && currentQuestion.learnedTwice != 1) {
+                                        currentQuestion.learnedOnce = 1
+                                        currentQuestion.failed = 0
+                                        Log.v(
+                                            "LearnedOnce",
+                                            currentQuestion.learnedOnce.toString()
                                         )
-                                    ) {
-                                        showMessage(context, "Korrekt")
-                                        if (currentQuestion.learnedOnce == 0 && currentQuestion.learnedTwice != 1) {
-                                            currentQuestion.learnedOnce = 1
-                                            currentQuestion.failed = 0
-                                            Log.v(
-                                                "LearnedOnce",
-                                                currentQuestion.learnedOnce.toString()
-                                            )
-                                        } else if (currentQuestion.learnedOnce == 1 && currentQuestion.learnedTwice != 1) {
-                                            currentQuestion.learnedTwice = 1
-                                            currentQuestion.learnedOnce = 0
-                                            currentQuestion.failed = 0
-                                            Log.v(
-                                                "LearnedTwice",
-                                                currentQuestion.learnedTwice.toString()
-                                            )
-                                        }
-                                    }
-                                    if (!trainingViewModel.isSelectionCorrect(
-                                            currentQuestion
-                                        )
-                                    ) {
-                                        showMessage(context, "Falsch")
+                                    } else if (currentQuestion.learnedOnce == 1 && currentQuestion.learnedTwice != 1) {
+                                        currentQuestion.learnedTwice = 1
                                         currentQuestion.learnedOnce = 0
-                                        currentQuestion.learnedTwice = 0
-                                        currentQuestion.failed = 1
-
-                                        if (generalViewModel.isVibrating.value == 1) {
-                                            @Suppress("DEPRECATION") val vibration: Vibrator =
-                                                context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-                                            vibration.vibrate(
-                                                VibrationEffect.createOneShot(
-                                                    200,
-                                                    VibrationEffect.DEFAULT_AMPLITUDE
-                                                )
-                                            )
-                                        }
-                                        Log.v("Failed", currentQuestion.failed.toString())
-                                    }
-                                    //Saves all changes into database
-                                    questionViewModel.updateQuestion(
-                                        QuestionProjection.modelToEntity(
-                                            currentQuestion
+                                        currentQuestion.failed = 0
+                                        Log.v(
+                                            "LearnedTwice",
+                                            currentQuestion.learnedTwice.toString()
                                         )
-                                    )
-                                    trainingViewModel.onChangeEnableNavButtons(false)
-                                }
-                                if (answerBtnText == "Weiter") {
-                                    currentQuestion.apply {
-                                        this.checkboxA.checked = false
-                                        this.checkboxB.checked = false
-                                        this.checkboxC.checked = false
-                                        this.checkboxD.checked = false
                                     }
-                                    trainingViewModel.onChangeEnableNavButtons(true)
-                                    trainingViewModel.resetCurrentSelection()
-                                    Log.v("Current Question", currentQuestion.correctAnswers)
-                                    trainingViewModel.setNavigationButton(
-                                        NavigationButton.NEXT_PAGE,
-                                        index,
-                                        trainingData
-                                    )
-                                    if (index == trainingData.size - 1) {
-                                        onOpenTrainingDialog(true)
-                                    }
-                                    trainingViewModel.onChangeAnswerButtonText("Antworten")
                                 }
-                            }) {
-                            Text(
-                                text = answerBtnText,
-                                color = Color.White
-                            )
-                        }
-                    }
-                    Row(
-                        modifier = Modifier.padding(bottom = 30.dp)
-                    ) {
-                        //Loads next question
-                        IconButton(
-                            enabled = isNavButtonEnabled,
-                            onClick = {
+                                if (!trainingViewModel.isSelectionCorrect(
+                                        currentQuestion
+                                    )
+                                ) {
+                                    showMessage(context, "Falsch")
+                                    currentQuestion.learnedOnce = 0
+                                    currentQuestion.learnedTwice = 0
+                                    currentQuestion.failed = 1
+
+                                    if (generalViewModel.isVibrating.value == 1) {
+                                        @Suppress("DEPRECATION") val vibration: Vibrator =
+                                            context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                                        vibration.vibrate(
+                                            VibrationEffect.createOneShot(
+                                                200,
+                                                VibrationEffect.DEFAULT_AMPLITUDE
+                                            )
+                                        )
+                                    }
+                                    Log.v("Failed", currentQuestion.failed.toString())
+                                }
+                                //Saves all changes into database
+                                questionViewModel.updateQuestion(
+                                    QuestionProjection.modelToEntity(
+                                        currentQuestion
+                                    )
+                                )
+                                trainingViewModel.onChangeEnableNavButtons(false)
+                            }
+                            if (answerBtnText == "Weiter") {
+                                currentQuestion.apply {
+                                    this.checkboxA.checked = false
+                                    this.checkboxB.checked = false
+                                    this.checkboxC.checked = false
+                                    this.checkboxD.checked = false
+                                }
+                                trainingViewModel.onChangeEnableNavButtons(true)
+                                trainingViewModel.resetCurrentSelection()
+                                Log.v("Current Question", currentQuestion.correctAnswers)
                                 trainingViewModel.setNavigationButton(
                                     NavigationButton.NEXT_PAGE,
                                     index,
                                     trainingData
                                 )
-                                trainingViewModel.resetCurrentSelection()
-                            }) {
-                            Icon(
-                                Icons.Filled.ChevronRight,
-                                contentDescription = "Next question button",
-                                modifier = Modifier.size(50.dp),
-                                tint = Artemis_Yellow
-                            )
-                        }
+                                if (index == trainingData.size - 1) {
+                                    onOpenTrainingDialog(true)
+                                }
+                                trainingViewModel.onChangeAnswerButtonText("Antworten")
+                            }
+                        }) {
+                        Text(
+                            text = answerBtnText,
+                            color = Color.White
+                        )
+                    }
 
-                        //Loads last question
-                        IconButton(
-                            enabled = isNavButtonEnabled,
-                            onClick = {
-                                trainingViewModel.setNavigationButton(
-                                    NavigationButton.LAST_PAGE,
-                                    index,
-                                    trainingData
-                                )
-                                trainingViewModel.resetCurrentSelection()
-                            }) {
-                            Icon(
-                                Icons.Filled.LastPage,
-                                contentDescription = "Last page button",
-                                modifier = Modifier.size(50.dp),
-                                tint = Artemis_Yellow
+                    //Skip to 10 questions forward
+                    IconButton(
+                        modifier = Modifier.weight(0.1f),
+                        enabled = isNavButtonEnabled,
+                        onClick = {
+                            trainingViewModel.setNavigationButton(
+                                NavigationButton.SKIP_TEN_FORWARD,
+                                index,
+                                trainingData
                             )
-                        }
+                            trainingViewModel.resetCurrentSelection()
+                        }) {
+                        Icon(
+                            Icons.Filled.RotateRight,
+                            contentDescription = "Prev question button",
+                            modifier = Modifier.size(25.dp),
+                            tint = Artemis_Yellow
+                        )
+                    }
+                    //Loads next question
+                    IconButton(
+                        modifier = Modifier.weight(0.1f),
+                        enabled = isNavButtonEnabled,
+                        onClick = {
+                            trainingViewModel.setNavigationButton(
+                                NavigationButton.NEXT_PAGE,
+                                index,
+                                trainingData
+                            )
+                            trainingViewModel.resetCurrentSelection()
+                        }) {
+                        Icon(
+                            Icons.Filled.ChevronRight,
+                            contentDescription = "Next question button",
+                            modifier = Modifier.size(50.dp),
+                            tint = Artemis_Yellow
+                        )
+                    }
+                    //Loads last question
+                    IconButton(
+                        modifier = Modifier.weight(0.1f),
+                        enabled = isNavButtonEnabled,
+                        onClick = {
+                            trainingViewModel.setNavigationButton(
+                                NavigationButton.LAST_PAGE,
+                                index,
+                                trainingData
+                            )
+                            trainingViewModel.resetCurrentSelection()
+                        }) {
+                        Icon(
+                            Icons.Filled.LastPage,
+                            contentDescription = "Last page button",
+                            modifier = Modifier.size(50.dp),
+                            tint = Artemis_Yellow
+                        )
                     }
                 }
             }
