@@ -89,24 +89,6 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
         return (chapter1 + chapter2 + chapter3 + chapter4 + chapter5 + chapter6)
     }
 
-    private fun removeIndexNumberFromQuestion(questions: List<Question>): List<Question> {
-        for (question in questions) {
-            val subString = question.text.substring(0, 4)
-            when (')') {
-                subString[1] -> {
-                    question.text = question.text.removeRange(0, 3)
-                }
-                subString[2] -> {
-                    question.text = question.text.removeRange(0, 4)
-                }
-                subString[3] -> {
-                    question.text = question.text.removeRange(0, 5)
-                }
-            }
-        }
-        return questions
-    }
-
     fun checkDictionary(matchedText: String): Dictionary {
         val dictionary = Dictionary(0, "", "", "")
         var matched = false
@@ -251,48 +233,6 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
             5 -> topic = Screen.DrawerScreen.TopicPreservationOfWildLifeAndNature.title
         }
         return topic
-    }
-
-    fun prepareQuestionData(
-        criteriaFilter: CriteriaFilter,
-        questions: List<QuestionProjection>,
-        trainingSize: Int
-    ) {
-        CoroutineScope(Dispatchers.IO).launch {
-            prepareQuestionDataCoroutine(criteriaFilter, questions, trainingSize)
-        }
-    }
-
-    private suspend fun prepareQuestionDataCoroutine(
-        criteriaFilter: CriteriaFilter,
-        questions: List<QuestionProjection>,
-        trainingSize: Int
-    ) = withContext(Dispatchers.IO) {
-        val learnedOnceQuestions = questions.filter { it.learnedOnce == 1 }
-        val learnedTwiceQuestions = questions.filter { it.learnedTwice == 1 }
-        val failedQuestions = questions.filter { it.failed == 1 }
-        val favourites = questions.filter { it.favourite == 1 }
-        val remainingQuestions = questions.toMutableList()
-        remainingQuestions.also {
-            it.removeAll(learnedOnceQuestions.toSet())
-            it.removeAll(learnedTwiceQuestions.toSet())
-            it.removeAll(failedQuestions.toSet())
-        }
-        val trainingDataWithoutFilter = mutableListOf<QuestionProjection>()
-        trainingDataWithoutFilter.addAll(failedQuestions.take(8))
-        trainingDataWithoutFilter.addAll(learnedOnceQuestions.take(5))
-        trainingDataWithoutFilter.addAll(learnedTwiceQuestions.take(2))
-        trainingDataWithoutFilter.addAll(remainingQuestions.take(trainingSize))
-
-        when (criteriaFilter) {
-            CriteriaFilter.ALL_QUESTIONS_SHUFFLED -> _questions.postValue(trainingDataWithoutFilter)
-            CriteriaFilter.NOT_LEARNED -> _questions.postValue(learnedOnceQuestions)
-            CriteriaFilter.FAILED -> _questions.postValue(failedQuestions)
-            CriteriaFilter.FAVOURITES -> _questions.postValue(favourites)
-            else -> {
-
-            }
-        }
     }
 
     fun extractStatisticsFromTopics(): List<StatisticProjection> {
