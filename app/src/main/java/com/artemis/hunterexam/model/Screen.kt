@@ -1,70 +1,45 @@
 package com.artemis.hunterexam.model
 
-import com.artemis.hunterexam.R
-
 
 class Screen {
 
     open class DrawerScreen(
-        val drawable: Int?,
         var title: String,
         var route: String,
         var topic: Int
     ) {
-        constructor(drawable: Int, title: String, route: String) : this(
-            drawable,
-            title,
-            route,
-            0
-        )
-
-        constructor(title: String, route: String, topic: Int) : this(
-            null,
-            title,
-            route,
-            topic
-        )
-
         constructor(title: String, route: String) : this(
-            null,
             title,
             route,
             0
         )
 
         object Home : DrawerScreen(
-            R.drawable.ic_baseline_home_24,
             "Startmenü",
             "startmenu",
         )
 
-
         object QuestionCatalogue : DrawerScreen(
-            R.drawable.ic_baseline_menu_book_24,
             "Sachgebiete",
             "questioncatalogue"
         )
 
         object Assignment : DrawerScreen(
-            R.drawable.ic_baseline_assignment_24,
             "Prüfung",
             "assignment"
         )
 
         object Statistics : DrawerScreen(
-            R.drawable.ic_baseline_insert_chart_24,
             "Statistik",
             "statistics"
         )
 
         object Configuration : DrawerScreen(
-            R.drawable.ic_baseline_build_circle_24,
             "Einstellungen",
             "configuration"
         )
 
         object Imprint : DrawerScreen(
-            R.drawable.ic_baseline_info_24,
             "Impressum",
             "imprint"
         )

@@ -20,7 +20,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
-import com.artemis.hunterexam.helper.RowScopeExtension.Companion.TableCell
+import com.artemis.hunterexam.helper.TableCell
 import com.artemis.hunterexam.ui.theme.Artemis_Green
 import com.artemis.hunterexam.ui.theme.Artemis_Red
 import com.artemis.hunterexam.ui.theme.Artemis_Yellow

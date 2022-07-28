@@ -12,46 +12,41 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
-class RowScopeExtension {
+@Composable
+fun RowScope.TableCell(
+    text: String,
+    weight: Float,
+) {
+    Text(
+        text = text,
+        Modifier
+            .weight(weight),
+        color = Color.White,
+        style = MaterialTheme.typography.caption
+    )
+}
 
-    companion object {
-        @Composable
-        fun RowScope.TableCell(
-            text: String,
-            weight: Float,
-        ) {
-            Text(
-                text = text,
-                Modifier
-                    .weight(weight),
-                color = Color.White,
-                style = MaterialTheme.typography.caption
-            )
-        }
-
-        @Composable
-        fun RowScope.TableCell(
-            text: String,
-            imageVector: ImageVector,
-            tint: Color,
-            weight: Float,
-        ) {
-            Text(
-                text = text,
-                Modifier
-                    .weight(weight),
-                color = Color.White,
-                style = MaterialTheme.typography.caption,
-                textAlign = TextAlign.End,
-            )
-            Icon(
-                imageVector,
-                contentDescription = "ImageVector for table cell",
-                Modifier
-                    .weight(weight)
-                    .size(16.dp),
-                tint = tint
-            )
-        }
-    }
+@Composable
+fun RowScope.TableCell(
+    text: String,
+    imageVector: ImageVector,
+    tint: Color,
+    weight: Float,
+) {
+    Text(
+        text = text,
+        Modifier
+            .weight(weight),
+        color = Color.White,
+        style = MaterialTheme.typography.caption,
+        textAlign = TextAlign.End,
+    )
+    Icon(
+        imageVector,
+        contentDescription = "ImageVector for table cell",
+        Modifier
+            .weight(weight)
+            .size(16.dp),
+        tint = tint
+    )
 }

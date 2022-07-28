@@ -14,7 +14,4 @@ interface QuestionDao {
 
     @Update(onConflict = REPLACE)
     suspend fun updateQuestion(question: Question)
-
-    @Query("SELECT COUNT(topic) FROM questions WHERE topic =:topic AND failed = 0")
-    fun countFailedQuestions(topic: Int): Int
 }
