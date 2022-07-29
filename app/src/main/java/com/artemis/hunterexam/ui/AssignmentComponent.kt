@@ -1,6 +1,7 @@
 package com.artemis.hunterexam.ui
 
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -712,13 +713,17 @@ class AssignmentComponent {
                     resultListOfAnsweredQuestions,
                     evaluationButtonText
                 )
-            }
+            } // no else
             if (isAssignmentDialogOpen) {
                 AssignmentAlertDialog(
                     onOpenAssignmentDialog,
                     navController,
+                    assignmentViewModel,
                     generalViewModel,
                 )
+            } // no else
+            BackHandler(enabled = true) {
+                onOpenAssignmentDialog(true)
             }
         } else {
             ResultContent(
@@ -818,6 +823,7 @@ class AssignmentComponent {
     fun AssignmentAlertDialog(
         onOpenAssignmentDialog: (Boolean) -> Unit,
         navController: NavController,
+        assignmentViewModel: AssignmentViewModel,
         generalViewModel: GeneralViewModel
     ) {
         AlertDialog(
@@ -841,6 +847,7 @@ class AssignmentComponent {
                         onClick = {
                             navController.navigate(Screen.DrawerScreen.Home.route)
                             onOpenAssignmentDialog(false)
+                            assignmentViewModel.onChangeIndex(0)
                             generalViewModel.onCloseTrainingScreen(
                                 Pair(
                                     Constants.ALPHA_INVISIBLE,

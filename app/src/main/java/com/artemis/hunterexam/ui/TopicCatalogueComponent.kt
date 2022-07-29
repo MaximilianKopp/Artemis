@@ -1,5 +1,6 @@
 package com.artemis.hunterexam.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -119,6 +120,9 @@ class TopicCatalogueComponent {
                     }
                 }
             }
+        }
+        BackHandler(enabled = true) {
+            navController.navigate(Screen.DrawerScreen.Home.route)
         }
     }
 }

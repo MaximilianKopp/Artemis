@@ -258,7 +258,6 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
             statistics.add(
                 StatisticProjection(
                     item.first.title,
-                    allQuestions,
                     onceLearnedQuestions,
                     learnedQuestions,
                     failedQuestions,

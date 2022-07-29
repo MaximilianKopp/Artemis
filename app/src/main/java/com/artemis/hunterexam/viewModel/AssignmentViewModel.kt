@@ -139,7 +139,7 @@ class AssignmentViewModel : ViewModel() {
         onChangeCurrentQuestion(currentQuestion)
     }
 
-    private fun onChangeIndex(newIndex: Int) {
+    fun onChangeIndex(newIndex: Int) {
         CoroutineScope(Dispatchers.IO).launch {
             onChangeIndexCoroutine(newIndex)
         }

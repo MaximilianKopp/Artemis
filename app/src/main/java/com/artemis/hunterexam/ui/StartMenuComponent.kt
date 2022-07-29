@@ -73,15 +73,11 @@ class StartMenuComponent {
         val isAssignmentDialogClosed: Boolean by generalViewModel.openAssignmentDialog.observeAsState(
             false
         )
-        BackHandler {
-            navController.navigate(Screen.DrawerScreen.Home.route) {
-                navController.popBackStack()
-            }
-        }
         Scaffold(
             scaffoldState = state,
             backgroundColor = Artemis_Green,
-            topBar = {
+            topBar =
+            {
                 appBarComposition.GeneralTopAppBar(
                     currentScreen = currentScreen,
                     scope = scope,
@@ -90,7 +86,8 @@ class StartMenuComponent {
                     questionViewModel = questionViewModel
                 )
             },
-            drawerContent = {
+            drawerContent =
+            {
                 appBarComposition.DrawerContent(
                     questionViewModel = questionViewModel,
                     scope = scope,
@@ -99,7 +96,8 @@ class StartMenuComponent {
                 )
             },
             drawerBackgroundColor = Artemis_Green
-        ) { it ->
+        )
+        { it ->
             NavHelper.LoadNavigationRoutes(
                 navController = navController,
                 paddingValues = it,
@@ -160,6 +158,11 @@ class StartMenuComponent {
         assignmentViewModel: AssignmentViewModel,
         navController: NavController
     ) {
+        BackHandler {
+            navController.apply {
+                this.navigate(Screen.DrawerScreen.Home.route)
+            }
+        }
         val scrollState = rememberScrollState()
         Column(
             modifier =

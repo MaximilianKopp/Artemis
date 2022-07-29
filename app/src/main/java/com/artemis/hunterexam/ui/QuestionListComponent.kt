@@ -1,6 +1,7 @@
 package com.artemis.hunterexam.ui
 
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -111,6 +112,9 @@ class QuestionListComponent {
                 questionViewModel,
                 questionsByTopicAndFilter
             )
+        }
+        BackHandler(enabled = true) {
+            navController.navigate(Screen.DrawerScreen.QuestionCatalogue.route)
         }
     }
 

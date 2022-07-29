@@ -57,7 +57,6 @@ class TrainingComponent {
         generalViewModel: GeneralViewModel
     ) {
         val navIndex: Int by trainingViewModel.index.observeAsState(0)
-        val currentFilter = questionViewModel.filter.observeAsState()
         val trainingData = trainingViewModel.trainingData.observeAsState(listOf())
         trainingViewModel.resetCurrentSelection()
 
@@ -522,13 +521,14 @@ class TrainingComponent {
             }
         }
         BackHandler(enabled = true) {
-            if (loadScreen != null) {
+            onOpenTrainingDialog(true)
+            if (loadScreen != null && isTrainingDialogOpen) {
+                questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
+                trainingViewModel.onChangeIndex(0)
+                trainingViewModel.onChangeAnswerButtonText("Antworten")
+                trainingViewModel.resetCurrentSelection()
                 navController.navigate(loadScreen.route)
             }
-            questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
-            trainingViewModel.onChangeIndex(0)
-            trainingViewModel.onChangeAnswerButtonText("Antworten")
-            trainingViewModel.resetCurrentSelection()
         }
     }
 
