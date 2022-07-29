@@ -180,7 +180,7 @@ class QuestionListComponent {
             Card(
                 backgroundColor = Artemis_Yellow,
                 modifier = Modifier
-                    .padding(10.dp)
+                    .padding(15.dp)
                     .border(BorderStroke(2.dp, Color.White), RoundedCornerShape(15.dp)),
                 shape = RoundedCornerShape(15.dp),
             ) {

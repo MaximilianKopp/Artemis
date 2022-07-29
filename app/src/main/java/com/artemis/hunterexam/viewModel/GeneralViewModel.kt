@@ -1,14 +1,18 @@
 package com.artemis.hunterexam.viewModel
 
 import android.app.Application
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.artemis.hunterexam.data.configuration.ConfigurationRepository
 import com.artemis.hunterexam.data.db.ArtemisDatabase
+import com.artemis.hunterexam.helper.NavigationButton
+import com.artemis.hunterexam.model.QuestionProjection
 import com.artemis.hunterexam.model.Screen
 import com.artemis.hunterexam.model.Topic
 import kotlinx.coroutines.CoroutineScope
@@ -64,6 +68,37 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
 
     private val _showAppBar = MutableLiveData<Boolean>()
     val showAppBar: LiveData<Boolean> = _showAppBar
+
+    private val _index = MutableLiveData<Int>()
+    val index: LiveData<Int> = _index
+
+    private val _currentQuestion = MutableLiveData<QuestionProjection>()
+    val currentQuestion: LiveData<QuestionProjection> = _currentQuestion
+
+    private val _favouriteColor = MutableLiveData<Int>()
+    val favouriteColor: LiveData<Int> = _favouriteColor
+
+    private val _checkedAnswers = mutableSetOf<String>()
+    private val checkedAnswers: Set<String> = _checkedAnswers as HashSet<String>
+
+    private val _topicWildlifeButtonColor = MutableLiveData<Color>()
+    val topicWildlifeButtonColor: LiveData<Color> = _topicWildlifeButtonColor
+
+    private val _topicHuntingOperations = MutableLiveData<Color>()
+    val topicHuntingOperations: LiveData<Color> = _topicHuntingOperations
+
+    private val _topicWildLifeTreatment = MutableLiveData<Color>()
+    val topicWildLifeTreatment: LiveData<Color> = _topicWildLifeTreatment
+
+    private val _topicWeaponsLawAndTechnology = MutableLiveData<Color>()
+    val topicWeaponsLawAndTechnology: LiveData<Color> = _topicWeaponsLawAndTechnology
+
+    private val _topicHuntingLaw = MutableLiveData<Color>()
+    val topicHuntingLaw: LiveData<Color> = _topicHuntingLaw
+
+    private val _topicPreservationOfWildLifeAndNature = MutableLiveData<Color>()
+    val topicPreservationOfWildLifeAndNature: LiveData<Color> =
+        _topicPreservationOfWildLifeAndNature
 
     private val configurationRepository: ConfigurationRepository
 
@@ -127,6 +162,173 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
             _sizeOfTrainingUnit.postValue(size)
             configurationRepository.updateSizeOfTrainingUnit(size.toString())
         }
+
+    fun onChangeIndex(newIndex: Int) {
+        CoroutineScope(Dispatchers.IO).launch {
+            onChangeIndexCoroutine(newIndex)
+        }
+        Log.v("Current index", (newIndex + 1).toString())
+    }
+
+    private suspend fun onChangeIndexCoroutine(newIndex: Int) =
+        withContext(Dispatchers.IO) {
+            _index.postValue(newIndex)
+        }
+
+    fun onChangeCurrentQuestion(newQuestion: QuestionProjection) {
+        CoroutineScope(Dispatchers.IO).launch {
+            onChangeCurrentQuestionCoroutine(newQuestion)
+        }
+    }
+
+    @Suppress("JavaCollectionsStaticMethodOnImmutableList")
+    private fun restoreSelection(currentQuestion: QuestionProjection) {
+        _checkedAnswers.clear()
+        for (cb in currentQuestion.checkboxList) {
+            if (cb.checked) {
+                _checkedAnswers.add(cb.option)
+            }
+        }
+        checkedAnswers.toSortedSet().toString()
+        currentQuestion.currentSelection = _checkedAnswers.toString()
+    }
+
+    private suspend fun onChangeCurrentQuestionCoroutine(newQuestion: QuestionProjection) =
+        withContext(Dispatchers.IO) {
+            restoreSelection(newQuestion)
+            _currentQuestion.postValue(newQuestion)
+        }
+
+    fun onChangeFavouriteState(isFavourite: Int) {
+        CoroutineScope(Dispatchers.IO).launch {
+            onChangeFavouriteStateCoroutine(isFavourite)
+        }
+    }
+
+    private suspend fun onChangeFavouriteStateCoroutine(isFavourite: Int) =
+        withContext(Dispatchers.IO) {
+            _favouriteColor.postValue(isFavourite)
+        }
+
+    fun setTopicBoxButton(
+        direction: NavigationButton,
+        topic: Int,
+        questions: List<QuestionProjection>
+    ) {
+        var index = 0
+        when (topic) {
+            0 -> index = 0
+            1 -> index = 21
+            2 -> index = 41
+            3 -> index = 61
+            4 -> index = 81
+            5 -> index = 101
+        }
+        setDirection(direction, questions, index)
+    }
+
+    private fun setDirection(
+        direction: NavigationButton,
+        questions: List<QuestionProjection>,
+        index: Int
+    ) {
+        when (direction) {
+            NavigationButton.FIRST_PAGE -> firstPage(questions)
+            NavigationButton.PREV_PAGE -> prevPage(index, questions)
+            NavigationButton.SKIP_TEN_BACKWARD -> skipTenBackward(index, questions)
+            NavigationButton.SKIP_TEN_FORWARD -> skipTenForward(index, questions)
+            NavigationButton.NEXT_PAGE -> nextPage(index, questions)
+            NavigationButton.LAST_PAGE -> lastPage(questions)
+            NavigationButton.SKIPPED_INDEX -> skippedIndex(questions, index)
+        }
+    }
+
+    private fun skippedIndex(questions: List<QuestionProjection>, skippedIndex: Int) {
+        val index = if (skippedIndex == 0) 0 else skippedIndex - 1
+        onChangeIndex(index)
+        onChangeCurrentQuestion(questions[index])
+        onChangeFavouriteState(questions[index].favourite)
+    }
+
+    //Navigation bar with buttons
+    fun setNavigationButton(
+        direction: NavigationButton,
+        index: Int,
+        questions: List<QuestionProjection>
+    ) {
+        when (direction) {
+            NavigationButton.FIRST_PAGE -> firstPage(questions)
+            NavigationButton.PREV_PAGE -> prevPage(index, questions)
+            NavigationButton.SKIP_TEN_BACKWARD -> skipTenBackward(index, questions)
+            NavigationButton.SKIP_TEN_FORWARD -> skipTenForward(index, questions)
+            NavigationButton.NEXT_PAGE -> nextPage(index, questions)
+            NavigationButton.LAST_PAGE -> lastPage(questions)
+            else -> {}
+        }
+    }
+
+    private fun firstPage(questions: List<QuestionProjection>) {
+        onChangeIndex(0)
+        onChangeCurrentQuestion(questions[0].apply {
+            this.checkboxList = this.checkboxList.shuffled()
+        })
+        onChangeFavouriteState(questions[0].favourite)
+    }
+
+    private fun prevPage(index: Int, questions: List<QuestionProjection>) {
+        if (index > 0) {
+            onChangeIndex(index - 1)
+            onChangeCurrentQuestion(questions[index - 1].apply {
+                this.checkboxList = this.checkboxList.shuffled()
+            })
+            onChangeFavouriteState(questions[index - 1].favourite)
+        }
+    }
+
+    private fun skipTenBackward(index: Int, questions: List<QuestionProjection>) {
+        var offset = 10
+        if ((index - offset) < 0) {
+            offset = index
+        }
+        onChangeIndex(index - offset)
+        onChangeCurrentQuestion(questions[index - offset].apply {
+            this.checkboxList = this.checkboxList.shuffled()
+        })
+        onChangeFavouriteState(questions[index - offset].favourite)
+
+    }
+
+    private fun skipTenForward(index: Int, questions: List<QuestionProjection>) {
+        var offset = 10
+        if (index < questions.size - 10) {
+            if (index == 0) {
+                offset = 9
+            }
+            onChangeIndex(index + offset)
+            onChangeCurrentQuestion(questions[index + offset].apply {
+                this.checkboxList = this.checkboxList.shuffled()
+            })
+            onChangeFavouriteState(questions[index + offset].favourite)
+        }
+    }
+
+    private fun nextPage(index: Int, questions: List<QuestionProjection>) {
+        if (index < questions.size - 1) {
+            onChangeIndex(index + 1)
+            onChangeCurrentQuestion(questions[index + 1].apply {
+                this.checkboxList = this.checkboxList.shuffled()
+            })
+            onChangeFavouriteState(questions[index + 1].favourite)
+        }
+    }
+
+    private fun lastPage(questions: List<QuestionProjection>) {
+        onChangeIndex(questions.size - 1)
+        onChangeCurrentQuestion(questions[questions.size - 1].apply {
+            this.checkboxList = this.checkboxList.shuffled()
+        })
+        onChangeFavouriteState(questions[questions.size - 1].favourite)
+    }
 
     fun onChangeShowHints(isHintShow: Int) {
         CoroutineScope(Dispatchers.IO).launch {
