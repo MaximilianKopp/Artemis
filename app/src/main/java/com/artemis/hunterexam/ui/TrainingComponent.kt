@@ -56,7 +56,7 @@ class TrainingComponent {
         trainingViewModel: TrainingViewModel,
         generalViewModel: GeneralViewModel
     ) {
-        val navIndex: Int by trainingViewModel.index.observeAsState(0)
+        val navIndex: Int by generalViewModel.index.observeAsState(0)
         val trainingData = trainingViewModel.trainingData.observeAsState(listOf())
         trainingViewModel.resetCurrentSelection()
 
@@ -86,14 +86,14 @@ class TrainingComponent {
         onOpenTrainingDialog: (Boolean) -> Unit,
     ) {
         val context = LocalContext.current
-        val currentQuestion: QuestionProjection by trainingViewModel.currentQuestion.observeAsState(
+        val currentQuestion: QuestionProjection by generalViewModel.currentQuestion.observeAsState(
             trainingData[0]
         )
-        val isNavButtonEnabled: Boolean by trainingViewModel.isButtonEnabled.observeAsState(true)
+        val isNavButtonEnabled: Boolean by generalViewModel.isButtonEnabled.observeAsState(true)
         val isAnswerButtonEnabled = remember { mutableStateOf(false) }
-        val answerBtnText: String by trainingViewModel.answerBtnText.observeAsState("Antworten")
+        val answerBtnText: String by generalViewModel.answerBtnText.observeAsState("Antworten")
 
-        val favouriteState: Int by trainingViewModel.favouriteColor.observeAsState(currentQuestion.favourite)
+        val favouriteState: Int by generalViewModel.favouriteColor.observeAsState(currentQuestion.favourite)
         val currentTopic = questionViewModel.currentTopic.value
         val loadScreen =
             currentTopic?.let { generalViewModel.loadScreenByTopic(it) }
@@ -130,7 +130,7 @@ class TrainingComponent {
                                 } else {
                                     currentQuestion.favourite = 1
                                 }
-                                trainingViewModel.onChangeFavouriteState(currentQuestion.favourite)
+                                generalViewModel.onChangeFavouriteState(currentQuestion.favourite)
                                 questionViewModel.updateQuestion(
                                     QuestionProjection.modelToEntity(
                                         currentQuestion
@@ -215,7 +215,7 @@ class TrainingComponent {
                                     colors = checkBoxColor,
                                     onCheckedChange = {
                                         if (answerBtnText != "Weiter") {
-                                            trainingViewModel.onChangeCheckboxes(
+                                            generalViewModel.onChangeCheckboxes(
                                                 checkbox,
                                                 currentQuestion,
                                                 checkedState
@@ -287,7 +287,7 @@ class TrainingComponent {
                         modifier = Modifier.weight(0.1f),
                         enabled = isNavButtonEnabled,
                         onClick = {
-                            trainingViewModel.setNavigationButton(
+                            generalViewModel.setNavigationButton(
                                 NavigationButton.FIRST_PAGE,
                                 index,
                                 trainingData
@@ -306,7 +306,7 @@ class TrainingComponent {
                         modifier = Modifier.weight(0.1f),
                         enabled = isNavButtonEnabled,
                         onClick = {
-                            trainingViewModel.setNavigationButton(
+                            generalViewModel.setNavigationButton(
                                 NavigationButton.PREV_PAGE,
                                 index,
                                 trainingData
@@ -325,7 +325,7 @@ class TrainingComponent {
                         modifier = Modifier.weight(0.1f),
                         enabled = isNavButtonEnabled,
                         onClick = {
-                            trainingViewModel.setNavigationButton(
+                            generalViewModel.setNavigationButton(
                                 NavigationButton.SKIP_TEN_BACKWARD,
                                 index,
                                 trainingData
@@ -359,7 +359,7 @@ class TrainingComponent {
                                         currentQuestion
                                     )
                                 )
-                                trainingViewModel.onChangeAnswerButtonText("Weiter")
+                                generalViewModel.onChangeAnswerButtonText("Weiter")
                                 if (trainingViewModel.isSelectionCorrect(
                                         currentQuestion
                                     )
@@ -409,7 +409,7 @@ class TrainingComponent {
                                         currentQuestion
                                     )
                                 )
-                                trainingViewModel.onChangeEnableNavButtons(false)
+                                generalViewModel.onChangeEnableNavButtons(false)
                             }
                             if (answerBtnText == "Weiter") {
                                 currentQuestion.apply {
@@ -418,10 +418,10 @@ class TrainingComponent {
                                     this.checkboxC.checked = false
                                     this.checkboxD.checked = false
                                 }
-                                trainingViewModel.onChangeEnableNavButtons(true)
+                                generalViewModel.onChangeEnableNavButtons(true)
                                 trainingViewModel.resetCurrentSelection()
                                 Log.v("Current Question", currentQuestion.correctAnswers)
-                                trainingViewModel.setNavigationButton(
+                                generalViewModel.setNavigationButton(
                                     NavigationButton.NEXT_PAGE,
                                     index,
                                     trainingData
@@ -429,7 +429,7 @@ class TrainingComponent {
                                 if (index == trainingData.size - 1) {
                                     onOpenTrainingDialog(true)
                                 }
-                                trainingViewModel.onChangeAnswerButtonText("Antworten")
+                                generalViewModel.onChangeAnswerButtonText("Antworten")
                             }
                         }) {
                         Text(
@@ -443,7 +443,7 @@ class TrainingComponent {
                         modifier = Modifier.weight(0.1f),
                         enabled = isNavButtonEnabled,
                         onClick = {
-                            trainingViewModel.setNavigationButton(
+                            generalViewModel.setNavigationButton(
                                 NavigationButton.SKIP_TEN_FORWARD,
                                 index,
                                 trainingData
@@ -462,7 +462,7 @@ class TrainingComponent {
                         modifier = Modifier.weight(0.1f),
                         enabled = isNavButtonEnabled,
                         onClick = {
-                            trainingViewModel.setNavigationButton(
+                            generalViewModel.setNavigationButton(
                                 NavigationButton.NEXT_PAGE,
                                 index,
                                 trainingData
@@ -481,7 +481,7 @@ class TrainingComponent {
                         modifier = Modifier.weight(0.1f),
                         enabled = isNavButtonEnabled,
                         onClick = {
-                            trainingViewModel.setNavigationButton(
+                            generalViewModel.setNavigationButton(
                                 NavigationButton.LAST_PAGE,
                                 index,
                                 trainingData
@@ -524,8 +524,8 @@ class TrainingComponent {
             onOpenTrainingDialog(true)
             if (loadScreen != null && isTrainingDialogOpen) {
                 questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
-                trainingViewModel.onChangeIndex(0)
-                trainingViewModel.onChangeAnswerButtonText("Antworten")
+                generalViewModel.onChangeIndex(0)
+                generalViewModel.onChangeAnswerButtonText("Antworten")
                 trainingViewModel.resetCurrentSelection()
                 navController.navigate(loadScreen.route)
             }
@@ -564,7 +564,7 @@ class TrainingComponent {
                         onClick = {
                             navController.navigate(loadScreen.route)
                             questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
-                            trainingViewModel.onChangeIndex(0)
+                            generalViewModel.onChangeIndex(0)
                             onOpenTrainingDialog(false)
                             generalViewModel.onCloseTrainingScreen(
                                 Pair(
@@ -572,8 +572,8 @@ class TrainingComponent {
                                     Constants.DISABLED
                                 )
                             )
-                            trainingViewModel.onChangeIndex(0)
-                            trainingViewModel.onChangeAnswerButtonText("Antworten")
+                            generalViewModel.onChangeIndex(0)
+                            generalViewModel.onChangeAnswerButtonText("Antworten")
                             trainingViewModel.resetCurrentSelection()
                         },
                         Modifier

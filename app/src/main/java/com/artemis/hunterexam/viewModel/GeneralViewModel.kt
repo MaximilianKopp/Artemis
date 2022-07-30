@@ -11,10 +11,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.artemis.hunterexam.data.configuration.ConfigurationRepository
 import com.artemis.hunterexam.data.db.ArtemisDatabase
+import com.artemis.hunterexam.helper.Constants
 import com.artemis.hunterexam.helper.NavigationButton
+import com.artemis.hunterexam.model.QuestionCheckbox
 import com.artemis.hunterexam.model.QuestionProjection
 import com.artemis.hunterexam.model.Screen
 import com.artemis.hunterexam.model.Topic
+import com.artemis.hunterexam.ui.theme.Artemis_Yellow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -71,6 +74,12 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
 
     private val _index = MutableLiveData<Int>()
     val index: LiveData<Int> = _index
+
+    private val _isButtonEnabled = MutableLiveData<Boolean>()
+    val isButtonEnabled: LiveData<Boolean> = _isButtonEnabled
+
+    private val _answerBtnText = MutableLiveData("Antworten")
+    val answerBtnText: LiveData<String> = _answerBtnText
 
     private val _currentQuestion = MutableLiveData<QuestionProjection>()
     val currentQuestion: LiveData<QuestionProjection> = _currentQuestion
@@ -181,6 +190,69 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    fun onChangeCheckboxes(
+        checkbox: QuestionCheckbox,
+        currentQuestion: QuestionProjection,
+        checkedState: MutableState<Boolean>
+    ) {
+        CoroutineScope(Dispatchers.IO).launch {
+            onChangeCheckboxesCoroutine(checkbox, currentQuestion, checkedState)
+        }
+    }
+
+    private suspend fun onChangeCheckboxesCoroutine(
+        checkbox: QuestionCheckbox,
+        currentQuestion: QuestionProjection,
+        checkedState: MutableState<Boolean>
+    ) = withContext(Dispatchers.IO) {
+        checkbox.checked = !checkbox.checked
+        when (checkbox.option) {
+            Constants.TRAINING_SELECTION_A -> currentQuestion.checkboxA = checkbox.apply {
+                checkedState.value = checkbox.checked
+            }
+            Constants.TRAINING_SELECTION_B -> currentQuestion.checkboxB = checkbox.apply {
+                checkedState.value = checkbox.checked
+            }
+            Constants.TRAINING_SELECTION_C -> currentQuestion.checkboxC = checkbox.apply {
+                checkedState.value = checkbox.checked
+            }
+            Constants.TRAINING_SELECTION_D -> currentQuestion.checkboxD = checkbox.apply {
+                checkedState.value = checkbox.checked
+            }
+        }
+        _currentQuestion.postValue(currentQuestion)
+        onChangeCurrentQuestion(currentQuestion)
+    }
+
+    private suspend fun onChangeCurrentQuestionCoroutine(newQuestion: QuestionProjection) =
+        withContext(Dispatchers.IO) {
+            restoreSelection(newQuestion)
+            _currentQuestion.postValue(newQuestion)
+        }
+
+
+    fun onChangeAnswerButtonText(answerBtnText: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            onChangeAnswerButtonTextCoroutine(answerBtnText)
+        }
+    }
+
+    private suspend fun onChangeAnswerButtonTextCoroutine(answerBtnText: String) =
+        withContext(Dispatchers.IO) {
+            _answerBtnText.postValue(answerBtnText)
+        }
+
+    fun onChangeEnableNavButtons(enabled: Boolean) {
+        CoroutineScope(Dispatchers.IO).launch {
+            onChangeEnableNavButtonsCoroutine(enabled)
+        }
+    }
+
+    private suspend fun onChangeEnableNavButtonsCoroutine(enabled: Boolean) =
+        withContext(Dispatchers.IO) {
+            _isButtonEnabled.postValue(enabled)
+        }
+
     @Suppress("JavaCollectionsStaticMethodOnImmutableList")
     private fun restoreSelection(currentQuestion: QuestionProjection) {
         _checkedAnswers.clear()
@@ -192,12 +264,6 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
         checkedAnswers.toSortedSet().toString()
         currentQuestion.currentSelection = _checkedAnswers.toString()
     }
-
-    private suspend fun onChangeCurrentQuestionCoroutine(newQuestion: QuestionProjection) =
-        withContext(Dispatchers.IO) {
-            restoreSelection(newQuestion)
-            _currentQuestion.postValue(newQuestion)
-        }
 
     fun onChangeFavouriteState(isFavourite: Int) {
         CoroutineScope(Dispatchers.IO).launch {
@@ -225,6 +291,69 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
             5 -> index = 101
         }
         setDirection(direction, questions, index)
+    }
+
+    private fun onChangeTopicButtonColor(newValue: Color, topic: Int) {
+        CoroutineScope(Dispatchers.IO).launch {
+            onChangeTopicButtonColorCoroutine(newValue, topic)
+        }
+    }
+
+    private suspend fun onChangeTopicButtonColorCoroutine(newValue: Color, topic: Int) =
+        withContext(Dispatchers.IO) {
+            when (topic) {
+                Topic.TOPIC_1.ordinal -> _topicWildlifeButtonColor.postValue(newValue)
+                Topic.TOPIC_2.ordinal -> _topicHuntingOperations.postValue(newValue)
+                Topic.TOPIC_3.ordinal -> _topicWeaponsLawAndTechnology.postValue(newValue)
+                Topic.TOPIC_4.ordinal -> _topicWildLifeTreatment.postValue(newValue)
+                Topic.TOPIC_5.ordinal -> _topicHuntingLaw.postValue(newValue)
+                Topic.TOPIC_6.ordinal -> _topicPreservationOfWildLifeAndNature.postValue(newValue)
+            }
+        }
+
+    fun checkTopicButtonColors(
+        assignmentQuestions: List<QuestionProjection>,
+        currentQuestion: QuestionProjection
+    ) {
+        var count = 0
+        when (currentQuestion.topic) {
+            Topic.TOPIC_1.ordinal -> {
+                count = assignmentQuestions.subList(0, 20).count {
+                    it.checkboxList.stream().anyMatch { cb -> cb.checked }
+                }
+            }
+            Topic.TOPIC_2.ordinal -> {
+                count = assignmentQuestions.subList(20, 40).count {
+                    it.checkboxList.stream().anyMatch { cb -> cb.checked }
+                }
+            }
+            Topic.TOPIC_3.ordinal -> {
+                count = assignmentQuestions.subList(40, 60).count {
+                    it.checkboxList.stream().anyMatch { cb -> cb.checked }
+                }
+            }
+            Topic.TOPIC_4.ordinal -> {
+                count = assignmentQuestions.subList(60, 80).count {
+                    it.checkboxList.stream().anyMatch { cb -> cb.checked }
+                }
+            }
+            Topic.TOPIC_5.ordinal -> {
+                count = assignmentQuestions.subList(80, 100).count {
+                    it.checkboxList.stream().anyMatch { cb -> cb.checked }
+                }
+            }
+            Topic.TOPIC_6.ordinal -> {
+                count = assignmentQuestions.subList(100, 120).count {
+                    it.checkboxList.stream().anyMatch { cb -> cb.checked }
+                }
+            }
+        }
+        Log.v("Current count", count.toString() + " " + currentQuestion.text)
+        if (count == 20) {
+            onChangeTopicButtonColor(Artemis_Yellow, currentQuestion.topic)
+        } else {
+            onChangeTopicButtonColor(Color.White, currentQuestion.topic)
+        }
     }
 
     private fun setDirection(

@@ -58,7 +58,6 @@ class NavHelper {
                             Home.route -> startMenuComponent.StartMenu(
                                 generalViewModel,
                                 questionViewModel,
-                                assignmentViewModel,
                                 navController
                             )
                             QuestionCatalogue.route -> questionComponent.TopicCatalogueScreen(

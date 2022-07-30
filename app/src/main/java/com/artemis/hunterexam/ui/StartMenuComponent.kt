@@ -155,7 +155,6 @@ class StartMenuComponent {
     fun StartMenu(
         generalViewModel: GeneralViewModel,
         questionViewModel: QuestionViewModel,
-        assignmentViewModel: AssignmentViewModel,
         navController: NavController
     ) {
         BackHandler {
@@ -190,7 +189,7 @@ class StartMenuComponent {
                     val assignmentQuestions =
                         questionViewModel.prepareQuestionsForAssignment().toList()
                     questionViewModel.onChangeQuestionsForAssignment(assignmentQuestions)
-                    assignmentViewModel.onChangeCurrentQuestion(assignmentQuestions[0])
+                    generalViewModel.onChangeCurrentQuestion(assignmentQuestions[0])
                     generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Assignment)
                     navController.navigate(Screen.DrawerScreen.Assignment.route)
                 }) {
