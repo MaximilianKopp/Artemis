@@ -441,6 +441,46 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    fun checkStates(
+        currentQuestion: QuestionProjection,
+        checkbox: QuestionCheckbox,
+        checkedState: MutableState<Boolean>
+    ): Boolean {
+        for (cb in currentQuestion.checkboxList) {
+            if (cb.option == checkbox.option) {
+                checkedState.value = cb.checked
+                when (cb.option) {
+                    Constants.TRAINING_SELECTION_A -> currentQuestion.checkboxA.checked =
+                        checkedState.value
+                }
+            }
+        }
+        _currentQuestion.postValue(currentQuestion)
+        return checkedState.value
+    }
+
+    fun currentSelection(
+        currentQuestion: QuestionProjection,
+        checkedState: Boolean,
+        option: String
+    ) {
+        if (!checkedState) {
+            _checkedAnswers.add(option)
+        } else {
+            _checkedAnswers.remove(option)
+        }
+        Log.v("Selected Options", checkedAnswers.toString())
+        currentQuestion.currentSelection = checkedAnswers.toSortedSet().toString()
+    }
+
+    fun resetCurrentSelection() {
+        _checkedAnswers.clear()
+        _currentQuestion.value?.checkboxA?.checked = false
+        _currentQuestion.value?.checkboxB?.checked = false
+        _currentQuestion.value?.checkboxC?.checked = false
+        _currentQuestion.value?.checkboxD?.checked = false
+    }
+
     private fun nextPage(index: Int, questions: List<QuestionProjection>) {
         if (index < questions.size - 1) {
             onChangeIndex(index + 1)

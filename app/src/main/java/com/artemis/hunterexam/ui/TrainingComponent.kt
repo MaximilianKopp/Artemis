@@ -58,7 +58,7 @@ class TrainingComponent {
     ) {
         val navIndex: Int by generalViewModel.index.observeAsState(0)
         val trainingData = trainingViewModel.trainingData.observeAsState(listOf())
-        trainingViewModel.resetCurrentSelection()
+        generalViewModel.resetCurrentSelection()
 
         if (trainingData.value.isNotEmpty()) {
             TrainingContent(
@@ -191,7 +191,7 @@ class TrainingComponent {
                             ) {
                                 val isChecked =
                                     if (answerBtnText == "Antworten") {
-                                        trainingViewModel.checkStates(
+                                        generalViewModel.checkStates(
                                             currentQuestion,
                                             checkbox,
                                             checkedState
@@ -220,7 +220,7 @@ class TrainingComponent {
                                                 currentQuestion,
                                                 checkedState
                                             )
-                                            trainingViewModel.currentSelection(
+                                            generalViewModel.currentSelection(
                                                 currentQuestion,
                                                 checkbox.checked,
                                                 checkbox.option
@@ -292,7 +292,7 @@ class TrainingComponent {
                                 index,
                                 trainingData
                             )
-                            trainingViewModel.resetCurrentSelection()
+                            generalViewModel.resetCurrentSelection()
                         }) {
                         Icon(
                             Icons.Filled.FirstPage,
@@ -311,7 +311,7 @@ class TrainingComponent {
                                 index,
                                 trainingData
                             )
-                            trainingViewModel.resetCurrentSelection()
+                            generalViewModel.resetCurrentSelection()
                         }) {
                         Icon(
                             Icons.Filled.ChevronLeft,
@@ -330,7 +330,7 @@ class TrainingComponent {
                                 index,
                                 trainingData
                             )
-                            trainingViewModel.resetCurrentSelection()
+                            generalViewModel.resetCurrentSelection()
                         }) {
                         Icon(
                             Icons.Filled.RotateLeft,
@@ -419,7 +419,7 @@ class TrainingComponent {
                                     this.checkboxD.checked = false
                                 }
                                 generalViewModel.onChangeEnableNavButtons(true)
-                                trainingViewModel.resetCurrentSelection()
+                                generalViewModel.resetCurrentSelection()
                                 Log.v("Current Question", currentQuestion.correctAnswers)
                                 generalViewModel.setNavigationButton(
                                     NavigationButton.NEXT_PAGE,
@@ -448,7 +448,7 @@ class TrainingComponent {
                                 index,
                                 trainingData
                             )
-                            trainingViewModel.resetCurrentSelection()
+                            generalViewModel.resetCurrentSelection()
                         }) {
                         Icon(
                             Icons.Filled.RotateRight,
@@ -467,7 +467,7 @@ class TrainingComponent {
                                 index,
                                 trainingData
                             )
-                            trainingViewModel.resetCurrentSelection()
+                            generalViewModel.resetCurrentSelection()
                         }) {
                         Icon(
                             Icons.Filled.ChevronRight,
@@ -486,7 +486,7 @@ class TrainingComponent {
                                 index,
                                 trainingData
                             )
-                            trainingViewModel.resetCurrentSelection()
+                            generalViewModel.resetCurrentSelection()
                         }) {
                         Icon(
                             Icons.Filled.LastPage,
@@ -514,8 +514,7 @@ class TrainingComponent {
                         loadScreen,
                         navController,
                         questionViewModel,
-                        generalViewModel,
-                        trainingViewModel,
+                        generalViewModel
                     )
                 }
             }
@@ -526,7 +525,7 @@ class TrainingComponent {
                 questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
                 generalViewModel.onChangeIndex(0)
                 generalViewModel.onChangeAnswerButtonText("Antworten")
-                trainingViewModel.resetCurrentSelection()
+                generalViewModel.resetCurrentSelection()
                 navController.navigate(loadScreen.route)
             }
         }
@@ -539,9 +538,7 @@ class TrainingComponent {
         navController: NavController,
         questionViewModel: QuestionViewModel,
         generalViewModel: GeneralViewModel,
-        trainingViewModel: TrainingViewModel,
-
-        ) {
+    ) {
         AlertDialog(
             onDismissRequest = { onOpenTrainingDialog(false) },
             shape = RoundedCornerShape(CornerSize(25.dp)),
@@ -574,7 +571,7 @@ class TrainingComponent {
                             )
                             generalViewModel.onChangeIndex(0)
                             generalViewModel.onChangeAnswerButtonText("Antworten")
-                            trainingViewModel.resetCurrentSelection()
+                            generalViewModel.resetCurrentSelection()
                         },
                         Modifier
                             .width(300.dp)
