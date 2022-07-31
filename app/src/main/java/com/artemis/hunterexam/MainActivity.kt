@@ -8,10 +8,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.artemis.hunterexam.ui.StartMenuComponent
 import com.artemis.hunterexam.ui.theme.ArtemisTheme
-import com.artemis.hunterexam.viewModel.AssignmentViewModel
-import com.artemis.hunterexam.viewModel.GeneralViewModel
-import com.artemis.hunterexam.viewModel.QuestionViewModel
-import com.artemis.hunterexam.viewModel.TrainingViewModel
+import com.artemis.hunterexam.viewModel.*
 
 @ExperimentalComposeUiApi
 @ExperimentalFoundationApi
@@ -25,13 +22,15 @@ class MainActivity : ComponentActivity() {
             val questionViewModel: QuestionViewModel = viewModel()
             val trainingViewModel: TrainingViewModel = viewModel()
             val assignmentViewModel: AssignmentViewModel = viewModel()
+            val dictionaryViewModel: DictionaryViewModel = viewModel()
 
             ArtemisTheme {
                 startMenuComposition.StartScreen(
                     generalViewModel,
                     questionViewModel,
                     trainingViewModel,
-                    assignmentViewModel
+                    assignmentViewModel,
+                    dictionaryViewModel
                 )
             }
         }

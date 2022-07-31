@@ -12,10 +12,7 @@ import androidx.navigation.compose.composable
 import com.artemis.hunterexam.model.Screen
 import com.artemis.hunterexam.model.Screen.DrawerScreen.*
 import com.artemis.hunterexam.ui.*
-import com.artemis.hunterexam.viewModel.AssignmentViewModel
-import com.artemis.hunterexam.viewModel.GeneralViewModel
-import com.artemis.hunterexam.viewModel.QuestionViewModel
-import com.artemis.hunterexam.viewModel.TrainingViewModel
+import com.artemis.hunterexam.viewModel.*
 
 class NavHelper {
 
@@ -35,7 +32,8 @@ class NavHelper {
             generalViewModel: GeneralViewModel,
             questionViewModel: QuestionViewModel,
             trainingViewModel: TrainingViewModel,
-            assignmentViewModel: AssignmentViewModel
+            assignmentViewModel: AssignmentViewModel,
+            dictionaryViewModel: DictionaryViewModel
         ) {
 
             val startMenuComponent = StartMenuComponent()
@@ -46,6 +44,7 @@ class NavHelper {
             val trainingComponent = TrainingComponent()
             val imprintComponent = ImprintComponent()
             val privacyComponent = PrivacyComponent()
+            val dictionaryComponent = DictionaryComponent()
 
             NavHost(
                 navController,
@@ -68,6 +67,9 @@ class NavHelper {
                             )
                             Imprint.route -> imprintComponent.ImprintScreen()
                             Privacy.route -> privacyComponent.PrivacyScreen()
+                            Dictionary.route -> dictionaryComponent.DictionaryScreen(
+                                dictionaryViewModel = dictionaryViewModel
+                            )
                         }
                         generalViewModel.onHideSearchWidget(
                             Pair(

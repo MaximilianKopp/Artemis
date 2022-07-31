@@ -49,6 +49,11 @@ class Screen {
             "policy"
         )
 
+        object Dictionary : DrawerScreen(
+            "Glossar",
+            "dictionary"
+        )
+
         object TopicWildLife : DrawerScreen(
             "Wildbiologie & Wildhege",
             "topicWildlife",
@@ -105,7 +110,8 @@ class Screen {
             DrawerScreen.Statistics,
             DrawerScreen.Configuration,
             DrawerScreen.Imprint,
-            DrawerScreen.Privacy
+            DrawerScreen.Privacy,
+            DrawerScreen.Dictionary
         )
 
         val TOPIC_SCREENS = listOf(
