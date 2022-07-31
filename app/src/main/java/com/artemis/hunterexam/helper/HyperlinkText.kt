@@ -20,7 +20,7 @@ fun HyperlinkText(
     fontSize: TextUnit,
     linkTextFontWeight: FontWeight = FontWeight.Medium,
     linkTextDecoration: TextDecoration = TextDecoration.Underline,
-    hyperlinks: List<String> = listOf("https://stevdza-san.com")
+    hyperlinks: List<String>
 ) {
     val annotatedString = buildAnnotatedString {
         append(fullText)

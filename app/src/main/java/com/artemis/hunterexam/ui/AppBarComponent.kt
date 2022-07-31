@@ -1,6 +1,5 @@
 package com.artemis.hunterexam.ui
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -9,10 +8,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.FilterAlt
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -21,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
@@ -49,7 +44,7 @@ class AppBarComponent {
         generalViewModel: GeneralViewModel,
         questionViewModel: QuestionViewModel
     ) {
-        val title: String by generalViewModel.title.observeAsState("")
+        val title: String by generalViewModel.title.observeAsState(Constants.EMPTY_STRING)
         val questionFilter: Pair<Float, Boolean> by generalViewModel.questionFilter.observeAsState(
             Pair(Constants.ALPHA_VISIBLE, Constants.ENABLED)
         )
@@ -75,9 +70,6 @@ class AppBarComponent {
                     generalViewModel.onChangeSearchWidgetState(false)
                     questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
                 },
-                onSearchClicked = {
-                    Log.v("Clicked", "Search bar is active")
-                }
             )
         } else if (showAppBar) {
             DefaultAppBar(
@@ -114,8 +106,14 @@ class AppBarComponent {
             title = { Text(text = title) },
             backgroundColor = Artemis_Yellow,
             navigationIcon = {
-                IconButton(onClick = { scope.launch { state.drawerState.open() } }) {
-                    Icon(Icons.Default.Menu, contentDescription = "Menu")
+                if (currentScreen != Screen.DrawerScreen.Assignment) {
+                    IconButton(onClick = { scope.launch { state.drawerState.open() } }) {
+                        Icon(Icons.Default.Menu, contentDescription = "Menu")
+                    }
+                } else {
+                    Box(modifier = Modifier.padding(start = 10.dp)) {
+                        Icon(Icons.Default.Assignment, contentDescription = "Info")
+                    }
                 }
             },
             actions = {
@@ -126,6 +124,7 @@ class AppBarComponent {
                 ) {
                     Icon(Icons.Default.FilterAlt, contentDescription = "Filter")
                 }
+
                 IconButton(
                     onClick = {
                         onSearchTriggered()
@@ -164,10 +163,8 @@ class AppBarComponent {
         text: String,
         onTextChange: (String) -> Unit,
         onCloseClicked: () -> Unit,
-        onSearchClicked: (String) -> Unit
     ) {
         val keyboardController = LocalSoftwareKeyboardController.current
-        val keyboardFocus = LocalFocusManager.current
 
         Surface(
             modifier = Modifier
@@ -207,7 +204,7 @@ class AppBarComponent {
                     IconButton(
                         onClick = {
                             if (text.isNotEmpty()) {
-                                onTextChange("")
+                                onTextChange(Constants.EMPTY_STRING)
                             } else {
                                 onCloseClicked()
                             }
@@ -341,6 +338,7 @@ class AppBarComponent {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Image(
+                        modifier = Modifier.padding(end = 5.dp),
                         painter = painterResource(id = R.drawable.ic_baseline_home_24),
                         contentDescription = "Startmenü"
                     )
@@ -387,7 +385,7 @@ class AppBarComponent {
             TextButton(onClick = {
                 scope.launch { state.drawerState.close() }
                     .also {
-                        navController.navigate(Screen.DrawerScreen.Statistics.route)
+                        navController.navigate(Screen.DrawerScreen.Dictionary.route)
                         questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
                     }
             }) {
@@ -401,7 +399,7 @@ class AppBarComponent {
                     )
                     Text(
                         modifier = Modifier.fillMaxWidth(),
-                        text = "Wörterbuch",
+                        text = "Glossar",
                         style = MaterialTheme.typography.subtitle2,
                         color = Color.White
                     )

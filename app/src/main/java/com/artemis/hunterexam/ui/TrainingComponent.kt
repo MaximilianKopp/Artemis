@@ -92,8 +92,6 @@ class TrainingComponent {
         val isNavButtonEnabled: Boolean by generalViewModel.isButtonEnabled.observeAsState(true)
         val isAnswerButtonEnabled = remember { mutableStateOf(false) }
         val answerBtnText: String by generalViewModel.answerBtnText.observeAsState("Antworten")
-
-        val favouriteState: Int by generalViewModel.favouriteColor.observeAsState(currentQuestion.favourite)
         val currentTopic = questionViewModel.currentTopic.value
         val loadScreen =
             currentTopic?.let { generalViewModel.loadScreenByTopic(it) }
@@ -127,10 +125,11 @@ class TrainingComponent {
                             IconButton(onClick = {
                                 if (currentQuestion.favourite == 1) {
                                     currentQuestion.favourite = 0
+                                    currentQuestion.favouriteState.value = Color.Black
                                 } else {
                                     currentQuestion.favourite = 1
+                                    currentQuestion.favouriteState.value = Color.Yellow
                                 }
-                                generalViewModel.onChangeFavouriteState(currentQuestion.favourite)
                                 questionViewModel.updateQuestion(
                                     QuestionProjection.modelToEntity(
                                         currentQuestion
@@ -140,7 +139,7 @@ class TrainingComponent {
                                 Icon(
                                     imageVector = Icons.Filled.Star,
                                     contentDescription = "Favourite Icon",
-                                    tint = if (favouriteState == 1) Color.Yellow else Color.Black
+                                    tint = currentQuestion.favouriteState.value
                                 )
                             }
                             Column {

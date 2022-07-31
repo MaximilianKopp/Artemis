@@ -28,7 +28,7 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
     private val _currentScreen = MutableLiveData<Screen.DrawerScreen>()
     val currentScreen: LiveData<Screen.DrawerScreen> = _currentScreen
 
-    private val _title = MutableLiveData("")
+    private val _title = MutableLiveData(Constants.EMPTY_STRING)
     val title: LiveData<String> = _title
 
     private val _questionFilter = MutableLiveData<Pair<Float, Boolean>>()
@@ -57,7 +57,7 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
     val searchWidgetState: State<Boolean> = _searchWidgetState
 
     private val _searchTextState: MutableState<String> =
-        mutableStateOf(value = "")
+        mutableStateOf(value = Constants.EMPTY_STRING)
     val searchTextState: State<String> = _searchTextState
 
     private val _isVibrating = MutableLiveData<Int>()
@@ -83,9 +83,6 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
 
     private val _currentQuestion = MutableLiveData<QuestionProjection>()
     val currentQuestion: LiveData<QuestionProjection> = _currentQuestion
-
-    private val _favouriteColor = MutableLiveData<Int>()
-    val favouriteColor: LiveData<Int> = _favouriteColor
 
     private val _checkedAnswers = mutableSetOf<String>()
     private val checkedAnswers: Set<String> = _checkedAnswers as HashSet<String>
@@ -265,17 +262,6 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
         currentQuestion.currentSelection = _checkedAnswers.toString()
     }
 
-    fun onChangeFavouriteState(isFavourite: Int) {
-        CoroutineScope(Dispatchers.IO).launch {
-            onChangeFavouriteStateCoroutine(isFavourite)
-        }
-    }
-
-    private suspend fun onChangeFavouriteStateCoroutine(isFavourite: Int) =
-        withContext(Dispatchers.IO) {
-            _favouriteColor.postValue(isFavourite)
-        }
-
     fun setTopicBoxButton(
         direction: NavigationButton,
         topic: Int,
@@ -376,7 +362,6 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
         val index = if (skippedIndex == 0) 0 else skippedIndex - 1
         onChangeIndex(index)
         onChangeCurrentQuestion(questions[index])
-        onChangeFavouriteState(questions[index].favourite)
     }
 
     //Navigation bar with buttons
@@ -401,7 +386,6 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
         onChangeCurrentQuestion(questions[0].apply {
             this.checkboxList = this.checkboxList.shuffled()
         })
-        onChangeFavouriteState(questions[0].favourite)
     }
 
     private fun prevPage(index: Int, questions: List<QuestionProjection>) {
@@ -410,7 +394,6 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
             onChangeCurrentQuestion(questions[index - 1].apply {
                 this.checkboxList = this.checkboxList.shuffled()
             })
-            onChangeFavouriteState(questions[index - 1].favourite)
         }
     }
 
@@ -423,8 +406,6 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
         onChangeCurrentQuestion(questions[index - offset].apply {
             this.checkboxList = this.checkboxList.shuffled()
         })
-        onChangeFavouriteState(questions[index - offset].favourite)
-
     }
 
     private fun skipTenForward(index: Int, questions: List<QuestionProjection>) {
@@ -437,7 +418,6 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
             onChangeCurrentQuestion(questions[index + offset].apply {
                 this.checkboxList = this.checkboxList.shuffled()
             })
-            onChangeFavouriteState(questions[index + offset].favourite)
         }
     }
 
@@ -487,7 +467,6 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
             onChangeCurrentQuestion(questions[index + 1].apply {
                 this.checkboxList = this.checkboxList.shuffled()
             })
-            onChangeFavouriteState(questions[index + 1].favourite)
         }
     }
 
@@ -496,7 +475,6 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
         onChangeCurrentQuestion(questions[questions.size - 1].apply {
             this.checkboxList = this.checkboxList.shuffled()
         })
-        onChangeFavouriteState(questions[questions.size - 1].favourite)
     }
 
     fun onChangeShowHints(isHintShow: Int) {

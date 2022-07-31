@@ -27,10 +27,7 @@ import com.artemis.hunterexam.model.Screen
 import com.artemis.hunterexam.templates.TextButtonTemplate
 import com.artemis.hunterexam.templates.TextTemplate
 import com.artemis.hunterexam.ui.theme.Artemis_Green
-import com.artemis.hunterexam.viewModel.AssignmentViewModel
-import com.artemis.hunterexam.viewModel.GeneralViewModel
-import com.artemis.hunterexam.viewModel.QuestionViewModel
-import com.artemis.hunterexam.viewModel.TrainingViewModel
+import com.artemis.hunterexam.viewModel.*
 
 @ExperimentalComposeUiApi
 class StartMenuComponent {
@@ -42,13 +39,15 @@ class StartMenuComponent {
         generalViewModel: GeneralViewModel,
         questionViewModel: QuestionViewModel,
         trainingViewModel: TrainingViewModel,
-        assignmentViewModel: AssignmentViewModel
+        assignmentViewModel: AssignmentViewModel,
+        dictionaryViewModel: DictionaryViewModel
     ) {
         StartContent(
             generalViewModel,
             questionViewModel,
             trainingViewModel,
-            assignmentViewModel
+            assignmentViewModel,
+            dictionaryViewModel
         )
     }
 
@@ -58,7 +57,8 @@ class StartMenuComponent {
         generalViewModel: GeneralViewModel,
         questionViewModel: QuestionViewModel,
         trainingViewModel: TrainingViewModel,
-        assignmentViewModel: AssignmentViewModel
+        assignmentViewModel: AssignmentViewModel,
+        dictionaryViewModel: DictionaryViewModel
     ) {
         val navController: NavHostController = rememberNavController()
         val state = rememberScaffoldState(drawerState = DrawerState(DrawerValue.Closed))
@@ -110,7 +110,8 @@ class StartMenuComponent {
                 generalViewModel = generalViewModel,
                 questionViewModel = questionViewModel,
                 trainingViewModel = trainingViewModel,
-                assignmentViewModel = assignmentViewModel
+                assignmentViewModel = assignmentViewModel,
+                dictionaryViewModel = dictionaryViewModel
             )
         }
     }
@@ -211,12 +212,12 @@ class StartMenuComponent {
                     )
                 }
                 StartMenuButton(onClick = {
-                    navController.navigate(Screen.DrawerScreen.Imprint.route)
+                    navController.navigate(Screen.DrawerScreen.Dictionary.route)
                 }) {
                     StartMenuContent(
                         drawable = R.drawable.ic_baseline_info_24,
-                        contentDescription = "Imprint",
-                        text = Screen.DrawerScreen.Imprint.title
+                        contentDescription = "Dictionary",
+                        text = Screen.DrawerScreen.Dictionary.title
                     )
                 }
             }

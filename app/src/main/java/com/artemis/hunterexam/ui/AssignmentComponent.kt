@@ -371,7 +371,7 @@ class AssignmentComponent {
             assignmentQuestions[0]
         )
         Log.v("Current Filter", currentFilter.value.toString())
-        val favouriteState: Int by generalViewModel.favouriteColor.observeAsState(currentQuestion.favourite)
+
         val resultListOfAnsweredQuestions: MutableList<QuestionProjection> =
             assignmentQuestions.toMutableList()
         val isEvaluationDialogOpen: MutableState<Boolean> = remember { mutableStateOf(false) }
@@ -408,10 +408,11 @@ class AssignmentComponent {
                                 IconButton(onClick = {
                                     if (currentQuestion.favourite == 1) {
                                         currentQuestion.favourite = 0
+                                        currentQuestion.favouriteState.value = Color.Black
                                     } else {
                                         currentQuestion.favourite = 1
+                                        currentQuestion.favouriteState.value = Color.Yellow
                                     }
-                                    generalViewModel.onChangeFavouriteState(currentQuestion.favourite)
                                     questionViewModel.updateQuestion(
                                         QuestionProjection.modelToEntity(
                                             currentQuestion
@@ -421,7 +422,7 @@ class AssignmentComponent {
                                     Icon(
                                         imageVector = Icons.Filled.Star,
                                         contentDescription = "Favourite Icon",
-                                        tint = if (favouriteState == 1) Color.Yellow else Color.Black
+                                        tint = currentQuestion.favouriteState.value
                                     )
                                 }
                                 Column {
@@ -725,6 +726,9 @@ class AssignmentComponent {
                 onOpenAssignmentDialog(true)
             }
         } else {
+            BackHandler(enabled = true) {
+                onOpenAssignmentDialog(false)
+            }
             ResultContent(
                 showResultContent = showResultContent,
                 generalViewModel = generalViewModel,
@@ -745,7 +749,7 @@ class AssignmentComponent {
         evaluationButtonText: MutableState<String>,
     ) {
         val isAbleToEvaluate = assignmentQuestions.stream()
-            .allMatch { it.currentSelection != "[]" && it.currentSelection != "" }
+            .allMatch { it.currentSelection != "[]" && it.currentSelection != Constants.EMPTY_STRING }
 
         AlertDialog(
             onDismissRequest = { isEvaluationDialogOpen.value = false },
@@ -846,6 +850,7 @@ class AssignmentComponent {
                             navController.navigate(Screen.DrawerScreen.Home.route)
                             onOpenAssignmentDialog(false)
                             generalViewModel.onChangeIndex(0)
+                            generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Home)
                             generalViewModel.onCloseTrainingScreen(
                                 Pair(
                                     Constants.ALPHA_INVISIBLE,

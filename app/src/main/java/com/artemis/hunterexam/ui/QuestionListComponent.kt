@@ -11,12 +11,16 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.ArrowRight
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material.icons.rounded.ChevronRight
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -152,13 +156,11 @@ class QuestionListComponent {
             }
             items(questionsLiveData.value) { question ->
                 LoadQuestionItems(
-                    questionsByTopicAndFilter,
                     question,
                     generalViewModel,
                     questionViewModel,
                     trainingViewModel,
-                    navController,
-                    currentFilter
+                    navController
                 )
             }
         }
@@ -280,16 +282,12 @@ class QuestionListComponent {
 
     @Composable
     private fun LoadQuestionItems(
-        questionsByTopicAndFilter: List<QuestionProjection>,
         question: QuestionProjection,
         generalViewModel: GeneralViewModel,
         questionViewModel: QuestionViewModel,
         trainingViewModel: TrainingViewModel,
-        navController: NavController,
-        currentFilter: State<CriteriaFilter>
+        navController: NavController
     ) {
-        val isFavourite: MutableState<Int> =
-            rememberSaveable { mutableStateOf(question.favourite) }
         Card(
             backgroundColor = Color.White,
             modifier = Modifier
@@ -311,34 +309,14 @@ class QuestionListComponent {
         ) {
             Column {
                 Row {
-                    if (currentFilter.value == CriteriaFilter.FAVOURITES) {
-                        IconButton(onClick = {
-                            question.favourite = 0
-                            isFavourite.value = question.favourite
-                            questionViewModel.updateQuestion(
-                                QuestionProjection.modelToEntity(
-                                    question
-                                )
-                            )
-                            questionViewModel.onChangeQuestionList(questionsByTopicAndFilter.filter { it.favourite == 1 })
-                        }) {
-                            Icon(
-                                imageVector = Icons.Filled.Delete,
-                                contentDescription = "Delete favourite Icon",
-                                modifier = Modifier.size(20.dp),
-                                tint = Color.Black
-                            )
-                        }
-                    } else {
-                        Icon(
-                            imageVector = Icons.Filled.Star,
-                            contentDescription = "Favourite Icon",
-                            Modifier
-                                .size(26.dp)
-                                .padding(top = 8.dp),
-                            tint = if (isFavourite.value == 1) Color.Yellow else Color.Black,
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.Filled.Star,
+                        contentDescription = "Favourite Icon",
+                        Modifier
+                            .size(26.dp)
+                            .padding(top = 8.dp),
+                        tint = question.favouriteState.value
+                    )
                     Text(
                         text = question.text,
                         Modifier.padding(start = 5.dp, top = 8.dp)

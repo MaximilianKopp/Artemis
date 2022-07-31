@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import com.artemis.hunterexam.data.db.ArtemisDatabase
 import com.artemis.hunterexam.data.dictionary.DictionaryRepository
 import com.artemis.hunterexam.data.questions.QuestionRepository
+import com.artemis.hunterexam.helper.Constants
 import com.artemis.hunterexam.helper.CriteriaFilter
 import com.artemis.hunterexam.model.*
 import kotlinx.coroutines.CoroutineScope
@@ -223,7 +224,7 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun getTopicOfQuestion(currentQuestionNumericTopic: Int): String {
-        var topic = ""
+        var topic = Constants.EMPTY_STRING
         when (currentQuestionNumericTopic) {
             0 -> topic = Screen.DrawerScreen.TopicWildLife.title
             1 -> topic = Screen.DrawerScreen.TopicHuntingOperations.title
