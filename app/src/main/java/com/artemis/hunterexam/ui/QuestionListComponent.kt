@@ -257,13 +257,13 @@ class QuestionListComponent {
                 questionsLiveData.value.shuffled()
                     .take(sizeOfTrainingUnit)
             trainingViewModel.onChangeTrainingData(preparedTrainingData)
-            generalViewModel.onChangeCurrentQuestion(
+            trainingViewModel.onChangeCurrentQuestion(
                 preparedTrainingData[0]
             )
         } else {
             preparedTrainingData = questionsLiveData.value
             trainingViewModel.onChangeTrainingData(questionsLiveData.value)
-            generalViewModel.onChangeCurrentQuestion(
+            trainingViewModel.onChangeCurrentQuestion(
                 preparedTrainingData[0]
             )
         }
@@ -274,7 +274,7 @@ class QuestionListComponent {
                 Constants.DISABLED
             )
         )
-        generalViewModel.onChangeIndex(0)
+        trainingViewModel.onChangeIndex(0)
         generalViewModel.onChangeSearchWidgetState(false)
         generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Training)
         navController.navigate(Screen.DrawerScreen.Training.route)
@@ -303,7 +303,7 @@ class QuestionListComponent {
                     generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Training)
                     questionViewModel.onChangeFilter(CriteriaFilter.SINGLE_QUESTION)
                     trainingViewModel.onChangeTrainingData(listOf(question))
-                    generalViewModel.onChangeCurrentQuestion(question)
+                    trainingViewModel.onChangeCurrentQuestion(question)
                     navController.navigate(Screen.DrawerScreen.Training.route)
                 }
         ) {

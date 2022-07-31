@@ -2,13 +2,10 @@ package com.artemis.hunterexam.ui
 
 import android.util.Log
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -36,23 +33,23 @@ class AssignmentComponent {
 
     @Composable
     fun TopicButtons(
-        generalViewModel: GeneralViewModel,
+        assignmentViewModel: AssignmentViewModel,
         assignmentQuestions: List<QuestionProjection>
     ) {
-        val topicWildLifeButtonColor: Color by generalViewModel.topicWildlifeButtonColor.observeAsState(
+        val topicWildLifeButtonColor: Color by assignmentViewModel.topicWildlifeButtonColor.observeAsState(
             Color.White
         )
-        val topicHuntingOperations: Color by generalViewModel.topicHuntingOperations.observeAsState(
+        val topicHuntingOperations: Color by assignmentViewModel.topicHuntingOperations.observeAsState(
             Color.White
         )
-        val topicWeaponsLawAndTechnology: Color by generalViewModel.topicWeaponsLawAndTechnology.observeAsState(
+        val topicWeaponsLawAndTechnology: Color by assignmentViewModel.topicWeaponsLawAndTechnology.observeAsState(
             Color.White
         )
-        val topicWildLifeTreatment: Color by generalViewModel.topicWildLifeTreatment.observeAsState(
+        val topicWildLifeTreatment: Color by assignmentViewModel.topicWildLifeTreatment.observeAsState(
             Color.White
         )
-        val topicHuntingLaw: Color by generalViewModel.topicHuntingLaw.observeAsState(Color.White)
-        val topicPreservationOfWildLifeAndNature: Color by generalViewModel.topicPreservationOfWildLifeAndNature.observeAsState(
+        val topicHuntingLaw: Color by assignmentViewModel.topicHuntingLaw.observeAsState(Color.White)
+        val topicPreservationOfWildLifeAndNature: Color by assignmentViewModel.topicPreservationOfWildLifeAndNature.observeAsState(
             Color.White
         )
 
@@ -64,7 +61,7 @@ class AssignmentComponent {
                 .padding(5.dp),
             colors = ButtonDefaults.textButtonColors(topicWildLifeButtonColor),
             onClick = {
-                generalViewModel.setTopicBoxButton(
+                assignmentViewModel.setTopicBoxButton(
                     NavigationButton.SKIPPED_INDEX,
                     Screen.DrawerScreen.TopicWildLife.topic,
                     assignmentQuestions
@@ -86,7 +83,7 @@ class AssignmentComponent {
                 .padding(5.dp),
             colors = ButtonDefaults.textButtonColors(topicHuntingOperations),
             onClick = {
-                generalViewModel.setTopicBoxButton(
+                assignmentViewModel.setTopicBoxButton(
                     NavigationButton.SKIPPED_INDEX,
                     Screen.DrawerScreen.TopicHuntingOperations.topic,
                     assignmentQuestions
@@ -108,7 +105,7 @@ class AssignmentComponent {
                 .padding(5.dp),
             colors = ButtonDefaults.textButtonColors(topicWeaponsLawAndTechnology),
             onClick = {
-                generalViewModel.setTopicBoxButton(
+                assignmentViewModel.setTopicBoxButton(
                     NavigationButton.SKIPPED_INDEX,
                     Screen.DrawerScreen.TopicWeaponsLawAndTechnology.topic,
                     assignmentQuestions
@@ -130,7 +127,7 @@ class AssignmentComponent {
                 .padding(5.dp),
             colors = ButtonDefaults.textButtonColors(topicWildLifeTreatment),
             onClick = {
-                generalViewModel.setTopicBoxButton(
+                assignmentViewModel.setTopicBoxButton(
                     NavigationButton.SKIPPED_INDEX,
                     Screen.DrawerScreen.TopicWildLifeTreatment.topic,
                     assignmentQuestions
@@ -152,7 +149,7 @@ class AssignmentComponent {
                 .padding(5.dp),
             colors = ButtonDefaults.textButtonColors(topicHuntingLaw),
             onClick = {
-                generalViewModel.setTopicBoxButton(
+                assignmentViewModel.setTopicBoxButton(
                     NavigationButton.SKIPPED_INDEX,
                     Screen.DrawerScreen.TopicHuntingLaw.topic,
                     assignmentQuestions
@@ -174,7 +171,7 @@ class AssignmentComponent {
                 .padding(5.dp),
             colors = ButtonDefaults.textButtonColors(topicPreservationOfWildLifeAndNature),
             onClick = {
-                generalViewModel.setTopicBoxButton(
+                assignmentViewModel.setTopicBoxButton(
                     NavigationButton.SKIPPED_INDEX,
                     Screen.DrawerScreen.TopicPreservationOfWildLifeAndNature.topic,
                     assignmentQuestions
@@ -217,7 +214,6 @@ class AssignmentComponent {
     @Composable
     fun ResultContent(
         showResultContent: MutableState<Boolean>,
-        generalViewModel: GeneralViewModel,
         assignmentViewModel: AssignmentViewModel,
         assignmentQuestions: List<QuestionProjection>
     ) {
@@ -266,7 +262,7 @@ class AssignmentComponent {
                             colors = ButtonDefaults.buttonColors(Artemis_Blue),
                             onClick = {
                                 showResultContent.value = false
-                                generalViewModel.onChangeAppBarAppearance(true)
+                                assignmentViewModel.onChangeAppBarAppearance(true)
                             }) {
                             Text(
                                 color = Color.White,
@@ -295,7 +291,8 @@ class AssignmentComponent {
                     Card(
                         modifier = Modifier
                             .padding(5.dp),
-                        backgroundColor = Artemis_Yellow
+                        backgroundColor = Artemis_Yellow,
+                        border = BorderStroke(1.dp, Color.White)
                     ) {
                         Column(
                             modifier = Modifier.padding(10.dp)
@@ -363,11 +360,11 @@ class AssignmentComponent {
         assignmentViewModel: AssignmentViewModel,
     ) {
         val showResultContent: MutableState<Boolean> = remember { mutableStateOf(false) }
-        val navIndex: Int by generalViewModel.index.observeAsState(0)
+        val navIndex: Int by assignmentViewModel.index.observeAsState(0)
         val currentFilter = questionViewModel.filter.observeAsState()
         val evaluationButtonText: MutableState<String> = remember { mutableStateOf("Auswertung") }
         val enableCheckbox: MutableState<Boolean> = remember { mutableStateOf(true) }
-        val currentQuestion: QuestionProjection by generalViewModel.currentQuestion.observeAsState(
+        val currentQuestion: QuestionProjection by assignmentViewModel.currentQuestion.observeAsState(
             assignmentQuestions[0]
         )
         Log.v("Current Filter", currentFilter.value.toString())
@@ -391,7 +388,7 @@ class AssignmentComponent {
                         .fillMaxWidth()
                         .horizontalScroll(horizontalAssignmentScrollState, true, null, false)
                 ) {
-                    TopicButtons(generalViewModel, assignmentQuestions)
+                    TopicButtons(assignmentViewModel, assignmentQuestions)
                 }
                 val verticalScrollState = rememberScrollState()
                 Column(
@@ -482,7 +479,7 @@ class AssignmentComponent {
                                             checked = isChecked,
                                             colors = checkBoxColor,
                                             onCheckedChange = {
-                                                generalViewModel.onChangeCheckboxes(
+                                                assignmentViewModel.onChangeCheckboxes(
                                                     checkbox,
                                                     currentQuestion,
                                                     checkedState
@@ -508,7 +505,7 @@ class AssignmentComponent {
                                         )
                                     }
                                 }
-                                generalViewModel.checkTopicButtonColors(
+                                assignmentViewModel.checkTopicButtonColors(
                                     assignmentQuestions,
                                     currentQuestion
                                 )
@@ -545,7 +542,7 @@ class AssignmentComponent {
                                 TextButton(
                                     colors = ButtonDefaults.textButtonColors(Artemis_Red),
                                     onClick = {
-                                        generalViewModel.setNavigationButton(
+                                        assignmentViewModel.setNavigationButton(
                                             NavigationButton.SKIPPED_INDEX,
                                             assignmentQuestions.indexOf(question) + 1,
                                             assignmentQuestions
@@ -575,7 +572,7 @@ class AssignmentComponent {
                         IconButton(
                             modifier = Modifier.weight(0.1f),
                             onClick = {
-                                generalViewModel.setNavigationButton(
+                                assignmentViewModel.setNavigationButton(
                                     NavigationButton.FIRST_PAGE,
                                     navIndex,
                                     assignmentQuestions
@@ -588,29 +585,11 @@ class AssignmentComponent {
                                 tint = Artemis_Yellow
                             )
                         }
-                        //Loads previous question
-                        IconButton(
-                            modifier = Modifier.weight(0.1f),
-                            onClick = {
-                                generalViewModel.setNavigationButton(
-                                    NavigationButton.PREV_PAGE,
-                                    navIndex,
-                                    assignmentQuestions
-                                )
-                            }
-                        ) {
-                            Icon(
-                                Icons.Filled.ChevronLeft,
-                                contentDescription = "Prev question button",
-                                modifier = Modifier.size(50.dp),
-                                tint = Artemis_Yellow
-                            )
-                        }
                         //Skip to 10 questions backward
                         IconButton(
                             modifier = Modifier.weight(0.1f),
                             onClick = {
-                                generalViewModel.setNavigationButton(
+                                assignmentViewModel.setNavigationButton(
                                     NavigationButton.SKIP_TEN_BACKWARD,
                                     navIndex,
                                     assignmentQuestions
@@ -621,6 +600,24 @@ class AssignmentComponent {
                                 Icons.Filled.RotateLeft,
                                 contentDescription = "Prev question button",
                                 modifier = Modifier.size(25.dp),
+                                tint = Artemis_Yellow
+                            )
+                        }
+                        //Loads previous question
+                        IconButton(
+                            modifier = Modifier.weight(0.1f),
+                            onClick = {
+                                assignmentViewModel.setNavigationButton(
+                                    NavigationButton.PREV_PAGE,
+                                    navIndex,
+                                    assignmentQuestions
+                                )
+                            }
+                        ) {
+                            Icon(
+                                Icons.Filled.ChevronLeft,
+                                contentDescription = "Prev question button",
+                                modifier = Modifier.size(50.dp),
                                 tint = Artemis_Yellow
                             )
                         }
@@ -641,11 +638,28 @@ class AssignmentComponent {
                                 text = evaluationButtonText.value
                             )
                         }
+                        //Loads next question
+                        IconButton(
+                            modifier = Modifier.weight(0.1f),
+                            onClick = {
+                                assignmentViewModel.setNavigationButton(
+                                    NavigationButton.NEXT_PAGE,
+                                    navIndex,
+                                    assignmentQuestions
+                                )
+                            }) {
+                            Icon(
+                                Icons.Filled.ChevronRight,
+                                contentDescription = "Next question button",
+                                modifier = Modifier.size(50.dp),
+                                tint = Artemis_Yellow
+                            )
+                        }
                         //Skip to 10 questions forward
                         IconButton(
                             modifier = Modifier.weight(0.1f),
                             onClick = {
-                                generalViewModel.setNavigationButton(
+                                assignmentViewModel.setNavigationButton(
                                     NavigationButton.SKIP_TEN_FORWARD,
                                     navIndex,
                                     assignmentQuestions
@@ -659,28 +673,11 @@ class AssignmentComponent {
                                 tint = Artemis_Yellow
                             )
                         }
-                        //Loads next question
-                        IconButton(
-                            modifier = Modifier.weight(0.1f),
-                            onClick = {
-                                generalViewModel.setNavigationButton(
-                                    NavigationButton.NEXT_PAGE,
-                                    navIndex,
-                                    assignmentQuestions
-                                )
-                            }) {
-                            Icon(
-                                Icons.Filled.ChevronRight,
-                                contentDescription = "Next question button",
-                                modifier = Modifier.size(50.dp),
-                                tint = Artemis_Yellow
-                            )
-                        }
                         //Loads last question
                         IconButton(
                             modifier = Modifier.weight(0.1f),
                             onClick = {
-                                generalViewModel.setNavigationButton(
+                                assignmentViewModel.setNavigationButton(
                                     NavigationButton.LAST_PAGE,
                                     navIndex,
                                     assignmentQuestions
@@ -709,7 +706,7 @@ class AssignmentComponent {
                     isEvaluationDialogOpen,
                     showResultContent,
                     questionViewModel,
-                    generalViewModel,
+                    assignmentViewModel,
                     assignmentQuestions,
                     resultListOfAnsweredQuestions,
                     evaluationButtonText
@@ -720,6 +717,7 @@ class AssignmentComponent {
                     onOpenAssignmentDialog,
                     navController,
                     generalViewModel,
+                    assignmentViewModel
                 )
             } // no else
             BackHandler(enabled = true) {
@@ -731,7 +729,6 @@ class AssignmentComponent {
             }
             ResultContent(
                 showResultContent = showResultContent,
-                generalViewModel = generalViewModel,
                 assignmentViewModel = assignmentViewModel,
                 assignmentQuestions = assignmentQuestions
             )
@@ -743,7 +740,7 @@ class AssignmentComponent {
         isEvaluationDialogOpen: MutableState<Boolean>,
         showResultContent: MutableState<Boolean>,
         questionViewModel: QuestionViewModel,
-        generalViewModel: GeneralViewModel,
+        assignmentViewModel: AssignmentViewModel,
         assignmentQuestions: List<QuestionProjection>,
         resultListOfAnsweredQuestions: List<QuestionProjection>,
         evaluationButtonText: MutableState<String>,
@@ -791,12 +788,13 @@ class AssignmentComponent {
                                     )
                                 }
                             evaluationButtonText.value = "Ergebnisse"
-                            generalViewModel.onChangeAppBarAppearance(false)
+                            assignmentViewModel.onChangeAppBarAppearance(false)
                         },
                         Modifier
                             .width(300.dp)
                             .padding(4.dp),
                         colors = ButtonDefaults.buttonColors(Artemis_Yellow),
+                        border = BorderStroke(1.dp, Color.White)
                     ) {
                         Text(
                             text = "Ja",
@@ -811,6 +809,7 @@ class AssignmentComponent {
                             .width(300.dp)
                             .padding(4.dp),
                         colors = ButtonDefaults.buttonColors(Artemis_Yellow),
+                        border = BorderStroke(1.dp, Color.White)
                     ) {
                         Text(
                             text = "Nein",
@@ -826,7 +825,8 @@ class AssignmentComponent {
     fun AssignmentAlertDialog(
         onOpenAssignmentDialog: (Boolean) -> Unit,
         navController: NavController,
-        generalViewModel: GeneralViewModel
+        generalViewModel: GeneralViewModel,
+        assignmentViewModel: AssignmentViewModel
     ) {
         AlertDialog(
             onDismissRequest = { onOpenAssignmentDialog(false) },
@@ -849,7 +849,7 @@ class AssignmentComponent {
                         onClick = {
                             navController.navigate(Screen.DrawerScreen.Home.route)
                             onOpenAssignmentDialog(false)
-                            generalViewModel.onChangeIndex(0)
+                            assignmentViewModel.onChangeIndex(0)
                             generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Home)
                             generalViewModel.onCloseTrainingScreen(
                                 Pair(
@@ -862,6 +862,7 @@ class AssignmentComponent {
                             .width(300.dp)
                             .padding(4.dp),
                         colors = ButtonDefaults.buttonColors(Artemis_Yellow),
+                        border = BorderStroke(1.dp, Color.White)
                     ) {
                         Text(
                             text = "Ja",
@@ -875,7 +876,8 @@ class AssignmentComponent {
                         Modifier
                             .width(300.dp)
                             .padding(4.dp),
-                        colors = ButtonDefaults.buttonColors(Artemis_Yellow)
+                        colors = ButtonDefaults.buttonColors(Artemis_Yellow),
+                        border = BorderStroke(1.dp, Color.White)
                     ) {
                         Text(
                             text = "Nein",

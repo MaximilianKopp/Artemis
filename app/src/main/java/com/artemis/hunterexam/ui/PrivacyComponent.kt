@@ -28,7 +28,7 @@ class PrivacyComponent {
                 color = Color.White
             )
             Text(
-                text = "Die Applikation erhebt/speichert keine personenbezogenen Daten wie bspw. Name, Anschrift oder E-Mail-Adressen und betreibt keine Weiterverarbeitung bzw. gewerbliche Veräußerung von Informationen, die aus dem Nutzerverhalten abgeleitet werden könnten. \nDie Applikation ist vollständig offline nutzbar und setzt nur im Falle eine Aktualisierung durch Google-Play eine aktive Internverbindung voraus. \nDer Herausgeber und Eigentümer haftet nicht für eine eventuelle Weitergabe von Informationen, die im Rahmen der Google-Play Nutzungsbedingungen durchgeführt werden.",
+                text = "Die Applikation erhebt bzw. speichert weder personenbezogenen Daten wie bspw. Namen, Anschriften oder E-Mail-Adressen noch betreibt sie keine Weiterverarbeitung oder gewerbliche Veräußerung von Informationen, die aus dem Nutzerverhalten abgeleitet werden könnten. \nDie Applikation ist vollständig offline nutzbar und setzt nur im Falle eine Aktualisierung durch Google-Play eine aktive Internverbindung voraus. \nDer Herausgeber und Eigentümer ist nicht für Weiterverarbeitungen von Informationen verantwortlich, die im Rahmen der Google-Play Nutzungsbedingungen vorausgesetzt und durch den Endnutzer akzeptiert worden sind.",
                 style = MaterialTheme.typography.body1,
                 color = Color.White
             )

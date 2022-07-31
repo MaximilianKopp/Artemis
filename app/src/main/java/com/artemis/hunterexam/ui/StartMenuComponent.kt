@@ -83,6 +83,7 @@ class StartMenuComponent {
                     scope = scope,
                     state = state,
                     generalViewModel = generalViewModel,
+                    assignmentViewModel = assignmentViewModel,
                     questionViewModel = questionViewModel
                 )
             },
@@ -155,6 +156,7 @@ class StartMenuComponent {
     @Composable
     fun StartMenu(
         generalViewModel: GeneralViewModel,
+        assignmentViewModel: AssignmentViewModel,
         questionViewModel: QuestionViewModel,
         navController: NavController
     ) {
@@ -190,7 +192,7 @@ class StartMenuComponent {
                     val assignmentQuestions =
                         questionViewModel.prepareQuestionsForAssignment().toList()
                     questionViewModel.onChangeQuestionsForAssignment(assignmentQuestions)
-                    generalViewModel.onChangeCurrentQuestion(assignmentQuestions[0])
+                    assignmentViewModel.onChangeCurrentQuestion(assignmentQuestions[0])
                     generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Assignment)
                     navController.navigate(Screen.DrawerScreen.Assignment.route)
                 }) {

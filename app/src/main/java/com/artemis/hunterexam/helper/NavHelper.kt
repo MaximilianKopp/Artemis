@@ -56,6 +56,7 @@ class NavHelper {
                         when (generalScreen.route) {
                             Home.route -> startMenuComponent.StartMenu(
                                 generalViewModel,
+                                assignmentViewModel,
                                 questionViewModel,
                                 navController
                             )

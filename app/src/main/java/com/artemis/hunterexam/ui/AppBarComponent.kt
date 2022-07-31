@@ -28,6 +28,7 @@ import com.artemis.hunterexam.helper.CriteriaFilter
 import com.artemis.hunterexam.model.Screen
 import com.artemis.hunterexam.ui.theme.Artemis_Green
 import com.artemis.hunterexam.ui.theme.Artemis_Yellow
+import com.artemis.hunterexam.viewModel.AssignmentViewModel
 import com.artemis.hunterexam.viewModel.GeneralViewModel
 import com.artemis.hunterexam.viewModel.QuestionViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -42,6 +43,7 @@ class AppBarComponent {
         scope: CoroutineScope,
         state: ScaffoldState,
         generalViewModel: GeneralViewModel,
+        assignmentViewModel: AssignmentViewModel,
         questionViewModel: QuestionViewModel
     ) {
         val title: String by generalViewModel.title.observeAsState(Constants.EMPTY_STRING)
@@ -60,7 +62,7 @@ class AppBarComponent {
         val searchWidgetState by generalViewModel.searchWidgetState
         val searchTextState by generalViewModel.searchTextState
 
-        val showAppBar: Boolean by generalViewModel.showAppBar.observeAsState(true)
+        val showAppBar: Boolean by assignmentViewModel.showAppBar.observeAsState(true)
 
         if (searchWidgetState) {
             SearchAppBar(
