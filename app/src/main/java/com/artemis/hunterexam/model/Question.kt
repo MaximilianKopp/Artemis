@@ -2,8 +2,9 @@ package com.artemis.hunterexam.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.artemis.hunterexam.helper.Constants
 
-@Entity(tableName = "questions")
+@Entity(tableName = Constants.TABLE_NAME_QUESTIONS)
 data class Question(
     @PrimaryKey(autoGenerate = true)
     val id: Int,

@@ -269,25 +269,25 @@ class StartMenuComponent {
                 modifier = Modifier.padding(start = 25.dp, top = 25.dp)
             )
             Text(
-                text = "1x richtig beantwortet: ${questionViewModel.extractTotalStatistics()["OnceLearnedTotal"]}",
+                text = "1x richtig beantwortet: ${questionViewModel.extractTotalStatistics()[Constants.STATISTICS_ONCE_LEARNED_TOTAL]}",
                 color = Color.White,
                 style = MaterialTheme.typography.body2,
                 modifier = Modifier.padding(start = 25.dp, top = 10.dp)
             )
             Text(
-                text = "2x richtig beantwortet: ${questionViewModel.extractTotalStatistics()["TwiceLearnedTotal"]}",
+                text = "2x richtig beantwortet: ${questionViewModel.extractTotalStatistics()[Constants.STATISTICS_TWICE_LEARNED_TOTAL]}",
                 color = Color.White,
                 style = MaterialTheme.typography.body2,
                 modifier = Modifier.padding(start = 25.dp, top = 10.dp)
             )
             Text(
-                text = "Falsch beantwortet: ${questionViewModel.extractTotalStatistics()["FailedTotal"]}",
+                text = "Falsch beantwortet: ${questionViewModel.extractTotalStatistics()[Constants.STATISTICS_FAILED_TOTAL]}",
                 color = Color.White,
                 style = MaterialTheme.typography.body2,
                 modifier = Modifier.padding(start = 25.dp, top = 10.dp)
             )
             Text(
-                text = "${questionViewModel.extractTotalStatistics()["TotalPercentage"]}% gelernt",
+                text = "${questionViewModel.extractTotalStatistics()[Constants.STATISTICS_TOTAL_PERCENTAGE]}% gelernt",
                 color = Color.White,
                 style = MaterialTheme.typography.body2,
                 modifier = Modifier.padding(start = 25.dp, top = 10.dp)

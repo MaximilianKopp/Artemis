@@ -450,7 +450,7 @@ class AssignmentComponent {
                                     val checkedState =
                                         remember { mutableStateOf(checkbox.checked) }
                                     val currentQuestionText: String =
-                                        assignmentViewModel.setCurrentQuestionText(
+                                        assignmentViewModel.setCurrentOptionText(
                                             currentQuestion, checkbox
                                         )
                                     Row {
@@ -542,7 +542,7 @@ class AssignmentComponent {
                                 TextButton(
                                     colors = ButtonDefaults.textButtonColors(Artemis_Red),
                                     onClick = {
-                                        assignmentViewModel.setNavigationButton(
+                                        assignmentViewModel.setDirection(
                                             NavigationButton.SKIPPED_INDEX,
                                             assignmentQuestions.indexOf(question) + 1,
                                             assignmentQuestions
@@ -572,7 +572,7 @@ class AssignmentComponent {
                         IconButton(
                             modifier = Modifier.weight(0.1f),
                             onClick = {
-                                assignmentViewModel.setNavigationButton(
+                                assignmentViewModel.setDirection(
                                     NavigationButton.FIRST_PAGE,
                                     navIndex,
                                     assignmentQuestions
@@ -589,7 +589,7 @@ class AssignmentComponent {
                         IconButton(
                             modifier = Modifier.weight(0.1f),
                             onClick = {
-                                assignmentViewModel.setNavigationButton(
+                                assignmentViewModel.setDirection(
                                     NavigationButton.SKIP_TEN_BACKWARD,
                                     navIndex,
                                     assignmentQuestions
@@ -607,7 +607,7 @@ class AssignmentComponent {
                         IconButton(
                             modifier = Modifier.weight(0.1f),
                             onClick = {
-                                assignmentViewModel.setNavigationButton(
+                                assignmentViewModel.setDirection(
                                     NavigationButton.PREV_PAGE,
                                     navIndex,
                                     assignmentQuestions
@@ -642,7 +642,7 @@ class AssignmentComponent {
                         IconButton(
                             modifier = Modifier.weight(0.1f),
                             onClick = {
-                                assignmentViewModel.setNavigationButton(
+                                assignmentViewModel.setDirection(
                                     NavigationButton.NEXT_PAGE,
                                     navIndex,
                                     assignmentQuestions
@@ -659,7 +659,7 @@ class AssignmentComponent {
                         IconButton(
                             modifier = Modifier.weight(0.1f),
                             onClick = {
-                                assignmentViewModel.setNavigationButton(
+                                assignmentViewModel.setDirection(
                                     NavigationButton.SKIP_TEN_FORWARD,
                                     navIndex,
                                     assignmentQuestions
@@ -677,7 +677,7 @@ class AssignmentComponent {
                         IconButton(
                             modifier = Modifier.weight(0.1f),
                             onClick = {
-                                assignmentViewModel.setNavigationButton(
+                                assignmentViewModel.setDirection(
                                     NavigationButton.LAST_PAGE,
                                     navIndex,
                                     assignmentQuestions

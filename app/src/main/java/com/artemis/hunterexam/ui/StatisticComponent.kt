@@ -20,6 +20,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
+import com.artemis.hunterexam.helper.Constants
+import com.artemis.hunterexam.helper.Constants.Companion.STATISTICS_TOTAL_PERCENTAGE
 import com.artemis.hunterexam.helper.TableCell
 import com.artemis.hunterexam.ui.theme.Artemis_Green
 import com.artemis.hunterexam.ui.theme.Artemis_Red
@@ -68,13 +70,13 @@ class StatisticComponent {
             Row {
                 Column {
                     Text(
-                        text = "1x richtig beantwortet: ${questionViewModel.extractTotalStatistics()["OnceLearnedTotal"]}",
+                        text = "1x richtig beantwortet: ${questionViewModel.extractTotalStatistics()[Constants.STATISTICS_ONCE_LEARNED_TOTAL]}",
                         color = Color.White,
                         style = MaterialTheme.typography.body2,
                         modifier = Modifier.padding(start = 25.dp, top = 10.dp)
                     )
                     Text(
-                        text = "Falsch beantwortet: ${questionViewModel.extractTotalStatistics()["FailedTotal"]}",
+                        text = "Falsch beantwortet: ${questionViewModel.extractTotalStatistics()[Constants.STATISTICS_FAILED_TOTAL]}",
                         color = Color.White,
                         style = MaterialTheme.typography.body2,
                         modifier = Modifier.padding(start = 25.dp, top = 10.dp)
@@ -82,13 +84,13 @@ class StatisticComponent {
                 }
                 Column {
                     Text(
-                        text = "2x richtig beantwortet: ${questionViewModel.extractTotalStatistics()["TwiceLearnedTotal"]}",
+                        text = "2x richtig beantwortet: ${questionViewModel.extractTotalStatistics()[Constants.STATISTICS_TWICE_LEARNED_TOTAL]}",
                         color = Color.White,
                         style = MaterialTheme.typography.body2,
                         modifier = Modifier.padding(start = 25.dp, top = 10.dp)
                     )
                     Text(
-                        text = "${questionViewModel.extractTotalStatistics()["TotalPercentage"]}% gelernt",
+                        text = "${questionViewModel.extractTotalStatistics()[STATISTICS_TOTAL_PERCENTAGE]}% gelernt",
                         color = Color.White,
                         style = MaterialTheme.typography.body2,
                         modifier = Modifier.padding(start = 25.dp, top = 10.dp)

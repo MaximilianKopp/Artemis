@@ -23,7 +23,7 @@ class TrainingViewModel : ViewModel() {
     private val _checkedAnswers = mutableSetOf<String>()
     private val checkedAnswers: Set<String> = _checkedAnswers as HashSet<String>
 
-    private val _answerBtnText = MutableLiveData("Antworten")
+    private val _answerBtnText = MutableLiveData(Constants.BTN_ANSWER)
     val answerBtnText: LiveData<String> = _answerBtnText
 
     private val _currentQuestion = MutableLiveData<QuestionProjection>()
@@ -72,7 +72,7 @@ class TrainingViewModel : ViewModel() {
                 question.optionD
             )
         }
-        return "ERROR"
+        return Constants.ERROR
     }
 
     private fun removeAlphabeticPrefixFromQuestionText(option: String): String {
@@ -167,12 +167,6 @@ class TrainingViewModel : ViewModel() {
         }
         _currentQuestion.postValue(currentQuestion)
         onChangeCurrentQuestion(currentQuestion)
-    }
-
-    private fun skippedIndex(questions: List<QuestionProjection>, skippedIndex: Int) {
-        val index = if (skippedIndex == 0) 0 else skippedIndex - 1
-        onChangeIndex(index)
-        onChangeCurrentQuestion(questions[index])
     }
 
     private fun firstPage(questions: List<QuestionProjection>) {

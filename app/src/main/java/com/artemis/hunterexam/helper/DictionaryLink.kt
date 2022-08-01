@@ -114,7 +114,7 @@ fun DictionaryAlertDialog(
                         hyperlinks = listOf(dictionaryEntry.url)
                     )
                     Text(
-                        text = "Das Anklicken dieses Links öffnet Ihren Web-Browser und leitet Sie zum Wikipedia-Eintrag weiter",
+                        text = Constants.DICTIONARY_HINT,
                         style = MaterialTheme.typography.overline
                     )
                 }

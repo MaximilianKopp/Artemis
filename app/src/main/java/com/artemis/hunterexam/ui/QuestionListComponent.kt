@@ -686,7 +686,7 @@ class QuestionListComponent {
         questionsByTopicAndFilter: List<QuestionProjection>,
     ) {
         val searchBarText: String by generalViewModel.searchTextState
-        if (currentFilter.value == CriteriaFilter.SEARCH) {
+        if (currentFilter.value == CriteriaFilter.CUSTOM_SEARCH) {
             questionViewModel.onChangeQuestionList(
                 questionsByTopicAndFilter.filter {
                     it.text.contains(searchBarText, true)

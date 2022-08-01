@@ -92,7 +92,7 @@ class TrainingComponent {
         )
         val isNavButtonEnabled: Boolean by trainingViewModel.isButtonEnabled.observeAsState(true)
         val isAnswerButtonEnabled = remember { mutableStateOf(false) }
-        val answerBtnText: String by trainingViewModel.answerBtnText.observeAsState("Antworten")
+        val answerBtnText: String by trainingViewModel.answerBtnText.observeAsState(Constants.BTN_ANSWER)
         val currentTopic = questionViewModel.currentTopic.value
         val loadScreen =
             currentTopic?.let { generalViewModel.loadScreenByTopic(it) }
@@ -190,7 +190,7 @@ class TrainingComponent {
                                 Modifier.padding(top = 10.dp, bottom = 10.dp)
                             ) {
                                 val isChecked =
-                                    if (answerBtnText == "Antworten") {
+                                    if (answerBtnText == Constants.BTN_ANSWER) {
                                         trainingViewModel.checkStates(
                                             currentQuestion,
                                             checkbox,
@@ -200,7 +200,7 @@ class TrainingComponent {
                                         true
                                     }
                                 val checkBoxColor: CheckboxColors =
-                                    if (answerBtnText == "Antworten") {
+                                    if (answerBtnText == Constants.BTN_ANSWER) {
                                         CheckboxDefaults.colors(checkbox.color)
                                     } else {
                                         CheckboxDefaults.colors(
@@ -345,7 +345,7 @@ class TrainingComponent {
                         colors = ButtonDefaults.buttonColors(Artemis_Blue),
                         //Contains whole logic for further answer processing
                         onClick = {
-                            if (answerBtnText == "Antworten") {
+                            if (answerBtnText == Constants.BTN_ANSWER) {
                                 //Change last viewed record by current timestamp
                                 currentQuestion.lastViewed =
                                     LocalDateTime.now().format(
@@ -429,7 +429,7 @@ class TrainingComponent {
                                 if (index == trainingData.size - 1) {
                                     onOpenTrainingDialog(true)
                                 }
-                                trainingViewModel.onChangeAnswerButtonText("Antworten")
+                                trainingViewModel.onChangeAnswerButtonText(Constants.BTN_ANSWER)
                             }
                         }) {
                         Text(
@@ -524,7 +524,7 @@ class TrainingComponent {
             if (loadScreen != null && isTrainingDialogOpen) {
                 questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
                 trainingViewModel.onChangeIndex(0)
-                trainingViewModel.onChangeAnswerButtonText("Antworten")
+                trainingViewModel.onChangeAnswerButtonText(Constants.BTN_ANSWER)
                 trainingViewModel.resetCurrentSelection()
                 navController.navigate(loadScreen.route)
             }
@@ -571,7 +571,7 @@ class TrainingComponent {
                                 )
                             )
                             trainingViewModel.onChangeIndex(0)
-                            trainingViewModel.onChangeAnswerButtonText("Antworten")
+                            trainingViewModel.onChangeAnswerButtonText(Constants.BTN_ANSWER)
                             trainingViewModel.resetCurrentSelection()
                         },
                         Modifier

@@ -130,7 +130,7 @@ class AppBarComponent {
                 IconButton(
                     onClick = {
                         onSearchTriggered()
-                        questionViewModel.onChangeFilter(CriteriaFilter.SEARCH)
+                        questionViewModel.onChangeFilter(CriteriaFilter.CUSTOM_SEARCH)
                     },
                     Modifier.alpha(searchWidget.first),
                     enabled = searchWidget.second,
