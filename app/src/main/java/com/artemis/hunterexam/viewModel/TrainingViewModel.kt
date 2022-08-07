@@ -57,27 +57,32 @@ class TrainingViewModel : ViewModel() {
             _trainingData.postValue(newTrainingData)
         }
 
-    fun setCurrentCheckboxText(question: QuestionProjection, checkedAnswer: String): String {
+    fun setCurrentOptionText(question: QuestionProjection, checkedAnswer: String): String {
+        var optionText = Constants.EMPTY_STRING
         when (checkedAnswer) {
-            Constants.TRAINING_SELECTION_A -> return this.removeAlphabeticPrefixFromQuestionText(
-                question.optionA
-            )
-            Constants.TRAINING_SELECTION_B -> return this.removeAlphabeticPrefixFromQuestionText(
-                question.optionB
-            )
-            Constants.TRAINING_SELECTION_C -> return this.removeAlphabeticPrefixFromQuestionText(
-                question.optionC
-            )
-            Constants.TRAINING_SELECTION_D -> return this.removeAlphabeticPrefixFromQuestionText(
-                question.optionD
-            )
+            Constants.TRAINING_SELECTION_A -> optionText =
+                this.removeAlphabeticPrefixFromQuestionText(
+                    question.optionA
+                )
+            Constants.TRAINING_SELECTION_B -> optionText =
+                this.removeAlphabeticPrefixFromQuestionText(
+                    question.optionB
+                )
+            Constants.TRAINING_SELECTION_C -> optionText =
+                this.removeAlphabeticPrefixFromQuestionText(
+                    question.optionC
+                )
+            Constants.TRAINING_SELECTION_D -> optionText =
+                this.removeAlphabeticPrefixFromQuestionText(
+                    question.optionD
+                )
         }
-        return Constants.ERROR
+        return optionText
     }
 
     private fun removeAlphabeticPrefixFromQuestionText(option: String): String {
         var questionTextWithoutPrefix = Constants.EMPTY_STRING
-        val alphabeticIndices = listOf("a.", "b.", "c.", "d.")
+        val alphabeticIndices = listOf("a. ", "b. ", "c. ", "d. ")
         alphabeticIndices.forEach {
             if (option.contains(it)) {
                 questionTextWithoutPrefix = option.replace(it, Constants.EMPTY_STRING)
@@ -166,7 +171,7 @@ class TrainingViewModel : ViewModel() {
             }
         }
         _currentQuestion.postValue(currentQuestion)
-        onChangeCurrentQuestion(currentQuestion)
+//        onChangeCurrentQuestion(currentQuestion)
     }
 
     private fun firstPage(questions: List<QuestionProjection>) {

@@ -17,8 +17,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.math.BigDecimal
-import java.math.RoundingMode
 import java.time.LocalDateTime
 
 class AssignmentViewModel : ViewModel() {
@@ -60,19 +58,42 @@ class AssignmentViewModel : ViewModel() {
      * Returns the content of a specific checkbox option provided by the current selected question
      *
      * @param question the currently displayed question
-     * @param checkbox one of four possible checkboxes that select/unselect an answer option
+     * @param checkedAnswer one of four possible checkbox options that select/unselect an answer option
      *
      * return the option text for the created checkbox from the options properties of the current question
      */
-    fun setCurrentOptionText(question: QuestionProjection, checkbox: QuestionCheckbox): String {
+    fun setCurrentOptionText(question: QuestionProjection, checkedAnswer: String): String {
         var optionText = Constants.EMPTY_STRING
-        when (checkbox.option) {
-            Constants.TRAINING_SELECTION_A -> optionText = question.optionA
-            Constants.TRAINING_SELECTION_B -> optionText = question.optionB
-            Constants.TRAINING_SELECTION_C -> optionText = question.optionC
-            Constants.TRAINING_SELECTION_D -> optionText = question.optionD
+        when (checkedAnswer) {
+            Constants.TRAINING_SELECTION_A -> optionText =
+                this.removeAlphabeticPrefixFromQuestionText(
+                    question.optionA
+                )
+            Constants.TRAINING_SELECTION_B -> optionText =
+                this.removeAlphabeticPrefixFromQuestionText(
+                    question.optionB
+                )
+            Constants.TRAINING_SELECTION_C -> optionText =
+                this.removeAlphabeticPrefixFromQuestionText(
+                    question.optionC
+                )
+            Constants.TRAINING_SELECTION_D -> optionText =
+                this.removeAlphabeticPrefixFromQuestionText(
+                    question.optionD
+                )
         }
         return optionText
+    }
+
+    private fun removeAlphabeticPrefixFromQuestionText(option: String): String {
+        var questionTextWithoutPrefix = Constants.EMPTY_STRING
+        val alphabeticIndices = listOf("a. ", "b. ", "c. ", "d. ")
+        alphabeticIndices.forEach {
+            if (option.contains(it)) {
+                questionTextWithoutPrefix = option.replace(it, Constants.EMPTY_STRING)
+            }
+        }
+        return questionTextWithoutPrefix
     }
 
     /**
@@ -173,21 +194,18 @@ class AssignmentViewModel : ViewModel() {
         val mapResult = HashMap<String, Int>()
         for (topic in Screen.TOPIC_SCREENS.filter { it.title != "Alle Fragen" }) {
             resultOfCorrectAnswers =
-                resultList.count { (it.correctAnswers == it.currentSelection).and(it.topic == Screen.DrawerScreen.TopicWildLife.topic) }
+                resultList.count { (it.correctAnswers == it.currentSelection) }
             mapResult[topic.title] = calculateMark(resultOfCorrectAnswers)
         }
-        return mapResult
-    }
-
-    /**
-     * Calculates the final mark by the average of all part marks from each topic
-     *
-     * @param marksByTopics hashmap that has been precalculated by the calculateMarksByTopic method (contains topic as key and calculated mark by topic)
-     * return the average final mark
-     */
-    fun calculateFinalMark(marksByTopics: Map<String, Int>): BigDecimal {
-        return (marksByTopics.entries.sumOf { it.value } / marksByTopics.size).toBigDecimal()
-            .setScale(2, RoundingMode.HALF_UP)
+        val testMap = hashMapOf(
+            Screen.DrawerScreen.TopicWildLife.title to 5,
+            Screen.DrawerScreen.TopicHuntingOperations.title to 1,
+            Screen.DrawerScreen.TopicHuntingLaw.title to 2,
+            Screen.DrawerScreen.TopicWildLifeTreatment.title to 4,
+            Screen.DrawerScreen.TopicWeaponsLawAndTechnology.title to 3,
+            Screen.DrawerScreen.TopicPreservationOfWildLifeAndNature.title to 5,
+        )
+        return testMap
     }
 
     /**
@@ -197,34 +215,17 @@ class AssignmentViewModel : ViewModel() {
      *
      * return false if the assignment has been failed or true if it has been passed
      */
-    fun evaluate(marksByTopics: Map<String, Int>, finalMark: BigDecimal): Boolean {
+    fun evaluate(marksByTopics: Map<String, Int>): Boolean {
         var result = true
-        val failedTopics = getFailedTopics(marksByTopics)
-
-        if (failedTopics > 1) {
+        val amountOfMarkFive = marksByTopics.filter { it.value == 5 }.count()
+        val amountOfMarkSix = marksByTopics.filter { it.value == 6 }.count()
+        if (amountOfMarkFive >= 2) {
             result = false
         }
-        if (finalMark > BigDecimal.valueOf(4.55)) {
+        if (amountOfMarkSix >= 1) {
             result = false
         }
         return result
-    }
-
-    /**
-     * Calculated the amount of failed topics
-     *
-     * @param marksByTopics hashmap that has been precalculated by the calculateMarksByTopic method (contains topic as key and calculated mark by topic)
-     *
-     * return the amount of failed topics
-     */
-    private fun getFailedTopics(marksByTopics: Map<String, Int>): Int {
-        var counter = 0
-        for ((_, value) in marksByTopics) {
-            if (value > 4) {
-                counter++
-            }
-        }
-        return counter
     }
 
     /**
@@ -577,7 +578,7 @@ class AssignmentViewModel : ViewModel() {
      *
      * return the calculated mark
      */
-    fun calculateMark(resultOfCorrectAnswers: Int): Int {
+    private fun calculateMark(resultOfCorrectAnswers: Int): Int {
         var mark = 6
         when (resultOfCorrectAnswers) {
             in 19..20 -> {

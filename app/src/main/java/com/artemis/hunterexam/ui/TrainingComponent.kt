@@ -181,7 +181,7 @@ class TrainingComponent {
                             val checkedState =
                                 remember { mutableStateOf(checkbox.checked) }
                             val currentCheckboxText: String =
-                                trainingViewModel.setCurrentCheckboxText(
+                                trainingViewModel.setCurrentOptionText(
                                     currentQuestion,
                                     checkbox.option
                                 )

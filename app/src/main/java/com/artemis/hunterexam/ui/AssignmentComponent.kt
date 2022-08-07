@@ -14,6 +14,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.artemis.hunterexam.helper.Constants
@@ -218,10 +219,8 @@ class AssignmentComponent {
         assignmentQuestions: List<QuestionProjection>
     ) {
         val verticalScrollState = rememberScrollState()
-        val partialMark: MutableState<Int> = remember { mutableStateOf(0) }
         val marksByTopics = assignmentViewModel.calculateMarksByTopic(assignmentQuestions)
-        val finalMark = assignmentViewModel.calculateFinalMark(marksByTopics)
-        val evaluation: Boolean = assignmentViewModel.evaluate(marksByTopics, finalMark)
+        val evaluation: Boolean = assignmentViewModel.evaluate(marksByTopics)
 
         Column(
             modifier = Modifier
@@ -232,7 +231,7 @@ class AssignmentComponent {
                     Card(
                         modifier = Modifier
                             .fillMaxWidth(),
-                        backgroundColor = if (evaluation) Artemis_Green.copy(alpha = 0.1f) else Artemis_Red,
+                        backgroundColor = if (evaluation) Artemis_Yellow.copy(alpha = 0.1f) else Artemis_Red,
                         shape = RoundedCornerShape(25.dp)
                     ) {
                         Column(
@@ -242,15 +241,30 @@ class AssignmentComponent {
                                 horizontalArrangement = Arrangement.Center,
                                 modifier = Modifier.padding(5.dp)
                             ) {
+                                IconButton(
+                                    onClick = { /*TODO*/ },
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Info,
+                                        contentDescription = "Range of scoring",
+                                        tint = Artemis_Yellow
+                                    )
+                                }
                                 if (evaluation) {
                                     Text(
-                                        text = "Du hast die Prüfung bestanden",
-                                        color = Color.White
+                                        modifier = Modifier.padding(5.dp),
+                                        textAlign = TextAlign.Center,
+                                        text = "Herzlichen Glückwunsch!\nDu hast die Prüfung bestanden",
+                                        color = Color.White,
+                                        style = MaterialTheme.typography.subtitle2
                                     )
                                 } else {
                                     Text(
-                                        text = "Du hast die Prüfung leider nicht bestanden",
-                                        color = Color.White
+                                        modifier = Modifier.padding(5.dp),
+                                        textAlign = TextAlign.Center,
+                                        text = "Du hast die Prüfung leider nicht bestanden\nEs wurden mind. 1 Sachgebiet mit der Note 6 oder mehr als 2 Sachgebiete mit der Note 5 abgeschlossen",
+                                        color = Color.White,
+                                        style = MaterialTheme.typography.subtitle2
                                     )
                                 }
                             }
@@ -285,9 +299,8 @@ class AssignmentComponent {
                         assignmentViewModel.filterWrongAnswersOfEachTopic(
                             amountCorrectAnswersByTopic
                         )
-                    val currentMark: Int =
-                        assignmentViewModel.calculateMark(amountCorrectAnswersByTopic)
-                    partialMark.value = currentMark
+                    val currentMark: Int? =
+                        marksByTopics[topic.title]
                     Card(
                         modifier = Modifier
                             .padding(5.dp),
@@ -303,19 +316,6 @@ class AssignmentComponent {
                                     style = MaterialTheme.typography.h6,
                                     color = Color.Black
                                 )
-                                if (partialMark.value > 4) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Close,
-                                        contentDescription = "Icon for failed assignment",
-                                        tint = Color.Red
-                                    )
-                                } else {
-                                    Icon(
-                                        imageVector = Icons.Filled.Check,
-                                        contentDescription = "Icon for passed assignment",
-                                        tint = Color.Green
-                                    )
-                                }
                             }
                             Divider(
                                 color = Color.Black, thickness = 2.dp
@@ -339,7 +339,8 @@ class AssignmentComponent {
                             }
                             Row {
                                 Text(
-                                    text = "Note: $currentMark", color = Color.Black
+                                    text = "Note: $currentMark",
+                                    color = if (currentMark != null && currentMark > 4) Artemis_Red else Artemis_Green
                                 )
                             }
                         }
@@ -451,7 +452,7 @@ class AssignmentComponent {
                                         remember { mutableStateOf(checkbox.checked) }
                                     val currentQuestionText: String =
                                         assignmentViewModel.setCurrentOptionText(
-                                            currentQuestion, checkbox
+                                            currentQuestion, checkbox.option
                                         )
                                     Row {
                                         val isChecked =
