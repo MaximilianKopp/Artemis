@@ -50,10 +50,10 @@ class AppBarComponent {
         val questionFilter: Pair<Float, Boolean> by generalViewModel.questionFilter.observeAsState(
             Pair(Constants.ALPHA_VISIBLE, Constants.ENABLED)
         )
-        val closeAssignmentScreen: Pair<Float, Boolean> by generalViewModel.closeAssignmentScreen.observeAsState(
+        val closeAssignmentScreen: Pair<Float, Boolean> by generalViewModel.assignmentCloseButton.observeAsState(
             Pair(Constants.ALPHA_INVISIBLE, Constants.DISABLED)
         )
-        val closeTrainingScreen: Pair<Float, Boolean> by generalViewModel.closeTrainingScreen.observeAsState(
+        val closeTrainingScreen: Pair<Float, Boolean> by generalViewModel.trainingCloseButton.observeAsState(
             Pair(Constants.ALPHA_INVISIBLE, Constants.DISABLED)
         )
         val searchWidget: Pair<Float, Boolean> by generalViewModel.searchWidget.observeAsState(

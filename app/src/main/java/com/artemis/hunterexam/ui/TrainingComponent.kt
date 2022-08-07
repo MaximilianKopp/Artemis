@@ -564,7 +564,7 @@ class TrainingComponent {
                             questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
                             trainingViewModel.onChangeIndex(0)
                             onOpenTrainingDialog(false)
-                            generalViewModel.onCloseTrainingScreen(
+                            generalViewModel.onChangeVisibilityOfTrainingCloseButton(
                                 Pair(
                                     Constants.ALPHA_INVISIBLE,
                                     Constants.DISABLED

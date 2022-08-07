@@ -197,15 +197,15 @@ class AssignmentViewModel : ViewModel() {
                 resultList.count { (it.correctAnswers == it.currentSelection) }
             mapResult[topic.title] = calculateMark(resultOfCorrectAnswers)
         }
-        val testMap = hashMapOf(
-            Screen.DrawerScreen.TopicWildLife.title to 5,
-            Screen.DrawerScreen.TopicHuntingOperations.title to 1,
-            Screen.DrawerScreen.TopicHuntingLaw.title to 2,
-            Screen.DrawerScreen.TopicWildLifeTreatment.title to 4,
-            Screen.DrawerScreen.TopicWeaponsLawAndTechnology.title to 3,
-            Screen.DrawerScreen.TopicPreservationOfWildLifeAndNature.title to 5,
-        )
-        return testMap
+//        val testMap = hashMapOf(
+//            Screen.DrawerScreen.TopicWildLife.title to 5,
+//            Screen.DrawerScreen.TopicHuntingOperations.title to 1,
+//            Screen.DrawerScreen.TopicHuntingLaw.title to 2,
+//            Screen.DrawerScreen.TopicWildLifeTreatment.title to 4,
+//            Screen.DrawerScreen.TopicWeaponsLawAndTechnology.title to 3,
+//            Screen.DrawerScreen.TopicPreservationOfWildLifeAndNature.title to 5,
+//        )
+        return mapResult
     }
 
     /**
@@ -498,27 +498,6 @@ class AssignmentViewModel : ViewModel() {
         _currentQuestion.postValue(currentQuestion)
         onChangeCurrentQuestion(currentQuestion)
     }
-
-    /**
-     * Launches the coroutine of the showAppBar method
-     *
-     * @param showAppBar boolean that will be passed to coroutine
-     */
-    fun onChangeAppBarAppearance(showAppBar: Boolean) {
-        CoroutineScope(Dispatchers.IO).launch {
-            onChangeAppBarAppearanceCoroutine(showAppBar)
-        }
-    }
-
-    /**
-     * Hides the TopAppBar during the whole assignment
-     *
-     * @param showAppBar decides if the TopAppBar has to been shown or not
-     */
-    private suspend fun onChangeAppBarAppearanceCoroutine(showAppBar: Boolean) =
-        withContext(Dispatchers.IO) {
-            _showAppBar.postValue(showAppBar)
-        }
 
     /**
      * If at least one checkbox of all questions within a topic is checked, the topicBoxButton color will be changed to yellow

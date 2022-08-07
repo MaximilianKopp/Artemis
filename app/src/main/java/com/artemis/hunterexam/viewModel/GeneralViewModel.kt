@@ -34,14 +34,14 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
     private val _openTrainingDialog = MutableLiveData(false)
     val openTrainingDialog: LiveData<Boolean> = _openTrainingDialog
 
-    private val _closeTrainingScreen = MutableLiveData<Pair<Float, Boolean>>()
-    val closeTrainingScreen: LiveData<Pair<Float, Boolean>> = _closeTrainingScreen
+    private val _trainingCloseButton = MutableLiveData<Pair<Float, Boolean>>()
+    val trainingCloseButton: LiveData<Pair<Float, Boolean>> = _trainingCloseButton
+
+    private val _assignmentCloseButton = MutableLiveData<Pair<Float, Boolean>>()
+    val assignmentCloseButton: LiveData<Pair<Float, Boolean>> = _assignmentCloseButton
 
     private val _openAssignmentDialog = MutableLiveData(false)
     val openAssignmentDialog: LiveData<Boolean> = _openAssignmentDialog
-
-    private val _closeAssignmentScreen = MutableLiveData<Pair<Float, Boolean>>()
-    val closeAssignmentScreen: LiveData<Pair<Float, Boolean>> = _closeAssignmentScreen
 
     private val _searchWidget = MutableLiveData<Pair<Float, Boolean>>()
     val searchWidget: LiveData<Pair<Float, Boolean>> = _searchWidget
@@ -172,26 +172,26 @@ class GeneralViewModel(application: Application) : AndroidViewModel(application)
             _searchWidget.postValue(visibility)
         }
 
-    fun onCloseAssignmentScreen(visibility: Pair<Float, Boolean>) {
+    fun onChangeVisibilityOfAssignmentCloseButton(visibility: Pair<Float, Boolean>) {
         CoroutineScope(Dispatchers.IO).launch {
-            onCloseAssignmentScreenCoroutine(visibility)
+            onChangeVisibilityOfAssignmentCloseButtonCoroutine(visibility)
         }
     }
 
-    private suspend fun onCloseAssignmentScreenCoroutine(visibility: Pair<Float, Boolean>) =
+    private suspend fun onChangeVisibilityOfAssignmentCloseButtonCoroutine(visibility: Pair<Float, Boolean>) =
         withContext(Dispatchers.IO) {
-            _closeAssignmentScreen.postValue(visibility)
+            _assignmentCloseButton.postValue(visibility)
         }
 
-    fun onCloseTrainingScreen(visibility: Pair<Float, Boolean>) {
+    fun onChangeVisibilityOfTrainingCloseButton(visibility: Pair<Float, Boolean>) {
         CoroutineScope(Dispatchers.IO).launch {
-            onCloseTrainingScreenCoroutine(visibility)
+            onChangeVisibilityOfTrainingCloseButtonCoroutine(visibility)
         }
     }
 
-    private suspend fun onCloseTrainingScreenCoroutine(visible: Pair<Float, Boolean>) =
+    private suspend fun onChangeVisibilityOfTrainingCloseButtonCoroutine(visible: Pair<Float, Boolean>) =
         withContext(Dispatchers.IO) {
-            _closeTrainingScreen.postValue(visible)
+            _trainingCloseButton.postValue(visible)
         }
 
     fun onOpenFilterDialog(isOpen: Boolean) {

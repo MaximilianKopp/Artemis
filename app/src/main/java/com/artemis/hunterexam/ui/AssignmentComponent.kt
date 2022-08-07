@@ -14,6 +14,8 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -216,11 +218,13 @@ class AssignmentComponent {
     fun ResultContent(
         showResultContent: MutableState<Boolean>,
         assignmentViewModel: AssignmentViewModel,
+        generalViewModel: GeneralViewModel,
         assignmentQuestions: List<QuestionProjection>
     ) {
         val verticalScrollState = rememberScrollState()
         val marksByTopics = assignmentViewModel.calculateMarksByTopic(assignmentQuestions)
         val evaluation: Boolean = assignmentViewModel.evaluate(marksByTopics)
+        val openScoringDialog = remember { mutableStateOf(false) }
 
         Column(
             modifier = Modifier
@@ -242,8 +246,11 @@ class AssignmentComponent {
                                 modifier = Modifier.padding(5.dp)
                             ) {
                                 IconButton(
-                                    onClick = { /*TODO*/ },
+                                    onClick = { openScoringDialog.value = true },
                                 ) {
+                                    if (openScoringDialog.value) {
+                                        ScoringSystem(openScoringDialog = openScoringDialog)
+                                    }
                                     Icon(
                                         imageVector = Icons.Filled.Info,
                                         contentDescription = "Range of scoring",
@@ -276,7 +283,12 @@ class AssignmentComponent {
                             colors = ButtonDefaults.buttonColors(Artemis_Blue),
                             onClick = {
                                 showResultContent.value = false
-                                assignmentViewModel.onChangeAppBarAppearance(true)
+                                generalViewModel.onChangeVisibilityOfAssignmentCloseButton(
+                                    Pair(
+                                        Constants.ALPHA_VISIBLE,
+                                        Constants.ENABLED
+                                    )
+                                )
                             }) {
                             Text(
                                 color = Color.White,
@@ -348,6 +360,36 @@ class AssignmentComponent {
                 }
             }
         }
+    }
+
+    @Composable
+    fun ScoringSystem(openScoringDialog: MutableState<Boolean>) {
+        AlertDialog(
+            modifier = Modifier.border(2.dp, Color.White, RectangleShape),
+            onDismissRequest = { openScoringDialog.value = false },
+            backgroundColor = Artemis_Yellow,
+            text = {
+                Column {
+                    Text(
+                        text = "Notenschlüssel",
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.body1
+                    )
+                    Text(text = "19-20 Punkte -> Note 1")
+                    Text(text = "16-18 Punkte -> Note 2")
+                    Text(text = "13-15 Punkte -> Note 3")
+                    Text(text = "10-12 Punkte -> Note 4")
+                    Text(text = "  7-9 Punkte -> Note 5")
+                    Text(text = "  0-7 Punkte -> Note 6")
+                    Divider(
+                        modifier = Modifier.padding(top = 10.dp, bottom = 10.dp),
+                        color = Color.White,
+                        thickness = 1.dp
+                    )
+                    Text(text = "Die Prüfung gilt als nicht bestanden, wenn in mind. einem Sachgebiet die Note 6 oder in mind. 2 Sachgebieten die Note 5 erreicht wurde.")
+                }
+            },
+            buttons = {})
     }
 
     @Composable
@@ -631,6 +673,12 @@ class AssignmentComponent {
                                     isEvaluationDialogOpen.value = true
                                 } else {
                                     showResultContent.value = true
+                                    generalViewModel.onChangeVisibilityOfAssignmentCloseButton(
+                                        Pair(
+                                            Constants.ALPHA_INVISIBLE,
+                                            Constants.DISABLED
+                                        )
+                                    )
                                 }
                             })
                         {
@@ -707,7 +755,7 @@ class AssignmentComponent {
                     isEvaluationDialogOpen,
                     showResultContent,
                     questionViewModel,
-                    assignmentViewModel,
+                    generalViewModel,
                     assignmentQuestions,
                     resultListOfAnsweredQuestions,
                     evaluationButtonText
@@ -731,6 +779,7 @@ class AssignmentComponent {
             ResultContent(
                 showResultContent = showResultContent,
                 assignmentViewModel = assignmentViewModel,
+                generalViewModel = generalViewModel,
                 assignmentQuestions = assignmentQuestions
             )
         }
@@ -741,7 +790,7 @@ class AssignmentComponent {
         isEvaluationDialogOpen: MutableState<Boolean>,
         showResultContent: MutableState<Boolean>,
         questionViewModel: QuestionViewModel,
-        assignmentViewModel: AssignmentViewModel,
+        generalViewModel: GeneralViewModel,
         assignmentQuestions: List<QuestionProjection>,
         resultListOfAnsweredQuestions: List<QuestionProjection>,
         evaluationButtonText: MutableState<String>,
@@ -789,7 +838,12 @@ class AssignmentComponent {
                                     )
                                 }
                             evaluationButtonText.value = "Ergebnisse"
-                            assignmentViewModel.onChangeAppBarAppearance(false)
+                            generalViewModel.onChangeVisibilityOfAssignmentCloseButton(
+                                Pair(
+                                    Constants.ALPHA_INVISIBLE,
+                                    Constants.DISABLED
+                                )
+                            )
                         },
                         Modifier
                             .width(300.dp)
@@ -852,7 +906,7 @@ class AssignmentComponent {
                             onOpenAssignmentDialog(false)
                             assignmentViewModel.onChangeIndex(0)
                             generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Home)
-                            generalViewModel.onCloseTrainingScreen(
+                            generalViewModel.onChangeVisibilityOfAssignmentCloseButton(
                                 Pair(
                                     Constants.ALPHA_INVISIBLE,
                                     Constants.DISABLED

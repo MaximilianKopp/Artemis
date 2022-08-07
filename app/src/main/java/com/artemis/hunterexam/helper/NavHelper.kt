@@ -84,13 +84,13 @@ class NavHelper {
                                 Constants.DISABLED
                             )
                         )
-                        generalViewModel.onCloseTrainingScreen(
+                        generalViewModel.onChangeVisibilityOfTrainingCloseButton(
                             Pair(
                                 Constants.ALPHA_INVISIBLE,
                                 Constants.DISABLED
                             )
                         )
-                        generalViewModel.onCloseAssignmentScreen(
+                        generalViewModel.onChangeVisibilityOfAssignmentCloseButton(
                             Pair(
                                 Constants.ALPHA_INVISIBLE,
                                 Constants.DISABLED
@@ -264,7 +264,7 @@ class NavHelper {
                                         )
                                     }
                                 }
-                                generalViewModel.onCloseTrainingScreen(
+                                generalViewModel.onChangeVisibilityOfTrainingCloseButton(
                                     Pair(
                                         Constants.ALPHA_INVISIBLE,
                                         Constants.DISABLED
@@ -297,7 +297,7 @@ class NavHelper {
                                 Constants.DISABLED
                             )
                         )
-                        generalViewModel.onCloseAssignmentScreen(
+                        generalViewModel.onChangeVisibilityOfAssignmentCloseButton(
                             Pair(
                                 Constants.ALPHA_VISIBLE,
                                 Constants.ENABLED
@@ -326,13 +326,13 @@ class NavHelper {
                                 Constants.DISABLED
                             )
                         )
-                        generalViewModel.onCloseTrainingScreen(
+                        generalViewModel.onChangeVisibilityOfTrainingCloseButton(
                             Pair(
                                 Constants.ALPHA_VISIBLE,
                                 Constants.ENABLED
                             )
                         )
-                        generalViewModel.onCloseTrainingScreen(
+                        generalViewModel.onChangeVisibilityOfTrainingCloseButton(
                             Pair(
                                 Constants.ALPHA_VISIBLE,
                                 Constants.ENABLED
