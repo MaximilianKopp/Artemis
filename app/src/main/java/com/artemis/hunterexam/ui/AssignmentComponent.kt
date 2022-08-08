@@ -2,13 +2,10 @@ package com.artemis.hunterexam.ui
 
 import android.util.Log
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -17,6 +14,9 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.artemis.hunterexam.helper.Constants
@@ -36,23 +36,23 @@ class AssignmentComponent {
 
     @Composable
     fun TopicButtons(
-        generalViewModel: GeneralViewModel,
+        assignmentViewModel: AssignmentViewModel,
         assignmentQuestions: List<QuestionProjection>
     ) {
-        val topicWildLifeButtonColor: Color by generalViewModel.topicWildlifeButtonColor.observeAsState(
+        val topicWildLifeButtonColor: Color by assignmentViewModel.topicWildlifeButtonColor.observeAsState(
             Color.White
         )
-        val topicHuntingOperations: Color by generalViewModel.topicHuntingOperations.observeAsState(
+        val topicHuntingOperations: Color by assignmentViewModel.topicHuntingOperations.observeAsState(
             Color.White
         )
-        val topicWeaponsLawAndTechnology: Color by generalViewModel.topicWeaponsLawAndTechnology.observeAsState(
+        val topicWeaponsLawAndTechnology: Color by assignmentViewModel.topicWeaponsLawAndTechnology.observeAsState(
             Color.White
         )
-        val topicWildLifeTreatment: Color by generalViewModel.topicWildLifeTreatment.observeAsState(
+        val topicWildLifeTreatment: Color by assignmentViewModel.topicWildLifeTreatment.observeAsState(
             Color.White
         )
-        val topicHuntingLaw: Color by generalViewModel.topicHuntingLaw.observeAsState(Color.White)
-        val topicPreservationOfWildLifeAndNature: Color by generalViewModel.topicPreservationOfWildLifeAndNature.observeAsState(
+        val topicHuntingLaw: Color by assignmentViewModel.topicHuntingLaw.observeAsState(Color.White)
+        val topicPreservationOfWildLifeAndNature: Color by assignmentViewModel.topicPreservationOfWildLifeAndNature.observeAsState(
             Color.White
         )
 
@@ -64,7 +64,7 @@ class AssignmentComponent {
                 .padding(5.dp),
             colors = ButtonDefaults.textButtonColors(topicWildLifeButtonColor),
             onClick = {
-                generalViewModel.setTopicBoxButton(
+                assignmentViewModel.setTopicBoxButton(
                     NavigationButton.SKIPPED_INDEX,
                     Screen.DrawerScreen.TopicWildLife.topic,
                     assignmentQuestions
@@ -86,7 +86,7 @@ class AssignmentComponent {
                 .padding(5.dp),
             colors = ButtonDefaults.textButtonColors(topicHuntingOperations),
             onClick = {
-                generalViewModel.setTopicBoxButton(
+                assignmentViewModel.setTopicBoxButton(
                     NavigationButton.SKIPPED_INDEX,
                     Screen.DrawerScreen.TopicHuntingOperations.topic,
                     assignmentQuestions
@@ -108,7 +108,7 @@ class AssignmentComponent {
                 .padding(5.dp),
             colors = ButtonDefaults.textButtonColors(topicWeaponsLawAndTechnology),
             onClick = {
-                generalViewModel.setTopicBoxButton(
+                assignmentViewModel.setTopicBoxButton(
                     NavigationButton.SKIPPED_INDEX,
                     Screen.DrawerScreen.TopicWeaponsLawAndTechnology.topic,
                     assignmentQuestions
@@ -130,7 +130,7 @@ class AssignmentComponent {
                 .padding(5.dp),
             colors = ButtonDefaults.textButtonColors(topicWildLifeTreatment),
             onClick = {
-                generalViewModel.setTopicBoxButton(
+                assignmentViewModel.setTopicBoxButton(
                     NavigationButton.SKIPPED_INDEX,
                     Screen.DrawerScreen.TopicWildLifeTreatment.topic,
                     assignmentQuestions
@@ -152,7 +152,7 @@ class AssignmentComponent {
                 .padding(5.dp),
             colors = ButtonDefaults.textButtonColors(topicHuntingLaw),
             onClick = {
-                generalViewModel.setTopicBoxButton(
+                assignmentViewModel.setTopicBoxButton(
                     NavigationButton.SKIPPED_INDEX,
                     Screen.DrawerScreen.TopicHuntingLaw.topic,
                     assignmentQuestions
@@ -174,7 +174,7 @@ class AssignmentComponent {
                 .padding(5.dp),
             colors = ButtonDefaults.textButtonColors(topicPreservationOfWildLifeAndNature),
             onClick = {
-                generalViewModel.setTopicBoxButton(
+                assignmentViewModel.setTopicBoxButton(
                     NavigationButton.SKIPPED_INDEX,
                     Screen.DrawerScreen.TopicPreservationOfWildLifeAndNature.topic,
                     assignmentQuestions
@@ -217,15 +217,14 @@ class AssignmentComponent {
     @Composable
     fun ResultContent(
         showResultContent: MutableState<Boolean>,
-        generalViewModel: GeneralViewModel,
         assignmentViewModel: AssignmentViewModel,
+        generalViewModel: GeneralViewModel,
         assignmentQuestions: List<QuestionProjection>
     ) {
         val verticalScrollState = rememberScrollState()
-        val partialMark: MutableState<Int> = remember { mutableStateOf(0) }
         val marksByTopics = assignmentViewModel.calculateMarksByTopic(assignmentQuestions)
-        val finalMark = assignmentViewModel.calculateFinalMark(marksByTopics)
-        val evaluation: Boolean = assignmentViewModel.evaluate(marksByTopics, finalMark)
+        val evaluation: Boolean = assignmentViewModel.evaluate(marksByTopics)
+        val openScoringDialog = remember { mutableStateOf(false) }
 
         Column(
             modifier = Modifier
@@ -236,7 +235,7 @@ class AssignmentComponent {
                     Card(
                         modifier = Modifier
                             .fillMaxWidth(),
-                        backgroundColor = if (evaluation) Artemis_Green.copy(alpha = 0.1f) else Artemis_Red,
+                        backgroundColor = if (evaluation) Artemis_Yellow.copy(alpha = 0.1f) else Artemis_Red,
                         shape = RoundedCornerShape(25.dp)
                     ) {
                         Column(
@@ -246,15 +245,33 @@ class AssignmentComponent {
                                 horizontalArrangement = Arrangement.Center,
                                 modifier = Modifier.padding(5.dp)
                             ) {
+                                IconButton(
+                                    onClick = { openScoringDialog.value = true },
+                                ) {
+                                    if (openScoringDialog.value) {
+                                        ScoringSystem(openScoringDialog = openScoringDialog)
+                                    }
+                                    Icon(
+                                        imageVector = Icons.Filled.Info,
+                                        contentDescription = "Range of scoring",
+                                        tint = Artemis_Yellow
+                                    )
+                                }
                                 if (evaluation) {
                                     Text(
-                                        text = "Du hast die Prüfung bestanden",
-                                        color = Color.White
+                                        modifier = Modifier.padding(5.dp),
+                                        textAlign = TextAlign.Center,
+                                        text = "Herzlichen Glückwunsch!\nDu hast die Prüfung bestanden",
+                                        color = Color.White,
+                                        style = MaterialTheme.typography.subtitle2
                                     )
                                 } else {
                                     Text(
-                                        text = "Du hast die Prüfung leider nicht bestanden",
-                                        color = Color.White
+                                        modifier = Modifier.padding(5.dp),
+                                        textAlign = TextAlign.Center,
+                                        text = "Du hast die Prüfung leider nicht bestanden\nEs wurden mind. 1 Sachgebiet mit der Note 6 oder mehr als 2 Sachgebiete mit der Note 5 abgeschlossen",
+                                        color = Color.White,
+                                        style = MaterialTheme.typography.subtitle2
                                     )
                                 }
                             }
@@ -266,7 +283,12 @@ class AssignmentComponent {
                             colors = ButtonDefaults.buttonColors(Artemis_Blue),
                             onClick = {
                                 showResultContent.value = false
-                                generalViewModel.onChangeAppBarAppearance(true)
+                                generalViewModel.onChangeVisibilityOfAssignmentCloseButton(
+                                    Pair(
+                                        Constants.ALPHA_VISIBLE,
+                                        Constants.ENABLED
+                                    )
+                                )
                             }) {
                             Text(
                                 color = Color.White,
@@ -289,13 +311,13 @@ class AssignmentComponent {
                         assignmentViewModel.filterWrongAnswersOfEachTopic(
                             amountCorrectAnswersByTopic
                         )
-                    val currentMark: Int =
-                        assignmentViewModel.calculateMark(amountCorrectAnswersByTopic)
-                    partialMark.value = currentMark
+                    val currentMark: Int? =
+                        marksByTopics[topic.title]
                     Card(
                         modifier = Modifier
                             .padding(5.dp),
-                        backgroundColor = Artemis_Yellow
+                        backgroundColor = Artemis_Yellow,
+                        border = BorderStroke(1.dp, Color.White)
                     ) {
                         Column(
                             modifier = Modifier.padding(10.dp)
@@ -306,19 +328,6 @@ class AssignmentComponent {
                                     style = MaterialTheme.typography.h6,
                                     color = Color.Black
                                 )
-                                if (partialMark.value > 4) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Close,
-                                        contentDescription = "Icon for failed assignment",
-                                        tint = Color.Red
-                                    )
-                                } else {
-                                    Icon(
-                                        imageVector = Icons.Filled.Check,
-                                        contentDescription = "Icon for passed assignment",
-                                        tint = Color.Green
-                                    )
-                                }
                             }
                             Divider(
                                 color = Color.Black, thickness = 2.dp
@@ -342,7 +351,8 @@ class AssignmentComponent {
                             }
                             Row {
                                 Text(
-                                    text = "Note: $currentMark", color = Color.Black
+                                    text = "Note: $currentMark",
+                                    color = if (currentMark != null && currentMark > 4) Artemis_Red else Artemis_Green
                                 )
                             }
                         }
@@ -350,6 +360,36 @@ class AssignmentComponent {
                 }
             }
         }
+    }
+
+    @Composable
+    fun ScoringSystem(openScoringDialog: MutableState<Boolean>) {
+        AlertDialog(
+            modifier = Modifier.border(2.dp, Color.White, RectangleShape),
+            onDismissRequest = { openScoringDialog.value = false },
+            backgroundColor = Artemis_Yellow,
+            text = {
+                Column {
+                    Text(
+                        text = "Notenschlüssel",
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.body1
+                    )
+                    Text(text = "19-20 Punkte -> Note 1")
+                    Text(text = "16-18 Punkte -> Note 2")
+                    Text(text = "13-15 Punkte -> Note 3")
+                    Text(text = "10-12 Punkte -> Note 4")
+                    Text(text = "  7-9 Punkte -> Note 5")
+                    Text(text = "  0-7 Punkte -> Note 6")
+                    Divider(
+                        modifier = Modifier.padding(top = 10.dp, bottom = 10.dp),
+                        color = Color.White,
+                        thickness = 1.dp
+                    )
+                    Text(text = "Die Prüfung gilt als nicht bestanden, wenn in mind. einem Sachgebiet die Note 6 oder in mind. 2 Sachgebieten die Note 5 erreicht wurde.")
+                }
+            },
+            buttons = {})
     }
 
     @Composable
@@ -363,15 +403,15 @@ class AssignmentComponent {
         assignmentViewModel: AssignmentViewModel,
     ) {
         val showResultContent: MutableState<Boolean> = remember { mutableStateOf(false) }
-        val navIndex: Int by generalViewModel.index.observeAsState(0)
+        val navIndex: Int by assignmentViewModel.index.observeAsState(0)
         val currentFilter = questionViewModel.filter.observeAsState()
         val evaluationButtonText: MutableState<String> = remember { mutableStateOf("Auswertung") }
         val enableCheckbox: MutableState<Boolean> = remember { mutableStateOf(true) }
-        val currentQuestion: QuestionProjection by generalViewModel.currentQuestion.observeAsState(
+        val currentQuestion: QuestionProjection by assignmentViewModel.currentQuestion.observeAsState(
             assignmentQuestions[0]
         )
         Log.v("Current Filter", currentFilter.value.toString())
-        val favouriteState: Int by generalViewModel.favouriteColor.observeAsState(currentQuestion.favourite)
+
         val resultListOfAnsweredQuestions: MutableList<QuestionProjection> =
             assignmentQuestions.toMutableList()
         val isEvaluationDialogOpen: MutableState<Boolean> = remember { mutableStateOf(false) }
@@ -391,7 +431,7 @@ class AssignmentComponent {
                         .fillMaxWidth()
                         .horizontalScroll(horizontalAssignmentScrollState, true, null, false)
                 ) {
-                    TopicButtons(generalViewModel, assignmentQuestions)
+                    TopicButtons(assignmentViewModel, assignmentQuestions)
                 }
                 val verticalScrollState = rememberScrollState()
                 Column(
@@ -408,10 +448,11 @@ class AssignmentComponent {
                                 IconButton(onClick = {
                                     if (currentQuestion.favourite == 1) {
                                         currentQuestion.favourite = 0
+                                        currentQuestion.favouriteState.value = Color.Black
                                     } else {
                                         currentQuestion.favourite = 1
+                                        currentQuestion.favouriteState.value = Color.Yellow
                                     }
-                                    generalViewModel.onChangeFavouriteState(currentQuestion.favourite)
                                     questionViewModel.updateQuestion(
                                         QuestionProjection.modelToEntity(
                                             currentQuestion
@@ -421,7 +462,7 @@ class AssignmentComponent {
                                     Icon(
                                         imageVector = Icons.Filled.Star,
                                         contentDescription = "Favourite Icon",
-                                        tint = if (favouriteState == 1) Color.Yellow else Color.Black
+                                        tint = currentQuestion.favouriteState.value
                                     )
                                 }
                                 Column {
@@ -452,8 +493,8 @@ class AssignmentComponent {
                                     val checkedState =
                                         remember { mutableStateOf(checkbox.checked) }
                                     val currentQuestionText: String =
-                                        assignmentViewModel.setCurrentQuestionText(
-                                            currentQuestion, checkbox
+                                        assignmentViewModel.setCurrentOptionText(
+                                            currentQuestion, checkbox.option
                                         )
                                     Row {
                                         val isChecked =
@@ -481,7 +522,7 @@ class AssignmentComponent {
                                             checked = isChecked,
                                             colors = checkBoxColor,
                                             onCheckedChange = {
-                                                generalViewModel.onChangeCheckboxes(
+                                                assignmentViewModel.onChangeCheckboxes(
                                                     checkbox,
                                                     currentQuestion,
                                                     checkedState
@@ -507,7 +548,7 @@ class AssignmentComponent {
                                         )
                                     }
                                 }
-                                generalViewModel.checkTopicButtonColors(
+                                assignmentViewModel.checkTopicButtonColors(
                                     assignmentQuestions,
                                     currentQuestion
                                 )
@@ -544,7 +585,7 @@ class AssignmentComponent {
                                 TextButton(
                                     colors = ButtonDefaults.textButtonColors(Artemis_Red),
                                     onClick = {
-                                        generalViewModel.setNavigationButton(
+                                        assignmentViewModel.setDirection(
                                             NavigationButton.SKIPPED_INDEX,
                                             assignmentQuestions.indexOf(question) + 1,
                                             assignmentQuestions
@@ -574,7 +615,7 @@ class AssignmentComponent {
                         IconButton(
                             modifier = Modifier.weight(0.1f),
                             onClick = {
-                                generalViewModel.setNavigationButton(
+                                assignmentViewModel.setDirection(
                                     NavigationButton.FIRST_PAGE,
                                     navIndex,
                                     assignmentQuestions
@@ -587,29 +628,11 @@ class AssignmentComponent {
                                 tint = Artemis_Yellow
                             )
                         }
-                        //Loads previous question
-                        IconButton(
-                            modifier = Modifier.weight(0.1f),
-                            onClick = {
-                                generalViewModel.setNavigationButton(
-                                    NavigationButton.PREV_PAGE,
-                                    navIndex,
-                                    assignmentQuestions
-                                )
-                            }
-                        ) {
-                            Icon(
-                                Icons.Filled.ChevronLeft,
-                                contentDescription = "Prev question button",
-                                modifier = Modifier.size(50.dp),
-                                tint = Artemis_Yellow
-                            )
-                        }
                         //Skip to 10 questions backward
                         IconButton(
                             modifier = Modifier.weight(0.1f),
                             onClick = {
-                                generalViewModel.setNavigationButton(
+                                assignmentViewModel.setDirection(
                                     NavigationButton.SKIP_TEN_BACKWARD,
                                     navIndex,
                                     assignmentQuestions
@@ -623,6 +646,24 @@ class AssignmentComponent {
                                 tint = Artemis_Yellow
                             )
                         }
+                        //Loads previous question
+                        IconButton(
+                            modifier = Modifier.weight(0.1f),
+                            onClick = {
+                                assignmentViewModel.setDirection(
+                                    NavigationButton.PREV_PAGE,
+                                    navIndex,
+                                    assignmentQuestions
+                                )
+                            }
+                        ) {
+                            Icon(
+                                Icons.Filled.ChevronLeft,
+                                contentDescription = "Prev question button",
+                                modifier = Modifier.size(50.dp),
+                                tint = Artemis_Yellow
+                            )
+                        }
                         Button(
                             modifier = Modifier.weight(0.4f),
                             colors = ButtonDefaults.buttonColors(Artemis_Blue),
@@ -632,6 +673,12 @@ class AssignmentComponent {
                                     isEvaluationDialogOpen.value = true
                                 } else {
                                     showResultContent.value = true
+                                    generalViewModel.onChangeVisibilityOfAssignmentCloseButton(
+                                        Pair(
+                                            Constants.ALPHA_INVISIBLE,
+                                            Constants.DISABLED
+                                        )
+                                    )
                                 }
                             })
                         {
@@ -640,11 +687,28 @@ class AssignmentComponent {
                                 text = evaluationButtonText.value
                             )
                         }
+                        //Loads next question
+                        IconButton(
+                            modifier = Modifier.weight(0.1f),
+                            onClick = {
+                                assignmentViewModel.setDirection(
+                                    NavigationButton.NEXT_PAGE,
+                                    navIndex,
+                                    assignmentQuestions
+                                )
+                            }) {
+                            Icon(
+                                Icons.Filled.ChevronRight,
+                                contentDescription = "Next question button",
+                                modifier = Modifier.size(50.dp),
+                                tint = Artemis_Yellow
+                            )
+                        }
                         //Skip to 10 questions forward
                         IconButton(
                             modifier = Modifier.weight(0.1f),
                             onClick = {
-                                generalViewModel.setNavigationButton(
+                                assignmentViewModel.setDirection(
                                     NavigationButton.SKIP_TEN_FORWARD,
                                     navIndex,
                                     assignmentQuestions
@@ -658,28 +722,11 @@ class AssignmentComponent {
                                 tint = Artemis_Yellow
                             )
                         }
-                        //Loads next question
-                        IconButton(
-                            modifier = Modifier.weight(0.1f),
-                            onClick = {
-                                generalViewModel.setNavigationButton(
-                                    NavigationButton.NEXT_PAGE,
-                                    navIndex,
-                                    assignmentQuestions
-                                )
-                            }) {
-                            Icon(
-                                Icons.Filled.ChevronRight,
-                                contentDescription = "Next question button",
-                                modifier = Modifier.size(50.dp),
-                                tint = Artemis_Yellow
-                            )
-                        }
                         //Loads last question
                         IconButton(
                             modifier = Modifier.weight(0.1f),
                             onClick = {
-                                generalViewModel.setNavigationButton(
+                                assignmentViewModel.setDirection(
                                     NavigationButton.LAST_PAGE,
                                     navIndex,
                                     assignmentQuestions
@@ -719,16 +766,20 @@ class AssignmentComponent {
                     onOpenAssignmentDialog,
                     navController,
                     generalViewModel,
+                    assignmentViewModel
                 )
             } // no else
             BackHandler(enabled = true) {
                 onOpenAssignmentDialog(true)
             }
         } else {
+            BackHandler(enabled = true) {
+                onOpenAssignmentDialog(false)
+            }
             ResultContent(
                 showResultContent = showResultContent,
-                generalViewModel = generalViewModel,
                 assignmentViewModel = assignmentViewModel,
+                generalViewModel = generalViewModel,
                 assignmentQuestions = assignmentQuestions
             )
         }
@@ -745,7 +796,7 @@ class AssignmentComponent {
         evaluationButtonText: MutableState<String>,
     ) {
         val isAbleToEvaluate = assignmentQuestions.stream()
-            .allMatch { it.currentSelection != "[]" && it.currentSelection != "" }
+            .allMatch { it.currentSelection != "[]" && it.currentSelection != Constants.EMPTY_STRING }
 
         AlertDialog(
             onDismissRequest = { isEvaluationDialogOpen.value = false },
@@ -787,12 +838,18 @@ class AssignmentComponent {
                                     )
                                 }
                             evaluationButtonText.value = "Ergebnisse"
-                            generalViewModel.onChangeAppBarAppearance(false)
+                            generalViewModel.onChangeVisibilityOfAssignmentCloseButton(
+                                Pair(
+                                    Constants.ALPHA_INVISIBLE,
+                                    Constants.DISABLED
+                                )
+                            )
                         },
                         Modifier
                             .width(300.dp)
                             .padding(4.dp),
                         colors = ButtonDefaults.buttonColors(Artemis_Yellow),
+                        border = BorderStroke(1.dp, Color.White)
                     ) {
                         Text(
                             text = "Ja",
@@ -807,6 +864,7 @@ class AssignmentComponent {
                             .width(300.dp)
                             .padding(4.dp),
                         colors = ButtonDefaults.buttonColors(Artemis_Yellow),
+                        border = BorderStroke(1.dp, Color.White)
                     ) {
                         Text(
                             text = "Nein",
@@ -822,7 +880,8 @@ class AssignmentComponent {
     fun AssignmentAlertDialog(
         onOpenAssignmentDialog: (Boolean) -> Unit,
         navController: NavController,
-        generalViewModel: GeneralViewModel
+        generalViewModel: GeneralViewModel,
+        assignmentViewModel: AssignmentViewModel
     ) {
         AlertDialog(
             onDismissRequest = { onOpenAssignmentDialog(false) },
@@ -845,8 +904,9 @@ class AssignmentComponent {
                         onClick = {
                             navController.navigate(Screen.DrawerScreen.Home.route)
                             onOpenAssignmentDialog(false)
-                            generalViewModel.onChangeIndex(0)
-                            generalViewModel.onCloseTrainingScreen(
+                            assignmentViewModel.onChangeIndex(0)
+                            generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Home)
+                            generalViewModel.onChangeVisibilityOfAssignmentCloseButton(
                                 Pair(
                                     Constants.ALPHA_INVISIBLE,
                                     Constants.DISABLED
@@ -857,6 +917,7 @@ class AssignmentComponent {
                             .width(300.dp)
                             .padding(4.dp),
                         colors = ButtonDefaults.buttonColors(Artemis_Yellow),
+                        border = BorderStroke(1.dp, Color.White)
                     ) {
                         Text(
                             text = "Ja",
@@ -870,7 +931,8 @@ class AssignmentComponent {
                         Modifier
                             .width(300.dp)
                             .padding(4.dp),
-                        colors = ButtonDefaults.buttonColors(Artemis_Yellow)
+                        colors = ButtonDefaults.buttonColors(Artemis_Yellow),
+                        border = BorderStroke(1.dp, Color.White)
                     ) {
                         Text(
                             text = "Nein",

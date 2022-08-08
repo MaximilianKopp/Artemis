@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import com.artemis.hunterexam.data.db.ArtemisDatabase
 import com.artemis.hunterexam.data.dictionary.DictionaryRepository
 import com.artemis.hunterexam.data.questions.QuestionRepository
+import com.artemis.hunterexam.helper.Constants
 import com.artemis.hunterexam.helper.CriteriaFilter
 import com.artemis.hunterexam.model.*
 import kotlinx.coroutines.CoroutineScope
@@ -90,7 +91,8 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun checkDictionary(matchedText: String): Dictionary {
-        val dictionary = Dictionary(0, "", "", "")
+        val dictionary =
+            Dictionary(0, Constants.EMPTY_STRING, Constants.EMPTY_STRING, Constants.EMPTY_STRING)
         var matched = false
         for (entry in allDictionaryEntries) {
             if (matchedText.contains(entry.item) && !matched) {
@@ -207,23 +209,23 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
 
     fun getCurrentCriteriaFilter(currentCriteriaFilter: CriteriaFilter): String {
         val currentFilterAsString: String = when (currentCriteriaFilter) {
-            CriteriaFilter.ALL_QUESTIONS_SHUFFLED -> "Zufällige Auswahl"
-            CriteriaFilter.ALL_QUESTIONS_CHRONOLOGICAL -> "Alle Fragen"
-            CriteriaFilter.NOT_LEARNED -> "Noch nicht gelernt"
-            CriteriaFilter.ONCE_LEARNED -> "Mind. 1x richtig beantwortet"
-            CriteriaFilter.FAILED -> "Falsch beantwortet"
-            CriteriaFilter.FAVOURITES -> "Favouriten"
-            CriteriaFilter.LAST_VIEWED -> "Seit 1 Woche nicht angesehen"
-            CriteriaFilter.SEARCH -> "Benutzerdefinierte Suche"
+            CriteriaFilter.ALL_QUESTIONS_SHUFFLED -> Constants.SHUFFLED
+            CriteriaFilter.ALL_QUESTIONS_CHRONOLOGICAL -> Constants.CHRONOLOGICAL
+            CriteriaFilter.NOT_LEARNED -> Constants.NOT_LEARNED
+            CriteriaFilter.ONCE_LEARNED -> Constants.ONCE_LEARNED
+            CriteriaFilter.FAILED -> Constants.FAILED
+            CriteriaFilter.FAVOURITES -> Constants.FAVOURITES
+            CriteriaFilter.LAST_VIEWED -> Constants.LAST_VIEWED
+            CriteriaFilter.CUSTOM_SEARCH -> Constants.CUSTOM_SEARCH
             else -> {
-                "Keine Auswahl"
+                Constants.NO_SELECTION
             }
         }
         return currentFilterAsString
     }
 
     fun getTopicOfQuestion(currentQuestionNumericTopic: Int): String {
-        var topic = ""
+        var topic = Constants.EMPTY_STRING
         when (currentQuestionNumericTopic) {
             0 -> topic = Screen.DrawerScreen.TopicWildLife.title
             1 -> topic = Screen.DrawerScreen.TopicHuntingOperations.title
@@ -280,10 +282,10 @@ class QuestionViewModel(application: Application) : AndroidViewModel(application
         val totalPercentage =
             calculatePercentagePerTopic(twiceLearnedQuestionsTotal.toInt(), allQuestions.size)
         return hashMapOf(
-            "OnceLearnedTotal" to onceLearnedQuestionsTotal,
-            "FailedTotal" to failedQuestionsTotal,
-            "TwiceLearnedTotal" to twiceLearnedQuestionsTotal,
-            "TotalPercentage" to totalPercentage
+            Constants.STATISTICS_ONCE_LEARNED_TOTAL to onceLearnedQuestionsTotal,
+            Constants.STATISTICS_FAILED_TOTAL to failedQuestionsTotal,
+            Constants.STATISTICS_TWICE_LEARNED_TOTAL to twiceLearnedQuestionsTotal,
+            Constants.STATISTICS_TOTAL_PERCENTAGE to totalPercentage
         )
     }
 

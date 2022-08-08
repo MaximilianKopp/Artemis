@@ -8,6 +8,6 @@ enum class CriteriaFilter {
     FAVOURITES,
     ALL_QUESTIONS_CHRONOLOGICAL,
     SINGLE_QUESTION,
-    SEARCH,
+    CUSTOM_SEARCH,
     LAST_VIEWED
 }

@@ -1,6 +1,9 @@
 package com.artemis.hunterexam.model
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
+import com.artemis.hunterexam.helper.Constants
 
 class QuestionProjection(
     var id: Int,
@@ -16,6 +19,7 @@ class QuestionProjection(
     var learnedTwice: Int,
     var failed: Int,
     var lastViewed: String,
+    var favouriteState: MutableState<Color>,
 
     var checkboxA: QuestionCheckbox = QuestionCheckbox(false, "a", Color.Black),
     var checkboxB: QuestionCheckbox = QuestionCheckbox(false, "b", Color.Black),
@@ -45,6 +49,7 @@ class QuestionProjection(
                 questionEntity.learnedTwice,
                 questionEntity.failed,
                 questionEntity.lastViewed,
+                mutableStateOf(if (questionEntity.favourite == 1) Color.Yellow else Color.Black),
                 QuestionCheckbox(false, "a", Color.Black),
                 QuestionCheckbox(false, "b", Color.Black),
                 QuestionCheckbox(false, "c", Color.Black),
@@ -55,7 +60,7 @@ class QuestionProjection(
                     QuestionCheckbox(false, "c", Color.Black),
                     QuestionCheckbox(false, "d", Color.Black)
                 ).shuffled(),
-                currentSelection = ""
+                currentSelection = Constants.EMPTY_STRING
             )
         }
 

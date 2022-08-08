@@ -27,10 +27,7 @@ import com.artemis.hunterexam.model.Screen
 import com.artemis.hunterexam.templates.TextButtonTemplate
 import com.artemis.hunterexam.templates.TextTemplate
 import com.artemis.hunterexam.ui.theme.Artemis_Green
-import com.artemis.hunterexam.viewModel.AssignmentViewModel
-import com.artemis.hunterexam.viewModel.GeneralViewModel
-import com.artemis.hunterexam.viewModel.QuestionViewModel
-import com.artemis.hunterexam.viewModel.TrainingViewModel
+import com.artemis.hunterexam.viewModel.*
 
 @ExperimentalComposeUiApi
 class StartMenuComponent {
@@ -42,13 +39,15 @@ class StartMenuComponent {
         generalViewModel: GeneralViewModel,
         questionViewModel: QuestionViewModel,
         trainingViewModel: TrainingViewModel,
-        assignmentViewModel: AssignmentViewModel
+        assignmentViewModel: AssignmentViewModel,
+        dictionaryViewModel: DictionaryViewModel
     ) {
         StartContent(
             generalViewModel,
             questionViewModel,
             trainingViewModel,
-            assignmentViewModel
+            assignmentViewModel,
+            dictionaryViewModel
         )
     }
 
@@ -58,7 +57,8 @@ class StartMenuComponent {
         generalViewModel: GeneralViewModel,
         questionViewModel: QuestionViewModel,
         trainingViewModel: TrainingViewModel,
-        assignmentViewModel: AssignmentViewModel
+        assignmentViewModel: AssignmentViewModel,
+        dictionaryViewModel: DictionaryViewModel
     ) {
         val navController: NavHostController = rememberNavController()
         val state = rememberScaffoldState(drawerState = DrawerState(DrawerValue.Closed))
@@ -83,6 +83,7 @@ class StartMenuComponent {
                     scope = scope,
                     state = state,
                     generalViewModel = generalViewModel,
+                    assignmentViewModel = assignmentViewModel,
                     questionViewModel = questionViewModel
                 )
             },
@@ -110,7 +111,8 @@ class StartMenuComponent {
                 generalViewModel = generalViewModel,
                 questionViewModel = questionViewModel,
                 trainingViewModel = trainingViewModel,
-                assignmentViewModel = assignmentViewModel
+                assignmentViewModel = assignmentViewModel,
+                dictionaryViewModel = dictionaryViewModel
             )
         }
     }
@@ -154,6 +156,7 @@ class StartMenuComponent {
     @Composable
     fun StartMenu(
         generalViewModel: GeneralViewModel,
+        assignmentViewModel: AssignmentViewModel,
         questionViewModel: QuestionViewModel,
         navController: NavController
     ) {
@@ -189,7 +192,7 @@ class StartMenuComponent {
                     val assignmentQuestions =
                         questionViewModel.prepareQuestionsForAssignment().toList()
                     questionViewModel.onChangeQuestionsForAssignment(assignmentQuestions)
-                    generalViewModel.onChangeCurrentQuestion(assignmentQuestions[0])
+                    assignmentViewModel.onChangeCurrentQuestion(assignmentQuestions[0])
                     generalViewModel.onChangeCurrentScreen(Screen.DrawerScreen.Assignment)
                     navController.navigate(Screen.DrawerScreen.Assignment.route)
                 }) {
@@ -211,12 +214,12 @@ class StartMenuComponent {
                     )
                 }
                 StartMenuButton(onClick = {
-                    navController.navigate(Screen.DrawerScreen.Imprint.route)
+                    navController.navigate(Screen.DrawerScreen.Dictionary.route)
                 }) {
                     StartMenuContent(
                         drawable = R.drawable.ic_baseline_info_24,
-                        contentDescription = "Imprint",
-                        text = Screen.DrawerScreen.Imprint.title
+                        contentDescription = "Dictionary",
+                        text = Screen.DrawerScreen.Dictionary.title
                     )
                 }
             }
@@ -266,25 +269,25 @@ class StartMenuComponent {
                 modifier = Modifier.padding(start = 25.dp, top = 25.dp)
             )
             Text(
-                text = "1x richtig beantwortet: ${questionViewModel.extractTotalStatistics()["OnceLearnedTotal"]}",
+                text = "1x richtig beantwortet: ${questionViewModel.extractTotalStatistics()[Constants.STATISTICS_ONCE_LEARNED_TOTAL]}",
                 color = Color.White,
                 style = MaterialTheme.typography.body2,
                 modifier = Modifier.padding(start = 25.dp, top = 10.dp)
             )
             Text(
-                text = "2x richtig beantwortet: ${questionViewModel.extractTotalStatistics()["TwiceLearnedTotal"]}",
+                text = "2x richtig beantwortet: ${questionViewModel.extractTotalStatistics()[Constants.STATISTICS_TWICE_LEARNED_TOTAL]}",
                 color = Color.White,
                 style = MaterialTheme.typography.body2,
                 modifier = Modifier.padding(start = 25.dp, top = 10.dp)
             )
             Text(
-                text = "Falsch beantwortet: ${questionViewModel.extractTotalStatistics()["FailedTotal"]}",
+                text = "Falsch beantwortet: ${questionViewModel.extractTotalStatistics()[Constants.STATISTICS_FAILED_TOTAL]}",
                 color = Color.White,
                 style = MaterialTheme.typography.body2,
                 modifier = Modifier.padding(start = 25.dp, top = 10.dp)
             )
             Text(
-                text = "${questionViewModel.extractTotalStatistics()["TotalPercentage"]}% gelernt",
+                text = "${questionViewModel.extractTotalStatistics()[Constants.STATISTICS_TOTAL_PERCENTAGE]}% gelernt",
                 color = Color.White,
                 style = MaterialTheme.typography.body2,
                 modifier = Modifier.padding(start = 25.dp, top = 10.dp)

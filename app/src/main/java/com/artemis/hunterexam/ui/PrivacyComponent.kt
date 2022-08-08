@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.artemis.hunterexam.helper.Constants
 
 class PrivacyComponent {
 
@@ -23,12 +24,17 @@ class PrivacyComponent {
                 .verticalScroll(state = scrollableState, true)
         ) {
             Text(
-                text = "Datenschutz",
+                text = Constants.PRIVACY_HEADER,
                 style = MaterialTheme.typography.h6,
                 color = Color.White
             )
             Text(
-                text = "Die Applikation erhebt/speichert keine personenbezogenen Daten wie bspw. Name, Anschrift oder E-Mail-Adressen und betreibt keine Weiterverarbeitung bzw. gewerbliche Veräußerung von Informationen, die aus dem Nutzerverhalten abgeleitet werden könnten. \nDie Applikation ist vollständig offline nutzbar und setzt nur im Falle eine Aktualisierung durch Google-Play eine aktive Internverbindung voraus. \nDer Herausgeber und Eigentümer haftet nicht für eine eventuelle Weitergabe von Informationen, die im Rahmen der Google-Play Nutzungsbedingungen durchgeführt werden.",
+                text = Constants.PRIVACY_TEXT,
+                style = MaterialTheme.typography.body1,
+                color = Color.White
+            )
+            Text(
+                text = Constants.PRIVACY_PERMISSIONS,
                 style = MaterialTheme.typography.body1,
                 color = Color.White
             )

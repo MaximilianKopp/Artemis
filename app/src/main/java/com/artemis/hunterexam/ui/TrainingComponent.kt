@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.Gravity
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CornerSize
@@ -56,9 +57,9 @@ class TrainingComponent {
         trainingViewModel: TrainingViewModel,
         generalViewModel: GeneralViewModel
     ) {
-        val navIndex: Int by generalViewModel.index.observeAsState(0)
+        val navIndex: Int by trainingViewModel.index.observeAsState(0)
         val trainingData = trainingViewModel.trainingData.observeAsState(listOf())
-        generalViewModel.resetCurrentSelection()
+        trainingViewModel.resetCurrentSelection()
 
         if (trainingData.value.isNotEmpty()) {
             TrainingContent(
@@ -86,14 +87,12 @@ class TrainingComponent {
         onOpenTrainingDialog: (Boolean) -> Unit,
     ) {
         val context = LocalContext.current
-        val currentQuestion: QuestionProjection by generalViewModel.currentQuestion.observeAsState(
+        val currentQuestion: QuestionProjection by trainingViewModel.currentQuestion.observeAsState(
             trainingData[0]
         )
-        val isNavButtonEnabled: Boolean by generalViewModel.isButtonEnabled.observeAsState(true)
+        val isNavButtonEnabled: Boolean by trainingViewModel.isButtonEnabled.observeAsState(true)
         val isAnswerButtonEnabled = remember { mutableStateOf(false) }
-        val answerBtnText: String by generalViewModel.answerBtnText.observeAsState("Antworten")
-
-        val favouriteState: Int by generalViewModel.favouriteColor.observeAsState(currentQuestion.favourite)
+        val answerBtnText: String by trainingViewModel.answerBtnText.observeAsState(Constants.BTN_ANSWER)
         val currentTopic = questionViewModel.currentTopic.value
         val loadScreen =
             currentTopic?.let { generalViewModel.loadScreenByTopic(it) }
@@ -127,10 +126,11 @@ class TrainingComponent {
                             IconButton(onClick = {
                                 if (currentQuestion.favourite == 1) {
                                     currentQuestion.favourite = 0
+                                    currentQuestion.favouriteState.value = Color.Black
                                 } else {
                                     currentQuestion.favourite = 1
+                                    currentQuestion.favouriteState.value = Color.Yellow
                                 }
-                                generalViewModel.onChangeFavouriteState(currentQuestion.favourite)
                                 questionViewModel.updateQuestion(
                                     QuestionProjection.modelToEntity(
                                         currentQuestion
@@ -140,7 +140,7 @@ class TrainingComponent {
                                 Icon(
                                     imageVector = Icons.Filled.Star,
                                     contentDescription = "Favourite Icon",
-                                    tint = if (favouriteState == 1) Color.Yellow else Color.Black
+                                    tint = currentQuestion.favouriteState.value
                                 )
                             }
                             Column {
@@ -181,7 +181,7 @@ class TrainingComponent {
                             val checkedState =
                                 remember { mutableStateOf(checkbox.checked) }
                             val currentCheckboxText: String =
-                                trainingViewModel.setCurrentCheckboxText(
+                                trainingViewModel.setCurrentOptionText(
                                     currentQuestion,
                                     checkbox.option
                                 )
@@ -190,8 +190,8 @@ class TrainingComponent {
                                 Modifier.padding(top = 10.dp, bottom = 10.dp)
                             ) {
                                 val isChecked =
-                                    if (answerBtnText == "Antworten") {
-                                        generalViewModel.checkStates(
+                                    if (answerBtnText == Constants.BTN_ANSWER) {
+                                        trainingViewModel.checkStates(
                                             currentQuestion,
                                             checkbox,
                                             checkedState
@@ -200,7 +200,7 @@ class TrainingComponent {
                                         true
                                     }
                                 val checkBoxColor: CheckboxColors =
-                                    if (answerBtnText == "Antworten") {
+                                    if (answerBtnText == Constants.BTN_ANSWER) {
                                         CheckboxDefaults.colors(checkbox.color)
                                     } else {
                                         CheckboxDefaults.colors(
@@ -215,12 +215,12 @@ class TrainingComponent {
                                     colors = checkBoxColor,
                                     onCheckedChange = {
                                         if (answerBtnText != "Weiter") {
-                                            generalViewModel.onChangeCheckboxes(
+                                            trainingViewModel.onChangeCheckboxes(
                                                 checkbox,
                                                 currentQuestion,
                                                 checkedState
                                             )
-                                            generalViewModel.currentSelection(
+                                            trainingViewModel.currentSelection(
                                                 currentQuestion,
                                                 checkbox.checked,
                                                 checkbox.option
@@ -287,35 +287,16 @@ class TrainingComponent {
                         modifier = Modifier.weight(0.1f),
                         enabled = isNavButtonEnabled,
                         onClick = {
-                            generalViewModel.setNavigationButton(
+                            trainingViewModel.setNavigationButton(
                                 NavigationButton.FIRST_PAGE,
                                 index,
                                 trainingData
                             )
-                            generalViewModel.resetCurrentSelection()
+                            trainingViewModel.resetCurrentSelection()
                         }) {
                         Icon(
                             Icons.Filled.FirstPage,
                             contentDescription = "First page button",
-                            modifier = Modifier.size(50.dp),
-                            tint = Artemis_Yellow
-                        )
-                    }
-                    //Loads previous question
-                    IconButton(
-                        modifier = Modifier.weight(0.1f),
-                        enabled = isNavButtonEnabled,
-                        onClick = {
-                            generalViewModel.setNavigationButton(
-                                NavigationButton.PREV_PAGE,
-                                index,
-                                trainingData
-                            )
-                            generalViewModel.resetCurrentSelection()
-                        }) {
-                        Icon(
-                            Icons.Filled.ChevronLeft,
-                            contentDescription = "Prev question button",
                             modifier = Modifier.size(50.dp),
                             tint = Artemis_Yellow
                         )
@@ -325,17 +306,36 @@ class TrainingComponent {
                         modifier = Modifier.weight(0.1f),
                         enabled = isNavButtonEnabled,
                         onClick = {
-                            generalViewModel.setNavigationButton(
+                            trainingViewModel.setNavigationButton(
                                 NavigationButton.SKIP_TEN_BACKWARD,
                                 index,
                                 trainingData
                             )
-                            generalViewModel.resetCurrentSelection()
+                            trainingViewModel.resetCurrentSelection()
                         }) {
                         Icon(
                             Icons.Filled.RotateLeft,
                             contentDescription = "Prev question button",
                             modifier = Modifier.size(25.dp),
+                            tint = Artemis_Yellow
+                        )
+                    }
+                    //Loads previous question
+                    IconButton(
+                        modifier = Modifier.weight(0.1f),
+                        enabled = isNavButtonEnabled,
+                        onClick = {
+                            trainingViewModel.setNavigationButton(
+                                NavigationButton.PREV_PAGE,
+                                index,
+                                trainingData
+                            )
+                            trainingViewModel.resetCurrentSelection()
+                        }) {
+                        Icon(
+                            Icons.Filled.ChevronLeft,
+                            contentDescription = "Prev question button",
+                            modifier = Modifier.size(50.dp),
                             tint = Artemis_Yellow
                         )
                     }
@@ -345,7 +345,7 @@ class TrainingComponent {
                         colors = ButtonDefaults.buttonColors(Artemis_Blue),
                         //Contains whole logic for further answer processing
                         onClick = {
-                            if (answerBtnText == "Antworten") {
+                            if (answerBtnText == Constants.BTN_ANSWER) {
                                 //Change last viewed record by current timestamp
                                 currentQuestion.lastViewed =
                                     LocalDateTime.now().format(
@@ -359,7 +359,7 @@ class TrainingComponent {
                                         currentQuestion
                                     )
                                 )
-                                generalViewModel.onChangeAnswerButtonText("Weiter")
+                                trainingViewModel.onChangeAnswerButtonText("Weiter")
                                 if (trainingViewModel.isSelectionCorrect(
                                         currentQuestion
                                     )
@@ -409,7 +409,7 @@ class TrainingComponent {
                                         currentQuestion
                                     )
                                 )
-                                generalViewModel.onChangeEnableNavButtons(false)
+                                trainingViewModel.onChangeEnableNavButtons(false)
                             }
                             if (answerBtnText == "Weiter") {
                                 currentQuestion.apply {
@@ -418,10 +418,10 @@ class TrainingComponent {
                                     this.checkboxC.checked = false
                                     this.checkboxD.checked = false
                                 }
-                                generalViewModel.onChangeEnableNavButtons(true)
-                                generalViewModel.resetCurrentSelection()
+                                trainingViewModel.onChangeEnableNavButtons(true)
+                                trainingViewModel.resetCurrentSelection()
                                 Log.v("Current Question", currentQuestion.correctAnswers)
-                                generalViewModel.setNavigationButton(
+                                trainingViewModel.setNavigationButton(
                                     NavigationButton.NEXT_PAGE,
                                     index,
                                     trainingData
@@ -429,7 +429,7 @@ class TrainingComponent {
                                 if (index == trainingData.size - 1) {
                                     onOpenTrainingDialog(true)
                                 }
-                                generalViewModel.onChangeAnswerButtonText("Antworten")
+                                trainingViewModel.onChangeAnswerButtonText(Constants.BTN_ANSWER)
                             }
                         }) {
                         Text(
@@ -437,37 +437,17 @@ class TrainingComponent {
                             color = Color.White
                         )
                     }
-
-                    //Skip to 10 questions forward
-                    IconButton(
-                        modifier = Modifier.weight(0.1f),
-                        enabled = isNavButtonEnabled,
-                        onClick = {
-                            generalViewModel.setNavigationButton(
-                                NavigationButton.SKIP_TEN_FORWARD,
-                                index,
-                                trainingData
-                            )
-                            generalViewModel.resetCurrentSelection()
-                        }) {
-                        Icon(
-                            Icons.Filled.RotateRight,
-                            contentDescription = "Prev question button",
-                            modifier = Modifier.size(25.dp),
-                            tint = Artemis_Yellow
-                        )
-                    }
                     //Loads next question
                     IconButton(
                         modifier = Modifier.weight(0.1f),
                         enabled = isNavButtonEnabled,
                         onClick = {
-                            generalViewModel.setNavigationButton(
+                            trainingViewModel.setNavigationButton(
                                 NavigationButton.NEXT_PAGE,
                                 index,
                                 trainingData
                             )
-                            generalViewModel.resetCurrentSelection()
+                            trainingViewModel.resetCurrentSelection()
                         }) {
                         Icon(
                             Icons.Filled.ChevronRight,
@@ -476,17 +456,36 @@ class TrainingComponent {
                             tint = Artemis_Yellow
                         )
                     }
+                    //Skip to 10 questions forward
+                    IconButton(
+                        modifier = Modifier.weight(0.1f),
+                        enabled = isNavButtonEnabled,
+                        onClick = {
+                            trainingViewModel.setNavigationButton(
+                                NavigationButton.SKIP_TEN_FORWARD,
+                                index,
+                                trainingData
+                            )
+                            trainingViewModel.resetCurrentSelection()
+                        }) {
+                        Icon(
+                            Icons.Filled.RotateRight,
+                            contentDescription = "Prev question button",
+                            modifier = Modifier.size(25.dp),
+                            tint = Artemis_Yellow
+                        )
+                    }
                     //Loads last question
                     IconButton(
                         modifier = Modifier.weight(0.1f),
                         enabled = isNavButtonEnabled,
                         onClick = {
-                            generalViewModel.setNavigationButton(
+                            trainingViewModel.setNavigationButton(
                                 NavigationButton.LAST_PAGE,
                                 index,
                                 trainingData
                             )
-                            generalViewModel.resetCurrentSelection()
+                            trainingViewModel.resetCurrentSelection()
                         }) {
                         Icon(
                             Icons.Filled.LastPage,
@@ -514,7 +513,8 @@ class TrainingComponent {
                         loadScreen,
                         navController,
                         questionViewModel,
-                        generalViewModel
+                        generalViewModel,
+                        trainingViewModel
                     )
                 }
             }
@@ -523,9 +523,9 @@ class TrainingComponent {
             onOpenTrainingDialog(true)
             if (loadScreen != null && isTrainingDialogOpen) {
                 questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
-                generalViewModel.onChangeIndex(0)
-                generalViewModel.onChangeAnswerButtonText("Antworten")
-                generalViewModel.resetCurrentSelection()
+                trainingViewModel.onChangeIndex(0)
+                trainingViewModel.onChangeAnswerButtonText(Constants.BTN_ANSWER)
+                trainingViewModel.resetCurrentSelection()
                 navController.navigate(loadScreen.route)
             }
         }
@@ -538,6 +538,7 @@ class TrainingComponent {
         navController: NavController,
         questionViewModel: QuestionViewModel,
         generalViewModel: GeneralViewModel,
+        trainingViewModel: TrainingViewModel
     ) {
         AlertDialog(
             onDismissRequest = { onOpenTrainingDialog(false) },
@@ -561,22 +562,23 @@ class TrainingComponent {
                         onClick = {
                             navController.navigate(loadScreen.route)
                             questionViewModel.onChangeFilter(CriteriaFilter.ALL_QUESTIONS_SHUFFLED)
-                            generalViewModel.onChangeIndex(0)
+                            trainingViewModel.onChangeIndex(0)
                             onOpenTrainingDialog(false)
-                            generalViewModel.onCloseTrainingScreen(
+                            generalViewModel.onChangeVisibilityOfTrainingCloseButton(
                                 Pair(
                                     Constants.ALPHA_INVISIBLE,
                                     Constants.DISABLED
                                 )
                             )
-                            generalViewModel.onChangeIndex(0)
-                            generalViewModel.onChangeAnswerButtonText("Antworten")
-                            generalViewModel.resetCurrentSelection()
+                            trainingViewModel.onChangeIndex(0)
+                            trainingViewModel.onChangeAnswerButtonText(Constants.BTN_ANSWER)
+                            trainingViewModel.resetCurrentSelection()
                         },
                         Modifier
                             .width(300.dp)
                             .padding(4.dp),
                         colors = ButtonDefaults.buttonColors(Artemis_Yellow),
+                        border = BorderStroke(1.dp, Color.White)
                     ) {
                         Text(
                             text = "Ja",
@@ -590,7 +592,8 @@ class TrainingComponent {
                         Modifier
                             .width(300.dp)
                             .padding(4.dp),
-                        colors = ButtonDefaults.buttonColors(Artemis_Yellow)
+                        colors = ButtonDefaults.buttonColors(Artemis_Yellow),
+                        border = BorderStroke(1.dp, Color.White)
                     ) {
                         Text(
                             text = "Nein",
