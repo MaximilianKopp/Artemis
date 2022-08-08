@@ -22,8 +22,6 @@ class Constants {
         const val TRAINING_SELECTION_C = "c"
         const val TRAINING_SELECTION_D = "d"
 
-        const val ERROR = "Error"
-
         const val SIZE_OF_EACH_ASSIGNMENT_TOPIC = 20
 
         const val TABLE_NAME_CONFIGURATION = "configuration"
@@ -32,7 +30,7 @@ class Constants {
 
         const val PRIVACY_HEADER = "Datenschutz"
         const val PRIVACY_TEXT =
-            "Die Applikation erhebt bzw. speichert weder personenbezogenen Daten wie bspw. Namen, Anschriften oder E-Mail-Adressen noch betreibt sie keine Weiterverarbeitung oder gewerbliche Veräußerung von Informationen, die aus dem Nutzerverhalten abgeleitet werden könnten. \nDie Applikation ist vollständig offline nutzbar und setzt nur im Falle eine Aktualisierung durch Google-Play eine aktive Internverbindung voraus. \nDer Herausgeber und Eigentümer ist nicht für Weiterverarbeitungen von Informationen verantwortlich, die im Rahmen der Google-Play Nutzungsbedingungen vorausgesetzt und durch den Endnutzer akzeptiert worden sind.\n"
+            "Die Applikation erhebt bzw. speichert weder personenbezogenen Daten wie bspw. Namen, Anschriften oder E-Mail-Adressen noch betreibt sie die Weiterverarbeitung oder gewerbliche Veräußerung von Informationen, die aus dem Nutzerverhalten abgeleitet werden könnten. \nDie Applikation ist vollständig offline nutzbar und setzt nur im Falle eine Aktualisierung durch Google-Play eine aktive Internverbindung voraus. \nDer Herausgeber und Eigentümer ist nicht für Weiterverarbeitungen von Informationen verantwortlich, die im Rahmen der Google-Play Nutzungsbedingungen vorausgesetzt und durch den Endnutzer akzeptiert worden sind.\n"
 
         const val SHUFFLED = "Zufällige Auswahl"
         const val CHRONOLOGICAL = "Alle Fragen (chronologisch)"
