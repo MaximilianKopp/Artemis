@@ -8,3 +8,5 @@ Prüfungstrainer für die staatliche Jagdprüfung in Rheinland-Pfalz
 - Statistiken über den aktuellen Lernstand in den einzelnen Sachgebieten
 - Glossar mit vielen wichtigen Fachwörtern inkl. Links zum Nachschlagen
 - App ist abgesehen von den Glossar-Verlinkungen vollständig offline nutzbar
+
+Veröffentlicht im Google Play Store: https://play.google.com/store/apps/details?id=com.artemis.hunterexam&hl=de
